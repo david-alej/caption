@@ -13,7 +13,7 @@ module.exports = {
      * }], {});
      */
     queryInterface.bulkInsert(
-      "User",
+      "Users",
       [
         {
           username: "janedoe",
@@ -39,5 +39,6 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
+    queryInterface.bulkDelete("Users", null, {})
   },
 }
