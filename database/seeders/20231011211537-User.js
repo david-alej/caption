@@ -12,12 +12,24 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
      */
-    queryInterface.bulkInsert("User", [
-      {
-        username: "janedoe",
-        password: "janedoe",
-      },
-    ])
+    queryInterface.bulkInsert(
+      "User",
+      [
+        {
+          username: "janedoe",
+          password: "janedoe",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          username: "raringgarlic",
+          password: "raringgarlic",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+      {}
+    )
   },
 
   async down(queryInterface, Sequelize) {
