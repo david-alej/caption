@@ -1,7 +1,23 @@
-require("dotenv").config()
+const app = require("./server")
+const https = require("https")
+const fs = require("fs")
+const privateKey = fs.readFileSync("key.pem")
+const privateCertificate = fs.readFileSync("cert.pem")
 
-const app = reqiure("./server")
+require("dotenv").config()
 
 const PORT = process.env.PORT || 3300
 
-app.listen(PORT, () => console.log(`Server is live at localhost:${PORT}`))
+app.set("trust proxy", 1)
+
+https
+  .createServer(
+    {
+      key: privateKey,
+      cert: privateCertificate,
+    },
+    app
+  )
+  .listen(4000, () => {
+    console.log(`Server is live at https://localhost:${PORT}`)
+  })
