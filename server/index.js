@@ -34,9 +34,9 @@ app.use(
   })
 )
 
-app.use(cookieParser()) //process.env.COOKIES_SECRET
+app.use(cookieParser(process.env.COOKIES_SECRET)) //process.env.COOKIES_SECRET
 
-// app.use(helmet())
+app.use(helmet())
 
 app.use("/", routes)
 

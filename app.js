@@ -18,6 +18,10 @@ https
     },
     app
   )
-  .listen(4000, () => {
+  .listen(PORT, () => {
     console.log(`Server is live at https://localhost:${PORT}`)
   })
+
+// app.listen(PORT, () => {
+//   console.log(`Server is live at http://localhost:${PORT}`)
+// })
