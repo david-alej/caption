@@ -17,9 +17,8 @@ exports.postLogin = async (req, res, next) => {
         password: req.body.user.password,
       }
       res.status(200).send()
-      res.render("home")
     }
-    res.render("login")
+    res.status(404).send()
   } catch (err) {
     next(err)
   }

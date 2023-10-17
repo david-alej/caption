@@ -1,10 +1,11 @@
 const express = require("express")
-const routes = require("../routes")
 const session = require("express-session")
 const helmet = require("helmet")
-const morgan = require("morgan")
 const cookieParser = require("cookie-parser")
 const { doubleCsrf } = require("csrf-csrf")
+
+const routes = require("../routes/index")
+const { htttpLogger } = require("../util/index")
 
 require("dotenv").config()
 
@@ -16,7 +17,7 @@ const { invalidCsrfTokenError, generateToken, doubleCsrfProtection } =
     cookieOptions: { sameSite: "strict", secure: true, signed: true },
   })
 
-app.use(morgan("dev"))
+app.use(htttpLogger)
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
