@@ -1,7 +1,11 @@
-const { Router } = require("express")
+const captionRouter = require("./caption")
 const loginRouter = require("./login")
+const photoRouter = require("./photo")
+const userRouter = require("./user")
+
 const { errorHandlers } = require("../controllers/index")
 const { logErrorMiddleware, returnError, isOperationalError } = errorHandlers
+const { Router } = require("express")
 const router = Router()
 
 router.get("/", (req, res) => {
@@ -9,7 +13,10 @@ router.get("/", (req, res) => {
   res.send("Hurray")
 })
 
+router.use("/caption", captionRouter)
 router.use("/login", loginRouter)
+router.use("/photo", photoRouter)
+router.use("/user", userRouter)
 
 router.use(logErrorMiddleware)
 router.use(returnError)

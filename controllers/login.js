@@ -1,7 +1,9 @@
 const models = require("../database/models")
 
 exports.getLogin = async (req, res) => {
-  res.render("login")
+  // res.render("login")
+  res.status(200).send()
+  res.redirect("/login")
 }
 exports.postLogin = async (req, res, next) => {
   try {
