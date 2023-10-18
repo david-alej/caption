@@ -8,15 +8,13 @@ const morgan = require("morgan")
 //   responseTime: ":response-time",
 // })
 const format = (tokens, req, res) => {
-  return [
-    tokens.method(req, res),
-    tokens.url(req, res),
-    tokens.status(req, res),
-    tokens.res(req, res, "content-length"),
-    "-",
-    tokens["response-time"](req, res),
-    "ms",
-  ].join(" ")
+  return JSON.stringify({
+    method: tokens.method(req, res),
+    url: tokens.url(req, res),
+    status: tokens.status(req, res),
+    contentLength: tokens.res(req, res, "content-length"),
+    responseTime: tokens["response-time"](req, res),
+  })
 }
 
 const logger = require("./logger")
