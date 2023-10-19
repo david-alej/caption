@@ -22,9 +22,9 @@ router.use("/register", registerRouter)
 router.use(authorizedUser)
 router.use(doubleCsrfProtection)
 
-router.use("/caption", captionRouter)
-router.use("/photo", photoRouter)
-router.use("/user", userRouter)
+router.use("/captions", captionRouter)
+router.use("/photos", photoRouter)
+router.use("/users", userRouter)
 
 router.use(logErrorMiddleware, returnError)
 

@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator")
 const models = require("../database/models")
+const { Api500Error } = require("../util/apiErrors")
 const { Api404Error, Api400Error } = require("../util/index").apiErrors
 const { passwordHash } = require("../util/index").passwordHash
 
@@ -23,6 +24,13 @@ exports.postRegister = async (req, res, next) => {
       createdAt: new Date(),
       updatedAt: new Date(),
     })
+
+    if (!user) {
+      throw new Api500Error(
+        `Creating user query failed and was unable to finish.`
+      )
+    }
+
     res.status(201).json(`User with username: ${username} is created.`)
   } catch (err) {
     next(err)
