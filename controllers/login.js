@@ -1,8 +1,10 @@
 const bcrypt = require("bcrypt")
-const { validationResult } = require("express-validator")
+const { validationResult, matchedData } = require("express-validator")
 const models = require("../database/models")
-const { Api404Error, Api400Error } = require("../util/index").apiErrors
+const { Api404Error, Api400Error, Api500Error } =
+  require("../util/index").apiErrors
 const { generateToken } = require("../util/index").doubleCsrf
+const { authenticate } = require("../util/index").authenticate
 
 exports.getLogin = async (req, res) => {
   // res.render("login")
@@ -10,40 +12,31 @@ exports.getLogin = async (req, res) => {
 }
 
 exports.postLogin = async (req, res, next) => {
-  const { username, password } = req.body
-  const validationErrors = validationResult(req.body).array()
+  const validationErrors = validationResult(req).array({
+    onlyFirstError: true,
+  })[0]
   try {
-    if (validationErrors.length >= 1) {
-      throw new Api400Error(validationErrors[0].msg)
+    if (validationError) {
+      if (validationError.msg.substr(0, 17) === "Programming error") {
+        throw new Api500Error(validationError.msg)
+      }
+      throw new Api400Error(validationError.msg)
     }
-    const user = await models.User.findOne({
-      where: {
-        username,
-      },
+
+    const { username, password } = matchedData(req)
+
+    await authenticate(username, password)
+
+    req.session.authenticated = true
+    delete user.dataValues.password
+    req.session.user = user.dataValues
+
+    const csrfToken = generateToken(req, res)
+
+    res.status(200).json({
+      message: `User with username: ${username} is now logged in.`,
+      csrfToken,
     })
-    if (user === null) {
-      throw new Api404Error(`User with username: ${username} not found.`)
-    }
-    const passwordsMatch = await bcrypt.compare(
-      password,
-      user.dataValues.password
-    )
-    if (passwordsMatch) {
-      req.session.authenticated = true
-      delete user.dataValues.password
-      req.session.user = user.dataValues
-
-      const csrfToken = generateToken(req, res)
-
-      res.status(200).json({
-        message: `User with username: ${username} is now logged in.`,
-        csrfToken,
-      })
-      return
-    }
-    throw new Api404Error(
-      `User with username: ${username} input an incorrect password.`
-    )
   } catch (err) {
     next(err)
   }

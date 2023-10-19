@@ -1,19 +1,19 @@
 const authorize = require("./authorize")
-const captionControllers = require("./caption")
+const captionsControllers = require("./captions")
 const errorHandlers = require("./errorHandlers")
 const loginControllers = require("./login")
-const photoControllers = require("./photo")
+const photosControllers = require("./photos")
 const registerControllers = require("./register")
-const userControllers = require("./user")
+const usersControllers = require("./users")
 const validators = require("./validators")
 
 module.exports = {
   authorize,
-  captionControllers,
+  captionsControllers,
   errorHandlers,
   loginControllers,
-  photoControllers,
+  photosControllers,
   registerControllers,
-  userControllers,
+  usersControllers,
   validators,
 }

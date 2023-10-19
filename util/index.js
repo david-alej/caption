@@ -1,4 +1,5 @@
 const apiErrors = require("./apiErrors")
+const authenticate = require("./authenticate")
 const BaseError = require("./baseError")
 const doubleCsrf = require("./doubleCsrf")
 const httpLogger = require("./httpLogger")
@@ -7,6 +8,7 @@ const passwordHash = require("./passwordHash")
 
 module.exports = {
   apiErrors,
+  authenticate,
   BaseError,
   doubleCsrf,
   httpLogger,

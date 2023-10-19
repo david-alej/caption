@@ -1,8 +1,8 @@
-const captionRouter = require("./caption")
+const captionsRouter = require("./captions")
 const loginRouter = require("./login")
-const photoRouter = require("./photo")
+const photosRouter = require("./photos")
 const registerRouter = require("./register")
-const userRouter = require("./user")
+const usersRouter = require("./users")
 
 const { authorizedUser } = require("../controllers/index").authorize
 const { logError, logErrorMiddleware, returnError, isOperationalError } =
@@ -22,9 +22,9 @@ router.use("/register", registerRouter)
 router.use(authorizedUser)
 router.use(doubleCsrfProtection)
 
-router.use("/captions", captionRouter)
-router.use("/photos", photoRouter)
-router.use("/users", userRouter)
+router.use("/captions", captionsRouter)
+router.use("/photos", photosRouter)
+router.use("/users", usersRouter)
 
 router.use(logErrorMiddleware, returnError)
 

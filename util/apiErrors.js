@@ -39,7 +39,7 @@ class Api500Error extends BaseError {
     description,
     statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR,
     name = "Internal server error.",
-    isOperational = true
+    isOperational = false
   ) {
     super(description, statusCode, name, isOperational)
   }
