@@ -12,7 +12,7 @@ exports.getLogin = async (req, res) => {
 }
 
 exports.postLogin = async (req, res, next) => {
-  const validationErrors = validationResult(req).array({
+  const validationError = validationResult(req).array({
     onlyFirstError: true,
   })[0]
   try {
@@ -33,7 +33,7 @@ exports.postLogin = async (req, res, next) => {
 
     const csrfToken = generateToken(req, res)
 
-    res.status(200).json({
+    res.json({
       message: `User with username: ${username} is now logged in.`,
       csrfToken,
     })
