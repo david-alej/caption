@@ -1,8 +1,4 @@
-const bcrypt = require("bcrypt")
-const { validationResult, matchedData } = require("express-validator")
-const models = require("../database/models")
-const { Api404Error, Api400Error, Api500Error } =
-  require("../util/index").apiErrors
+const { validationCheck } = require("./validators")
 const { generateToken } = require("../util/index").doubleCsrf
 const { authenticate } = require("../util/index").authenticate
 
@@ -12,18 +8,8 @@ exports.getLogin = async (req, res) => {
 }
 
 exports.postLogin = async (req, res, next) => {
-  const validationError = validationResult(req).array({
-    onlyFirstError: true,
-  })[0]
   try {
-    if (validationError) {
-      if (validationError.msg.substr(0, 17) === "Programming error") {
-        throw new Api500Error(validationError.msg)
-      }
-      throw new Api400Error(validationError.msg)
-    }
-
-    const { username, password } = matchedData(req)
+    const { username, password } = validationCheck(req)
 
     await authenticate(username, password)
 
@@ -34,7 +20,7 @@ exports.postLogin = async (req, res, next) => {
     const csrfToken = generateToken(req, res)
 
     res.json({
-      message: `User with username: ${username} is now logged in.`,
+      message: `User: ${username} is now logged in.`,
       csrfToken,
     })
   } catch (err) {

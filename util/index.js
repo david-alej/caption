@@ -5,6 +5,7 @@ const doubleCsrf = require("./doubleCsrf")
 const httpLogger = require("./httpLogger")
 const logger = require("./logger")
 const passwordHash = require("./passwordHash")
+const s3 = require("./s3")
 
 module.exports = {
   apiErrors,
@@ -14,4 +15,5 @@ module.exports = {
   httpLogger,
   logger,
   passwordHash,
+  s3,
 }

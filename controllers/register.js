@@ -1,7 +1,6 @@
-const { validationResult, matchedData } = require("express-validator")
+const { validationCheck } = require("./validators")
 const models = require("../database/models")
-const { Api404Error, Api400Error, Api500Error } =
-  require("../util/index").apiErrors
+const { Api400Error, Api500Error } = require("../util/index").apiErrors
 const { passwordHash } = require("../util/index").passwordHash
 
 exports.getRegister = async (req, res) => {
@@ -11,41 +10,32 @@ exports.getRegister = async (req, res) => {
 
 exports.postRegister = async (req, res, next) => {
   const saltRounds = 10
-  const validationError = validationResult(req).array({
-    onlyFirstError: true,
-  })[0]
   try {
-    if (validationError) {
-      if (validationError.msg.substr(0, 17) === "Programming error") {
-        throw new Api500Error(validationError.msg)
-      }
-      throw new Api400Error(validationError.msg)
-    }
-    const { username, password } = matchedData(req)
+    const { username, password } = validationCheck(req)
 
-    user = await models.User.findOne({
+    const searched = await models.User.findOne({
       where: { username },
     })
 
-    if (user) {
-      throw new Api400Error("Username is already in use.")
+    if (searched) {
+      throw new Api400Error("Client: username is already in use.")
     }
 
     const hashedPassword = await passwordHash(password, saltRounds)
-    const user = await models.User.create({
+    const created = await models.User.create({
       username,
       password: hashedPassword,
       createdAt: new Date(),
       updatedAt: new Date(),
     })
 
-    if (!user) {
+    if (!created) {
       throw new Api500Error(
-        `Creating user query failed and was unable to finish.`
+        `Client: creating user query failed and was unable to finish.`
       )
     }
 
-    res.status(201).json(`User with username: ${username} is created.`)
+    res.status(201).json(`User: ${username} is created.`)
   } catch (err) {
     next(err)
   }
