@@ -12,16 +12,18 @@ const upload = multer({
 
 const { photosControllers } = require("../controllers/index")
 
+photosRouter.param("photoName", photosControllers.paramPhotoName)
+
 photosRouter.post("/", upload.single("photo"), photosControllers.postPhoto)
 
 photosRouter.get("/", photosControllers.getPhotos)
 
-photosRouter.get("/", photosControllers.getPhoto)
+photosRouter.get("/:photoName", photosControllers.getPhoto)
 
-photosRouter.put("/", photosControllers.putPhoto)
+photosRouter.put("/:photoName", photosControllers.putPhoto)
 
 photosRouter.delete("/", photosControllers.deletePhotos)
 
-photosRouter.delete("/", photosControllers.deletePhoto)
+photosRouter.delete("/:photoname", photosControllers.deletePhoto)
 
 module.exports = photosRouter

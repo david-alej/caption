@@ -69,7 +69,7 @@ exports.putUser = async (req, res, next) => {
 
     await authenticate(username, password)
 
-    const updatedValues = { username, password }
+    const updatedValues = { username, password, updatedAt: new Date() }
     if (newUsername) {
       updatedValues.username = newUsername
     }
@@ -79,7 +79,7 @@ exports.putUser = async (req, res, next) => {
     }
 
     const updated = await models.User.update(updatedValues, {
-      where: { id: req.session.user.id },
+      where: { id: user.id },
     })
 
     if (!updated) {
@@ -123,6 +123,7 @@ exports.deleteUsers = async (req, res, next) => {
 }
 
 exports.deleteSelf = async (req, res, next) => {
+  const user = req.session.user
   try {
     const { username, password } = validationCheck(req)
 
@@ -130,7 +131,7 @@ exports.deleteSelf = async (req, res, next) => {
 
     const deleted = await models.User.destroy({
       where: {
-        username,
+        id: user.id,
       },
     })
 
@@ -161,14 +162,14 @@ exports.delteUser = async (req, res, next) => {
 
     const deleted = await models.User.destroy({
       where: {
-        username: targetUser.username,
+        id: targetUser.id,
         isAdmin: false,
       },
     })
 
     if (!deleted) {
       throw new Api500Error(
-        `User: ${username} delete a user query did not work.`
+        `User: ${username} delete a user query did not work because query went wrong or you target user is an admin.`
       )
     }
     res
