@@ -4,7 +4,7 @@ const { authenticate } = require("../util/index").authenticate
 const { Api400Error, Api401Error, Api404Error, Api500Error } =
   require("../util/index").apiErrors
 
-exports.paramUser = async (req, res, next, username) => {
+exports.paramUsername = async (req, res, next, username) => {
   const user = req.session.user
   try {
     const { username } = validationCheck(req)

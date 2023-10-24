@@ -1,18 +1,19 @@
 require("dotenv").config()
 const fs = require("fs")
+const Sequelize = require("sequelize")
 const util = require("util")
 const uuidv4 = require("uuid").v4
 const unlinkFile = util.promisify(fs.unlink)
-const { uploadFile, getFileStream } = require("../util/index").s3
+const { uploadFile, attachPhotosToResponse } = require("../util/index").s3
 const models = require("../database/models")
-const { validationCheck } = require("./validators")
-const { Api400Error, Api404Error, Api500Error } =
+const { Api400Error, Api403Error, Api404Error, Api500Error } =
   require("../util/index").apiErrors
+const { paramUsername } = require("./users")
 
 exports.paramPhotoName = async (req, res, next, photoName) => {
   const user = req.session.user
   try {
-    const searched = await models.Photo.findOne({
+    const searched = await models.Photo.findAll({
       where: { photoName: photoName },
       include: [
         {
@@ -36,15 +37,19 @@ exports.paramPhotoName = async (req, res, next, photoName) => {
     })
 
     if (!searched) {
-      throw new Api404Error(`User: ${username} photo was not found.`)
+      throw new Api404Error(
+        `User: ${user.username} photos were not found given photo name.`
+      )
     }
 
-    req.photo = searched.dataValues
+    req.photos = searched.dataValues
     next()
   } catch (err) {
     next(err)
   }
 }
+
+exports.paramUsername = paramUsername
 
 exports.postPhoto = async (req, res, next) => {
   const user = req.session.user
@@ -62,6 +67,7 @@ exports.postPhoto = async (req, res, next) => {
     const fileExtension = originalname.slice(
       ((originalname.lastIndexOf(".") - 1) >>> 0) + 2
     )
+
     if (
       !allowedFiles.includes(fileExtension) ||
       !allowedFileTypes.includes(mimetype)
@@ -85,9 +91,7 @@ exports.postPhoto = async (req, res, next) => {
         uploadFile(resized, filename)
       })
 
-    const deleteFileLocally = unlinkFile(file.path)
-
-    const created = models.Photo.create({
+    const created = await models.Photo.create({
       userId: user.userId,
       photoName: fileTitle,
       photoFilename: filename,
@@ -95,13 +99,13 @@ exports.postPhoto = async (req, res, next) => {
       updatedAt: new Date(),
     })
 
-    if (!(await created)) {
+    await unlinkFile(file.path)
+
+    if (!created) {
       throw new Api500Error(`User: ${user.username} update query did not work.`)
     }
 
     console.log(result)
-
-    await deleteFileLocally
 
     res.status(201).json({
       imagePath: `/photos/${fileTitle}`,
@@ -112,17 +116,96 @@ exports.postPhoto = async (req, res, next) => {
   }
 }
 
-exports.getPhotos = async (req, res, next) => {}
-
-exports.getPhoto = async (req, res, next) => {
-  const photo = req.photo
+exports.getTopPhotos = async (req, res, next) => {
   try {
-    const { photoFilename } = photo
-    const readStream = getFileStream(photoFilename)
+    const searched = await models.Photo.findAll({
+      attributes: {
+        include: [
+          [Sequelize.fn("SUM", Sequelize.col("captions.votes")), "totalVotes"],
+        ],
+      },
+      include: [
+        {
+          model: Caption,
+          as: "captions",
+          attributes: [],
+          include: [
+            {
+              model: User,
+              as: "author",
+              attributes: { exclude: ["password"] },
+            },
+          ],
+          required: true,
+          order: [["votes", "DESC"]],
+        },
+        {
+          model: User,
+          as: "author",
+          attributes: { exclude: ["password"] },
+        },
+      ],
+      group: ["Photo.id"],
+      order: [[Sequelize.col("totalVotes"), "DESC"]],
+    })
 
-    readStream.pipe(res)
+    if (!searched) {
+      throw new Api404Error(`User: ${user.username} top photos were not found.`)
+    }
 
-    res.json(photo)
+    const photos = searched.dataValues
+
+    attachPhotosToResponse(res, photos)
+  } catch (err) {
+    next(err)
+  }
+}
+
+exports.getUserPhotos = async (req, res, next) => {
+  const user = req.user
+  try {
+    const searched = await models.Photo.findAll({
+      where: { userId: user.id },
+      include: [
+        {
+          model: models.Caption,
+          as: "captions",
+          order: [["votes", "DESC"]],
+          include: [
+            {
+              model: models.User,
+              as: "author",
+              attributes: { exclude: ["password"] },
+            },
+          ],
+        },
+        {
+          model: models.User,
+          as: "author",
+          attributes: { exclude: ["password"] },
+        },
+      ],
+    })
+
+    if (!searched) {
+      throw new Api404Error(
+        `User: ${user.username} photos were not found given user.`
+      )
+    }
+
+    const photos = searched.dataValues
+
+    attachPhotosToResponse(res, photos)
+  } catch (err) {
+    next(err)
+  }
+}
+
+exports.getPhotos = async (req, res, next) => {
+  const photos = req.photos
+
+  try {
+    attachPhotosToResponse(res, photos)
   } catch (err) {
     next(err)
   }
@@ -130,49 +213,82 @@ exports.getPhoto = async (req, res, next) => {
 
 exports.putPhoto = async (req, res, next) => {
   const photo = req.photo
+  const user = req.session.user
   try {
-    const { photoName } = validationCheck(req)
+    if (photo.userId !== user.id) {
+      throw new Api403Error(
+        `User: ${user.username} cannot update a photo that does not belong to them.`
+      )
+    }
 
     const updatedValues = { photoName, updatedAt: new Date() }
 
     const updated = await models.Photo.update(updatedValues, {
-      where: photo.id,
+      where: { id: photo.id },
     })
 
     if (!updated) {
       throw new Api500Error(
-        `User: ${username} update photo name query did not work.`
+        `User: ${user.username} update photo name query did not work.`
       )
     }
     res
       .status(204)
-      .send(`User: ${username} has updated one of their photos name.`)
+      .send(`User: ${user.username} has updated one of their photos name.`)
   } catch (err) {
     next(err)
   }
 }
 
-exports.deletePhotos = async (req, res, next) => {}
-
-exports.deletePhoto = async (req, res, next) => {
+exports.deletePhotos = async (req, res, next) => {
   const photo = req.photo
+  const user = req.session.user
   try {
-    const { photoName } = validationCheck(req)
+    if (photo.userId !== user.id || !user.isAdmin) {
+      throw new Api403Error(
+        `User: ${user.username} cannot update a photo that does not belong to them.`
+      )
+    }
 
-    const updatedValues = { photoName, updatedAt: new Date() }
-
-    const updated = await models.Photo.update(updatedValues, {
-      where: photo.id,
+    const deleted = await models.Photo.destroy({
+      where: { userId: user.id },
     })
 
-    if (!updated) {
+    if (!deleted) {
       throw new Api500Error(
-        `User: ${username} update photo name query did not work.`
+        `User: ${user.username} delete photo name query did not work.`
       )
     }
     res
       .status(204)
-      .send(`User: ${username} has updated one of their photos name.`)
+      .send(`User: ${user.username} has deleted one of their photos.`)
+  } catch (err) {
+    next(err)
+  }
+}
+
+exports.deletePhoto = async (req, res, next) => {
+  const photo = req.photo
+  const user = req.session.user
+  try {
+    if (photo.userId !== user.id || !user.isAdmin) {
+      throw new Api403Error(
+        `User: ${user.username} cannot update a photo that does not belong to them.`
+      )
+    }
+
+    const deleted = await models.Photo.destroy({
+      where: { id: photo.id },
+    })
+
+    if (!deleted) {
+      throw new Api500Error(
+        `User: ${user.username} delete photo name query did not work.`
+      )
+    }
+    res
+      .status(204)
+      .send(`User: ${user.username} has deleted one of their photos.`)
   } catch (err) {
     next(err)
   }

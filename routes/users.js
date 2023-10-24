@@ -4,7 +4,7 @@ const { usersControllers } = require("../controllers/index")
 const { credentialsValidator, usernameValidator, newCredentialsValidator } =
   require("../controllers/index").validators
 
-usersRouter.param("username", usernameValidator, usersControllers.paramUser)
+usersRouter.param("username", usernameValidator, usersControllers.paramUsername)
 
 usersRouter.get("/", usersControllers.getUsers)
 

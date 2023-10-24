@@ -23,6 +23,17 @@ class Api401Error extends BaseError {
   }
 }
 
+class Api403Error extends BaseError {
+  constructor(
+    description,
+    statusCode = httpStatusCodes.FORBIDDEN,
+    name = "Forbidden.",
+    isOperational = true
+  ) {
+    super(description, statusCode, name, isOperational)
+  }
+}
+
 class Api404Error extends BaseError {
   constructor(
     description,
@@ -45,4 +56,10 @@ class Api500Error extends BaseError {
   }
 }
 
-module.exports = { Api400Error, Api401Error, Api404Error, Api500Error }
+module.exports = {
+  Api400Error,
+  Api401Error,
+  Api403Error,
+  Api404Error,
+  Api500Error,
+}

@@ -31,31 +31,13 @@ const basicCredentialValidationChain = (
   bodyOrParam,
   optional = false
 ) => {
-  let head = ""
-  if (bodyOrParam === "param") {
-    head = param(requestValue)
-  }
-  if (bodyOrParam === "body") {
-    head = body(requestValue)
-  }
+  const head = basicValidationChain(requestValue, bodyOrParam, optional)
 
-  if (!head) {
-    throw new Error(
-      `Programming error: Basic validator chain function with first input of ${requestValue} has a bad input in the second paramter.`
-    )
-  }
-  if (optional) {
-    head = head.if(head.exists())
-  }
-  return head
-    .not()
-    .isEmpty()
-    .withMessage(requestValue + " must not be empty.")
-    .custom(async (value) => {
-      if (value.includes(" ")) {
-        throw new Error(requestValue + " must no have any blank spaces.")
-      }
-    })
+  return head.custom(async (value) => {
+    if (value.includes(" ")) {
+      throw new Error(requestValue + " must no have any blank spaces.")
+    }
+  })
 }
 
 exports.validationCheck = (request = req) => {
@@ -80,6 +62,8 @@ exports.credentialsValidator = [
 exports.usernameValidator = [
   basicCredentialValidationChain("username", "param"),
 ]
+
+exports.photoNameValidator = [basicValidationChain("photoName", "param")]
 
 exports.registerValidator = [
   basicCredentialValidationChain("username", "body")

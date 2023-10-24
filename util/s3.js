@@ -13,7 +13,6 @@ const s3 = new S3({
   secretAccessKey,
 })
 
-// uploads a file to s3
 function uploadFile(buffer, filename) {
   const uploadParams = {
     Bucket: bucketName,
@@ -25,7 +24,6 @@ function uploadFile(buffer, filename) {
 }
 exports.uploadFile = uploadFile
 
-// downloads a file from s3
 function getFileStream(fileKey) {
   const downloadParams = {
     Key: fileKey,
@@ -35,3 +33,38 @@ function getFileStream(fileKey) {
   return s3.getObject(downloadParams).createReadStream()
 }
 exports.getFileStream = getFileStream
+
+const attachPhotosToResponse = (res, photos) => {
+  const maxWidth = 750,
+    maxHeight = 750
+
+  const form = new FormData()
+
+  for (let i = 0; i < photos.length; i++) {
+    const { photoFilename, photoName } = photos[i]
+
+    const readStream = getFileStream(photoFilename)
+
+    const pipeline = sharp()
+      .resize(maxWidth, maxHeight)
+      .toBuffer()
+      .then((resized) => {
+        const stream = Readable.from(resized)
+        form.append(photoName, stream, photoFilename)
+        form.append(photoName + " - information", JSON.stringify(photos[i]))
+      })
+
+    readStream.pipe(pipeline)
+  }
+
+  res.setHeader(
+    "X-Content-Type",
+    "multipart/form-data; boundary=" + form._boundary
+  )
+
+  res.setHeader("Content-Type", "text/plain")
+
+  form.pipe(res)
+}
+
+exports.attachPhotosToResponse = attachPhotosToResponse
