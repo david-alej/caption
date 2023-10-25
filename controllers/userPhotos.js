@@ -1,5 +1,8 @@
 const models = require("../database/models")
 const { paramUsername } = require("./users")
+const { attachPhotosToResponse, deleteFile } = require("../util/index").s3
+const { Api403Error, Api404Error, Api500Error } =
+  require("../util/index").apiErrors
 
 exports.paramUsername = paramUsername
 
@@ -67,6 +70,10 @@ exports.deleteUserPhotos = async (req, res, next) => {
         `User: ${user.id} delete photo with photo id query did not work.`
       )
     }
+
+    const { photoFilename } = deleted.dataValues
+
+    await deleteFile(photoFilename)
 
     res.status(204).send(responseMsg)
   } catch (err) {

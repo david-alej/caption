@@ -68,3 +68,13 @@ const attachPhotosToResponse = (res, photos) => {
 }
 
 exports.attachPhotosToResponse = attachPhotosToResponse
+
+const deleteFile = (fileKey) => {
+  const deleteParams = {
+    key: fileKey,
+    bucker: process.env.AWS_BUCKET_NAME,
+  }
+  return s3.deleteBucket(deleteParams).promise()
+}
+
+exports.deleteFile = deleteFile

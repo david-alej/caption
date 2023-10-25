@@ -4,7 +4,8 @@ const Sequelize = require("sequelize")
 const util = require("util")
 const uuidv4 = require("uuid").v4
 const unlinkFile = util.promisify(fs.unlink)
-const { uploadFile, attachPhotosToResponse } = require("../util/index").s3
+const { uploadFile, attachPhotosToResponse, deleteFile } =
+  require("../util/index").s3
 const models = require("../database/models")
 const { Api400Error, Api403Error, Api404Error, Api500Error } =
   require("../util/index").apiErrors
@@ -241,35 +242,6 @@ exports.putPhoto = async (req, res, next) => {
   }
 }
 
-exports.deletePhotos = async (req, res, next) => {
-  const photo = req.photo
-  const user = req.session.user
-  const responseMsg = user.isAdmin
-    ? `User: ${user.id} has deleted all of user id ${photos.userId} photos.`
-    : `User: ${user.id} has deleted all of their own photos.`
-  try {
-    if (photo.userId !== user.id || !user.isAdmin) {
-      throw new Api403Error(
-        `User: ${user.id} cannot delete photos that does not belong to them.`
-      )
-    }
-
-    const deleted = await models.Photo.destroy({
-      where: { userId: user.id },
-    })
-
-    if (!deleted) {
-      throw new Api500Error(
-        `User: ${user.id} delete all photos with user id query did not work.`
-      )
-    }
-
-    res.status(204).send(responseMsg)
-  } catch (err) {
-    next(err)
-  }
-}
-
 exports.deletePhoto = async (req, res, next) => {
   const photo = req.photo
   const user = req.session.user
@@ -292,6 +264,10 @@ exports.deletePhoto = async (req, res, next) => {
         `User: ${user.id} delete photo with photo id query did not work.`
       )
     }
+
+    const { photoFilename } = deleted.dataValues
+
+    await deleteFile(photoFilename)
 
     res.status(204).send(responseMsg)
   } catch (err) {
