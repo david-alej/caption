@@ -202,47 +202,6 @@ exports.getTopPhotos = async (req, res, next) => {
   }
 }
 
-exports.getUserPhotos = async (req, res, next) => {
-  const user = req.session.user
-  const targetUser = req.user
-  try {
-    const searched = await models.Photo.findAll({
-      where: { userId: targetUser.id },
-      include: [
-        {
-          model: models.Caption,
-          as: "captions",
-          order: [["votes", "DESC"]],
-          include: [
-            {
-              model: models.User,
-              as: "author",
-              attributes: { exclude: ["password"] },
-            },
-          ],
-        },
-        {
-          model: models.User,
-          as: "author",
-          attributes: { exclude: ["password"] },
-        },
-      ],
-    })
-
-    if (!searched) {
-      throw new Api404Error(
-        `User: ${user.id} photos were not found given user with id ${targetUser.id}.`
-      )
-    }
-
-    const photos = searched.dataValues
-
-    attachPhotosToResponse(res, photos)
-  } catch (err) {
-    next(err)
-  }
-}
-
 exports.getPhotos = async (req, res, next) => {
   const photos = req.photos
 
