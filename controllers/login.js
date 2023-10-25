@@ -1,4 +1,4 @@
-const { validationCheck } = require("./validators")
+const { validationPerusal } = require("./validators")
 const { generateToken } = require("../util/index").doubleCsrf
 const { authenticate } = require("../util/index").authenticate
 
@@ -9,18 +9,18 @@ exports.getLogin = async (req, res) => {
 
 exports.postLogin = async (req, res, next) => {
   try {
-    const { username, password } = validationCheck(req)
+    const { username, password } = validationPerusal(req, "Client:")
 
-    await authenticate(username, password)
+    const user = await authenticate(username, password)
 
     req.session.authenticated = true
-    delete user.dataValues.password
-    req.session.user = user.dataValues
+    delete user.password
+    req.session.user = user
 
     const csrfToken = generateToken(req, res)
 
     res.json({
-      message: `User: ${username} is now logged in.`,
+      message: `User: ${user.id} is now logged in.`,
       csrfToken,
     })
   } catch (err) {

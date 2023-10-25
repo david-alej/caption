@@ -1,4 +1,4 @@
-const { validationCheck } = require("./validators")
+const { validationPerusal } = require("./validators")
 const models = require("../database/models")
 const { Api400Error, Api500Error } = require("../util/index").apiErrors
 const { passwordHash } = require("../util/index").passwordHash
@@ -11,17 +11,18 @@ exports.getRegister = async (req, res) => {
 exports.postRegister = async (req, res, next) => {
   const saltRounds = 10
   try {
-    const { username, password } = validationCheck(req)
+    const { username, password } = validationPerusal(req, "Client:")
 
     const searched = await models.User.findOne({
       where: { username },
     })
 
     if (searched) {
-      throw new Api400Error("Client: username is already in use.")
+      throw new Api400Error(`Client: username ${username} is already in use.`)
     }
 
     const hashedPassword = await passwordHash(password, saltRounds)
+
     const created = await models.User.create({
       username,
       password: hashedPassword,
@@ -35,7 +36,7 @@ exports.postRegister = async (req, res, next) => {
       )
     }
 
-    res.status(201).json(`User: ${username} is created.`)
+    res.status(201).json(`User: ${created.dataValues.id} is created.`)
   } catch (err) {
     next(err)
   }

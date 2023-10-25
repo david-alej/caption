@@ -1,6 +1,7 @@
 const express = require("express")
 const photosRouter = express.Router()
-const { photoNameValidator } = require("../controllers/index").validators
+const { paramIntegerValidator, paramTextValidator } =
+  require("../controllers/index").validators
 const { photosControllers } = require("../controllers/index")
 
 const multer = require("multer")
@@ -14,14 +15,14 @@ const upload = multer({
 
 photosRouter.param(
   "photoName",
-  photoNameValidator,
+  paramTextValidator("photoName"),
   photosControllers.paramPhotoName
 )
 
 photosRouter.param(
-  "username",
-  usernameameValidator,
-  photosControllers.paramUsername
+  "photoId",
+  paramIntegerValidator("photoId"),
+  photosControllers.paramPhotoId
 )
 
 photosRouter.post("/", upload.single("photo"), photosControllers.postPhoto)
@@ -30,12 +31,10 @@ photosRouter.get("/", photosControllers.getTopPhotos)
 
 photosRouter.get("/:photoName", photosControllers.getPhotos)
 
-photosRouter.get("/user/:username", photosControllers.getUserPhotos)
+photosRouter.put("/:photoId", photosControllers.putPhoto)
 
-photosRouter.put("/:photoName", photosControllers.putPhoto)
+photosRouter.delete("/:photoId", photosControllers.deletePhoto)
 
-photosRouter.delete("/", photosControllers.deletePhotos)
-
-photosRouter.delete("/:photoname", photosControllers.deletePhoto)
+photosRouter.use("/users", userPhotosRouter)
 
 module.exports = photosRouter

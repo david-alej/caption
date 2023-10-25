@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt")
 const models = require("../database/models")
-const { Api404Error } = require("./apiErrors")
+const { Api401Error } = require("./apiErrors")
 
 const usernameExists = async (username) => {
   const user = await models.User.findOne({
@@ -8,26 +8,30 @@ const usernameExists = async (username) => {
       username,
     },
   })
+
   if (!user) {
-    throw new Api404Error(`User with username: ${username} not found.`)
+    throw new Api401Error(`Client: username ${username} not found.`)
   }
+
+  return user.dataValues
 }
 
-const correctPassword = async (username, password) => {
-  const passwordsMatch = await bcrypt.compare(
-    password,
-    user.dataValues.password
-  )
+const correctPassword = async (user, password) => {
+  const passwordsMatch = await bcrypt.compare(password, user.password)
+
   if (!passwordsMatch) {
-    throw new Api404Error(
-      `User with username: ${username} input an incorrect password.`
+    throw new Api401Error(
+      `Client: with chosen user id ${user.id} has input an incorrect password.`
     )
   }
 }
 
-const authenticate = async (username, password) => {
-  await usernameExists(username)
-  await correctPassword(username, password)
+const authenticate = async (username, password, returnUser = false) => {
+  const user = await usernameExists(username)
+
+  await correctPassword(user, password)
+
+  if (returnUser) return user
 }
 
 module.exports = { usernameExists, correctPassword, authenticate }

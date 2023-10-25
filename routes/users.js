@@ -1,10 +1,14 @@
 const express = require("express")
 const usersRouter = express.Router()
 const { usersControllers } = require("../controllers/index")
-const { credentialsValidator, usernameValidator, newCredentialsValidator } =
+const { usernameValidator, credentialsValidator, newCredentialsValidator } =
   require("../controllers/index").validators
 
-usersRouter.param("username", usernameValidator, usersControllers.paramUsername)
+usersRouter.param(
+  "username",
+  usernameValidator("username", true, false),
+  usersControllers.paramUsername
+)
 
 usersRouter.get("/", usersControllers.getUsers)
 
@@ -15,10 +19,6 @@ usersRouter.put(
   [...credentialsValidator, ...newCredentialsValidator],
   usersControllers.putUser
 )
-
-usersRouter.delete("/all", credentialsValidator, usersControllers.deleteUsers)
-
-usersRouter.delete("/self", credentialsValidator, usersControllers.deleteSelf)
 
 usersRouter.delete(
   "/:username",
