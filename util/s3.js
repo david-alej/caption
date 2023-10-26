@@ -34,7 +34,7 @@ function getFileStream(fileKey) {
 }
 exports.getFileStream = getFileStream
 
-const attachPhotosToResponse = (res, photos) => {
+const attachFilesToResponse = (res, photos) => {
   const maxWidth = 750,
     maxHeight = 750
 
@@ -67,7 +67,7 @@ const attachPhotosToResponse = (res, photos) => {
   form.pipe(res)
 }
 
-exports.attachPhotosToResponse = attachPhotosToResponse
+exports.attachFilesToResponse = attachFilesToResponse
 
 const deleteFile = (fileKey) => {
   const deleteParams = {
