@@ -17,8 +17,21 @@ exports.paramUsername = async (req, res, next, username) => {
 
     const searched = await models.User.findOne({
       where: { username },
-      include: models.Photo,
       attributes: { exclude: ["password"] },
+      include: [
+        {
+          model: models.Photo,
+          as: "photos",
+          include: [
+            {
+              model: models.Caption,
+              as: "captions",
+              order: [["votes", "DESC"]],
+            },
+          ],
+          order: [["id", "DESC"]],
+        },
+      ],
       order: [["id", "DESC"]],
     })
     if (!searched) {
@@ -38,6 +51,20 @@ exports.getUsers = async (req, res, next) => {
   try {
     const searched = await models.User.findAll({
       attributes: { exclude: ["password"] },
+      include: [
+        {
+          model: models.Photo,
+          as: "photos",
+          include: [
+            {
+              model: models.Caption,
+              as: "captions",
+              order: [["votes", "DESC"]],
+            },
+          ],
+          order: [["id", "DESC"]],
+        },
+      ],
       order: [["id", "DESC"]],
     })
     res.json(searched)

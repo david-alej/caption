@@ -22,14 +22,16 @@ exports.paramPhotoName = async (req, res, next, photoName) => {
         {
           model: models.Caption,
           as: "captions",
-          order: [["votes", "DESC"]],
+
           include: [
             {
               model: models.User,
               as: "author",
               attributes: { exclude: ["password"] },
+              require: true,
             },
           ],
+          order: [["votes", "DESC"]],
         },
         {
           model: models.User,
@@ -63,14 +65,15 @@ exports.paramPhotoId = async (req, res, next, photoId) => {
         {
           model: models.Caption,
           as: "captions",
-          order: [["votes", "DESC"]],
           include: [
             {
               model: models.User,
               as: "author",
               attributes: { exclude: ["password"] },
+              require: true,
             },
           ],
+          order: [["votes", "DESC"]],
         },
         {
           model: models.User,
@@ -168,21 +171,21 @@ exports.getTopPhotos = async (req, res, next) => {
       },
       include: [
         {
-          model: Caption,
+          model: models.Caption,
           as: "captions",
           attributes: [],
           include: [
             {
-              model: User,
+              model: models.User,
               as: "author",
               attributes: { exclude: ["password"] },
+              required: true,
             },
           ],
-          required: true,
           order: [["votes", "DESC"]],
         },
         {
-          model: User,
+          model: models.User,
           as: "author",
           attributes: { exclude: ["password"] },
         },

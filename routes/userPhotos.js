@@ -9,8 +9,6 @@ userPhotosRouter.param(
   userPhotosControllers.paramUsername
 )
 
-userPhotosRouter.get("/:username", userPhotosControllers.getuserPhotos)
-
 userPhotosRouter.delete("/:username", userPhotosControllers.deleteuserPhotos)
 
 module.exports = userPhotosRouter
