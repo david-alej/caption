@@ -8,6 +8,8 @@ const sentenceCase = (camelCase) => {
   return result[0].toUpperCase() + result.substring(1).toLowerCase()
 }
 
+exports.sentenceCase = sentenceCase
+
 const basicCredentialValidator = (
   input,
   inputIsParam = false,
@@ -116,7 +118,31 @@ const textValidator = (input, inputIsParam = false, optional = false) => {
 
 exports.textValidator = textValidator
 
-const allowedBodyInputsValidator = (inputs) => {
+const captionsMultiInputCheck = (body) => {
+  if (Object.keys(body).length > 2) {
+    throw Error(
+      "the request body object must be non-existent, one, or two key-value pairs."
+    )
+  }
+
+  if (!Object.keys(body).includes("photoId")) {
+    throw Error(
+      `the request body object must include "photoId" if two key-value pairs are given.`
+    )
+  }
+
+  if (
+    !Object.keys(body).includes("username") ||
+    !Object.keys(body).includes("userId")
+  ) {
+    throw Error(
+      `the request body object must include either "username" or "userId" along with "photoId" if two key-value pairs are given.`
+    )
+  }
+  return true
+}
+
+const allowedBodyInputsValidator = (inputs, isCaptionsRoute = false) => {
   let afterNonUniqueErrorMsg = ""
 
   for (let i = 0; i < inputs.length; i++) {
@@ -131,14 +157,6 @@ const allowedBodyInputsValidator = (inputs) => {
     .if(body().exists())
     .custom((body) => {
       const keys = inputs
-      const numberOfBodyKeys = Object.keys(body).length
-
-      if (numberOfBodyKeys > 1) {
-        throw Error(
-          "the request body object must be none existent or only have one key-value pair."
-        )
-      }
-
       const bodyIncludesKeys = Object.keys(body).every((key) => {
         keys.includes(key)
       })
@@ -149,6 +167,18 @@ const allowedBodyInputsValidator = (inputs) => {
             afterNonUniqueErrorMsg
         )
       }
+
+      const numberOfBodyKeys = Object.keys(body).length
+
+      if (numberOfBodyKeys <= 1) {
+        return true
+      }
+
+      if (isCaptionsRoute) return captionsMultiInputCheck(body)
+
+      throw Error(
+        "the request body object must be non-existent or only have one key-value pair."
+      )
     })
 }
 
@@ -171,8 +201,10 @@ exports.newCredentialsValidator = [
   passwordValidator("newPassword", false, true),
 ]
 
+exports.postPhotosValidator = [textValidator("photoName")]
+
 exports.getPhotosValidator = [
-  textValidator("photoName", true),
+  textValidator("photoName", false, true),
   usernameValidator("username", false, true),
   allowedBodyInputsValidator(["photoName", "username"]),
 ]
@@ -181,4 +213,23 @@ exports.deletePhotosValidator = [
   usernameValidator("username", false, true),
   integerValidator("userId", false, true),
   allowedBodyInputsValidator(["username", "userId"]),
+]
+
+exports.postCaptionsValidator = [
+  integerValidator("photoId"),
+  textValidator("captionText"),
+]
+
+exports.getCaptionsValidator = [
+  usernameValidator("username", false, true),
+  integerValidator("userId", false, true),
+  integerValidator("photoId", false, true),
+  allowedBodyInputsValidator(["username", "userId", "photoId"], true),
+]
+
+exports.deleteCaptionsValidator = [
+  usernameValidator("username", false, true),
+  integerValidator("userId", false, true),
+  integerValidator("photoId", false, true),
+  allowedBodyInputsValidator(["username", "userId", "photoId"], true),
 ]

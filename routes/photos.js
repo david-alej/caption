@@ -1,7 +1,11 @@
 const express = require("express")
 const photosRouter = express.Router()
-const { integerValidator, getPhotosValidator, deletePhotosValidator } =
-  require("../controllers/index").validators
+const {
+  integerValidator,
+  textValidator,
+  getPhotosValidator,
+  deletePhotosValidator,
+} = require("../controllers/index").validators
 const { photosControllers } = require("../controllers/index")
 
 const multer = require("multer")
@@ -25,7 +29,11 @@ photosRouter.get("/", getPhotosValidator, photosControllers.getPhotos)
 
 photosRouter.get("/:photoId", photosControllers.getPhoto)
 
-photosRouter.put("/:photoId", photosControllers.putPhoto)
+photosRouter.put(
+  "/:photoId",
+  textValidator("photoName"),
+  photosControllers.putPhoto
+)
 
 photosRouter.delete("/", deletePhotosValidator, photosControllers.deletePhotos)
 

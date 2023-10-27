@@ -9,32 +9,43 @@ const { uploadFile, attachFilesToResponse, deleteFile } =
 const models = require("../database/models")
 const { Api400Error, Api401Error, Api403Error, Api404Error, Api500Error } =
   require("../util/index").apiErrors
+const { selfSearch, whereSearch, inputsToSearch } =
+  require("../util/index").search
 const { validationPerusal } = require("./validators")
 
-const whereSearch = (whereOption) => {
-  return {
-    where: whereOption,
+const otherOptions = {
+  include: [
+    {
+      model: models.Caption,
+      as: "captions",
+      include: [
+        {
+          model: models.User,
+          as: "author",
+          attributes: { exclude: ["password"] },
+          require: true,
+        },
+      ],
+      order: [["votes", "DESC"]],
+    },
+    {
+      model: models.User,
+      as: "author",
+      attributes: { exclude: ["password"] },
+    },
+  ],
+}
+
+const topPhotosSearch = {
+  attributes: {
     include: [
-      {
-        model: models.Caption,
-        as: "captions",
-        include: [
-          {
-            model: models.User,
-            as: "author",
-            attributes: { exclude: ["password"] },
-            require: true,
-          },
-        ],
-        order: [["votes", "DESC"]],
-      },
-      {
-        model: models.User,
-        as: "author",
-        attributes: { exclude: ["password"] },
-      },
+      [Sequelize.fn("SUM", Sequelize.col("captions.votes")), "totalVotes"],
     ],
-  }
+  },
+  ...otherOptions,
+  group: ["Photo.id"],
+  order: [[Sequelize.col("totalVotes"), "DESC"]],
+  limit: 10,
 }
 
 exports.paramPhotoId = async (req, res, next, photoId) => {
@@ -43,13 +54,13 @@ exports.paramPhotoId = async (req, res, next, photoId) => {
   try {
     const { photoId } = validationPerusal(req, `User: ${user.id}`)
 
-    const searchParams = whereSearch({ id: photoId })
+    const searchParams = whereSearch({ id: photoId }, otherOptions)
 
     const searched = await models.Photo.findOne(searchParams)
 
     if (!searched) {
       throw new Api401Error(
-        `User: ${user.id} photos were not found given photo id ${photoId}.`
+        `User: ${user.id} photo was not found given photo id ${photoId}.`
       )
     }
 
@@ -64,7 +75,8 @@ exports.paramPhotoId = async (req, res, next, photoId) => {
 exports.postPhoto = async (req, res, next) => {
   const user = req.session.user
   const file = req.file
-  const fileTitle = req.body.title
+  const preErrorMsg = `User: ${user.id}`
+  const { buffer, originalname, mimetype } = file
   const filename = uuidv4() + ".webp"
 
   console.log(file)
@@ -73,8 +85,9 @@ exports.postPhoto = async (req, res, next) => {
   const allowedFileTypes = ["image/png", "image/jpeg", "image/jpg", "image/gif"]
 
   try {
-    const { buffer, originalname, mimetype } = file
+    validationPerusal(req, preErrorMsg)
 
+    const fileTitle = req.body.title
     const fileExtension = originalname.slice(
       ((originalname.lastIndexOf(".") - 1) >>> 0) + 2
     )
@@ -130,53 +143,21 @@ exports.postPhoto = async (req, res, next) => {
 exports.getPhotos = async (req, res, next) => {
   const user = req.session.user
   const preErrorMsg = `User: ${user.id}`
-  const topPhotosSearch = {
-    attributes: {
-      include: [
-        [Sequelize.fn("SUM", Sequelize.col("captions.votes")), "totalVotes"],
-      ],
-    },
-    include: [
-      {
-        model: models.Caption,
-        as: "captions",
-        attributes: [],
-        include: [
-          {
-            model: models.User,
-            as: "author",
-            attributes: { exclude: ["password"] },
-            required: true,
-          },
-        ],
-        order: [["votes", "DESC"]],
-      },
-      {
-        model: models.User,
-        as: "author",
-        attributes: { exclude: ["password"] },
-      },
-    ],
-    group: ["Photo.id"],
-    order: [[Sequelize.col("totalVotes"), "DESC"]],
-  }
+
   try {
-    const { photoName, username } = validationPerusal(req, preErrorMsg)
+    validationPerusal(req, preErrorMsg)
 
-    let searchParams = topPhotosSearch
-
-    if (photoName) {
-      searchParams = whereSearch(photoName)
-    }
-
-    if (username) {
-      searchParams = whereSearch(username)
-    }
+    const { afterMsg, searchParams } = inputsToSearch(
+      req,
+      topPhotosSearch,
+      otherOptions,
+      "photo"
+    )
 
     const searched = await models.Photo.findAll(searchParams)
 
     if (!searched) {
-      throw new Api401Error(`User: ${user.id} photos were not found.`)
+      throw new Api401Error(`User: ${user.id} photos were not found` + afterMsg)
     }
 
     const photos = searched.dataValues
@@ -200,6 +181,7 @@ exports.getPhoto = async (req, res, next) => {
 exports.putPhoto = async (req, res, next) => {
   const photo = req.photo
   const user = req.session.user
+  const { photoName } = req.body
 
   try {
     if (photo.userId !== user.id) {
@@ -208,7 +190,7 @@ exports.putPhoto = async (req, res, next) => {
       )
     }
 
-    const updatedValues = { photoName: photo.photoName, updatedAt: new Date() }
+    const updatedValues = { photoName, updatedAt: new Date() }
 
     const updated = await models.Photo.update(updatedValues, {
       where: { id: photo.id },
@@ -219,31 +201,24 @@ exports.putPhoto = async (req, res, next) => {
         `User: ${user.id} update photo name query did not work.`
       )
     }
-    res
-      .status(204)
-      .send(`User: ${user.id} has updated one of their photos name.`)
+    res.send(
+      `User: ${user.id} has updated one of their photo with id ${photo.id}.`
+    )
   } catch (err) {
     next(err)
   }
 }
 
 exports.deletePhotos = async (req, res, next) => {
-  const preErrorMsg = `User: ${user.id}`
   const user = req.session.user
-  const targetUsername = req.body.username
-  const targetUserId = req.body.userId
-  const targetIsSelf =
-    user.username === targetUsername || user.id === targetUserId
-  const whereOption = targetUsername
-    ? { username: targetUsername }
-    : { userId: targetUserId }
-  const afterMessage = targetUsername
-    ? `username ${targetUsername}.`
-    : `id ${targetUserId}.`
+  const preErrorMsg = `User: ${user.id}`
+  let targetIsSelf =
+    req.body === undefined
+      ? true
+      : user.username === req.body.username || user.id === req.body.userId
   const responseMsg = targetIsSelf
-    ? `User: ${user.id} has deleted all of their own photos.`
-    : `User: ${user.id} has deleted all of the photos of a user with ` +
-      afterMessage
+    ? `User: ${user.id} has deleted all of their own photos associated`
+    : `User: ${user.id} has deleted all of the photos of a user associated`
 
   try {
     if (!targetIsSelf || !user.isAdmin) {
@@ -254,13 +229,19 @@ exports.deletePhotos = async (req, res, next) => {
 
     await validationPerusal(req, preErrorMsg)
 
-    const deleted = await models.Photo.destroy({
-      where: whereOption,
-    })
+    const { afterMsg, searchParams } = inputsToSearch(
+      req,
+      selfSearch(user.id),
+      otherOptions,
+      "photo"
+    )
+
+    const deleted = await models.Photo.destroy(searchParams)
 
     if (!deleted) {
       throw new Api500Error(
-        `User: ${user.id} delete photos query did not work given a user with .`
+        `User: ${user.id} delete photos query did not work given a user` +
+          afterMsg
       )
     }
 
@@ -268,7 +249,7 @@ exports.deletePhotos = async (req, res, next) => {
 
     await deleteFile(photoFilename)
 
-    res.status(204).send(responseMsg)
+    res.status(204).send(responseMsg + afterMsg)
   } catch (err) {
     next(err)
   }
