@@ -9,13 +9,13 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.hasMany(models.Caption, {
+      Photo.hasMany(models.Caption, {
         foreignKey: "photoId",
         as: "captions",
         onDelete: "CASCADE",
       })
 
-      this.belongsTo(models.User, {
+      Photo.belongsTo(models.User, {
         foreignKey: "userId",
         as: "author",
         onDelete: "CASCADE",
@@ -25,8 +25,8 @@ module.exports = (sequelize, DataTypes) => {
   Photo.init(
     {
       userId: DataTypes.INTEGER,
-      photoName: DataTypes.STRING,
-      photoFilename: DataTypes.STRING,
+      title: DataTypes.STRING,
+      filename: DataTypes.STRING,
     },
     {
       sequelize,

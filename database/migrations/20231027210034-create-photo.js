@@ -5,19 +5,21 @@ module.exports = {
     await queryInterface.createTable("Photos", {
       id: {
         allowNull: false,
-        autoIncrement: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
-        type: Sequelize.INTEGER,
       },
       userId: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
         allowNull: false,
       },
-      photoName: {
-        type: Sequelize.STRING,
+      title: {
+        type: Sequelize.STRING(150),
+        allowNull: false,
       },
-      photoFilename: {
-        type: Sequelize.STRING,
+      filename: {
+        type: Sequelize.STRING(41),
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
