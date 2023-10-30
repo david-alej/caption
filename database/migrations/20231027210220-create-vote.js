@@ -5,12 +5,12 @@ module.exports = {
     await queryInterface.createTable("Votes", {
       userId: {
         allowNull: false,
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         primaryKey: true,
       },
       captionId: {
         allowNull: false,
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         primaryKey: true,
       },
       value: {

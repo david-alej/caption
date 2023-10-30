@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Caption.hasMany(models.Vote, {
         foreignKey: "captionId",
-        as: "votes",
+        as: "ballot",
         onDelete: "CASCADE",
       })
 

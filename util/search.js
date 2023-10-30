@@ -1,5 +1,6 @@
 const { Api500Error } = require("./apiErrors")
-const { sentenceCase } = require("../controllers/index").validators
+// const { sentenceCase } = require("../controllers/index").validators
+
 const Sequelize = require("sequelize")
 
 const selfSearch = (userId) => {

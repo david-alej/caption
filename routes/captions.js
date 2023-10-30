@@ -2,7 +2,7 @@ const express = require("express")
 const captionsRouter = express.Router()
 const { captionsControllers } = require("../controllers/index")
 const {
-  integerValidator,
+  uuidValidator,
   textValidator,
   postCaptionsValidator,
   getCaptionsValidator,
@@ -11,7 +11,7 @@ const {
 
 captionsRouter.param(
   "captionId",
-  integerValidator("captionId", true),
+  uuidValidator("captionId", true),
   captionsControllers.paramCaptionId
 )
 

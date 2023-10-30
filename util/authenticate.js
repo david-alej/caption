@@ -26,12 +26,12 @@ const correctPassword = async (user, password) => {
   }
 }
 
-const authenticate = async (username, password, returnUser = false) => {
+const authenticate = async (username, password) => {
   const user = await usernameExists(username)
 
   await correctPassword(user, password)
 
-  if (returnUser) return user
+  return user
 }
 
 module.exports = { usernameExists, correctPassword, authenticate }

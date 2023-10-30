@@ -22,7 +22,7 @@ exports.postRegister = async (req, res, next) => {
     }
 
     const hashedPassword = await passwordHash(password, saltRounds)
-
+    console.log(hashedPassword)
     const created = await models.User.create({
       username,
       password: hashedPassword,

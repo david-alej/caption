@@ -7,16 +7,14 @@ const { Api400Error, Api401Error, Api404Error, Api500Error } =
 exports.paramUsername = async (req, res, next, username) => {
   const user = req.session.user
   try {
-    const { username } = validationPerusal(req, `User: ${user.id}`)
-
-    if (username === "") {
+    if (username === "" || username === undefined) {
       req.targetUser = user
       next()
       return
     }
 
     const searched = await models.User.findOne({
-      where: { username },
+      where: { username: username },
       attributes: { exclude: ["password"] },
       include: [
         {
@@ -39,7 +37,6 @@ exports.paramUsername = async (req, res, next, username) => {
         `User: ${user.id} target username ${username} not found.`
       )
     }
-
     req.targetUser = searched.dataValues
     next()
   } catch (err) {
@@ -141,9 +138,9 @@ exports.deleteUser = async (req, res, next) => {
     : `User: ${user.id} has deleted user ${targetUser.id}.`
 
   try {
-    if (!user.isAdmin || !targetIsSelf) {
+    if (!targetIsSelf && !user.isAdmin) {
       throw new Api401Error(
-        `User: ${user.id} is not authorized to delete a users.`
+        `User: ${user.id} is not authorized to delete a user.`
       )
     }
 

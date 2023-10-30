@@ -13,7 +13,7 @@ exports.postLogin = async (req, res, next) => {
 
     const user = await authenticate(username, password)
 
-    req.session.authenticated = true
+    req.session.authorized = true
     delete user.password
     req.session.user = user
 

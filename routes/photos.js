@@ -1,7 +1,7 @@
 const express = require("express")
 const photosRouter = express.Router()
 const {
-  integerValidator,
+  uuidValidator,
   textValidator,
   getPhotosValidator,
   deletePhotosValidator,
@@ -19,7 +19,7 @@ const upload = multer({
 
 photosRouter.param(
   "photoId",
-  integerValidator("photoId", true),
+  uuidValidator("photoId", true),
   photosControllers.paramPhotoId
 )
 

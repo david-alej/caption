@@ -1,7 +1,6 @@
 const { body, param } = require("express-validator")
 const { Api400Error, Api500Error } = require("../util/index").apiErrors
 const { validationResult, matchedData } = require("express-validator")
-const { head } = require("../routes/photos")
 
 const sentenceCase = (camelCase) => {
   const result = camelCase.replace(/([A-Z])/g, " $1")
@@ -15,28 +14,24 @@ const basicCredentialValidator = (
   inputIsParam = false,
   optional = false
 ) => {
-  let head = param(input)
-
   const inputName = sentenceCase(input)
+  let requestProperty = inputIsParam ? param : body
+  let head = requestProperty(input)
 
   if (!inputIsParam) {
-    head = body(input)
-
     if (optional) {
       head = head.if(head.exists())
     }
 
-    head = head.notEmpty().withMessage(input + " must not be empty.")
+    head = head.notEmpty().withMessage(inputName + " must not be empty.")
   }
 
-  return {
-    head: head.custom((value) => {
-      if (value.includes(" ")) {
-        throw new Error(inputName + " must no have any blank spaces.")
-      }
-    }),
-    inputName,
-  }
+  return head.custom((value) => {
+    if (value.includes(" ")) {
+      throw new Error(inputName + " must no have any blank spaces.")
+    }
+    return true
+  })
 }
 
 const usernameValidator = (
@@ -44,16 +39,13 @@ const usernameValidator = (
   inputIsParam = false,
   optional = false
 ) => {
-  const { head, inputName } = basicCredentialValidator(
-    input,
-    inputIsParam,
-    optional
-  )
+  const inputName = sentenceCase(input)
+  const head = basicCredentialValidator(input, inputIsParam, optional)
 
   return head
     .isLength({ min: 4, max: 20 })
     .withMessage(
-      inputName + " must be at least 4 characters and at most 15 characters."
+      inputName + " must be at least 4 characters and at most 20 characters."
     )
 }
 
@@ -64,11 +56,8 @@ const passwordValidator = (
   inputIsParam = false,
   optional = false
 ) => {
-  const { head, inputName } = basicCredentialValidator(
-    input,
-    inputIsParam,
-    optional
-  )
+  const inputName = sentenceCase(input)
+  const head = basicCredentialValidator(input, inputIsParam, optional)
 
   return head
     .isLength({ min: 8, max: 20 })
@@ -84,16 +73,12 @@ const passwordValidator = (
 exports.passwordValidator = passwordValidator
 
 const basicValidator = (input, inputIsParam = false, optional = false) => {
-  let head = param(input)
-
   const inputName = sentenceCase(input)
+  const requestProperty = inputIsParam ? param : body
+  let head = requestProperty(input)
 
-  if (!inputIsParam) {
-    head = body(input)
-
-    if (optional) {
-      head = head.if(head.exists())
-    }
+  if (optional) {
+    head = head.if(head.exists())
   }
 
   return { head, inputName }
@@ -186,7 +171,7 @@ exports.validationPerusal = (request, preErrorMsg) => {
   const validationError = validationResult(request).array({
     onlyFirstError: true,
   })[0]
-
+  console.log(validationResult(request).array())
   if (validationError) {
     throw new Api400Error(preErrorMsg + " " + validationError.msg)
   }
@@ -194,42 +179,55 @@ exports.validationPerusal = (request, preErrorMsg) => {
   return matchedData(request)
 }
 
-exports.credentialsValidator = [usernameValidator(), passwordValidator()]
+exports.credentialsValidator = () => {
+  return [usernameValidator(), passwordValidator()]
+}
 
-exports.newCredentialsValidator = [
-  usernameValidator("newUsername", false, true),
-  passwordValidator("newPassword", false, true),
-]
+exports.newCredentialsValidator = () => {
+  return [
+    usernameValidator("newUsername", false, true),
+    passwordValidator("newPassword", false, true),
+  ]
+}
 
-exports.postPhotosValidator = [textValidator("photoName")]
+exports.postPhotosValidator = () => {
+  return [textValidator("photoName")]
+}
 
-exports.getPhotosValidator = [
-  textValidator("photoName", false, true),
-  usernameValidator("username", false, true),
-  allowedBodyInputsValidator(["photoName", "username"]),
-]
+exports.getPhotosValidator = () => {
+  return [
+    textValidator("photoName", false, true),
+    usernameValidator("username", false, true),
+    allowedBodyInputsValidator(["photoName", "username"]),
+  ]
+}
 
-exports.deletePhotosValidator = [
-  usernameValidator("username", false, true),
-  integerValidator("userId", false, true),
-  allowedBodyInputsValidator(["username", "userId"]),
-]
+exports.deletePhotosValidator = () => {
+  return [
+    usernameValidator("username", false, true),
+    integerValidator("userId", false, true),
+    allowedBodyInputsValidator(["username", "userId"]),
+  ]
+}
 
-exports.postCaptionsValidator = [
-  integerValidator("photoId"),
-  textValidator("captionText"),
-]
+exports.postCaptionsValidator = () => {
+  return [integerValidator("photoId"), textValidator("captionText")]
+}
 
-exports.getCaptionsValidator = [
-  usernameValidator("username", false, true),
-  integerValidator("userId", false, true),
-  integerValidator("photoId", false, true),
-  allowedBodyInputsValidator(["username", "userId", "photoId"], true),
-]
+exports.getCaptionsValidator = () => {
+  return [
+    usernameValidator("username", false, true),
+    integerValidator("userId", false, true),
+    integerValidator("photoId", false, true),
+    allowedBodyInputsValidator(["username", "userId", "photoId"], true),
+  ]
+}
 
-exports.deleteCaptionsValidator = [
-  usernameValidator("username", false, true),
-  integerValidator("userId", false, true),
-  integerValidator("photoId", false, true),
-  allowedBodyInputsValidator(["username", "userId", "photoId"], true),
-]
+exports.deleteCaptionsValidator = () => {
+  return [
+    usernameValidator("username", false, true),
+    integerValidator("userId", false, true),
+    integerValidator("photoId", false, true),
+    allowedBodyInputsValidator(["username", "userId", "photoId"], true),
+  ]
+}
