@@ -1,4 +1,4 @@
-const { validationPerusal, sentenceCase } = require("./validators")
+const { validationPerusal } = require("./validators")
 const models = require("../database/models")
 const { Api401Error, Api403Error, Api500Error } =
   require("../util/index").apiErrors

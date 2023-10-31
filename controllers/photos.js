@@ -2,12 +2,13 @@ require("dotenv").config()
 const fs = require("fs")
 const Sequelize = require("sequelize")
 const util = require("util")
+const sharp = require("sharp")
 const uuidv4 = require("uuid").v4
 const unlinkFile = util.promisify(fs.unlink)
 const { uploadFile, attachFilesToResponse, deleteFile } =
   require("../util/index").s3
 const models = require("../database/models")
-const { Api400Error, Api401Error, Api403Error, Api404Error, Api500Error } =
+const { Api400Error, Api401Error, Api403Error, Api500Error } =
   require("../util/index").apiErrors
 const { selfSearch, whereSearch, inputsToSearch } =
   require("../util/index").search
@@ -259,7 +260,7 @@ exports.deletePhoto = async (req, res, next) => {
   const photo = req.photo
   const user = req.session.user
   const responseMsg = user.isAdmin
-    ? `User: ${user.id} has deleted one of user id ${photos.userId} photos.`
+    ? `User: ${user.id} has deleted one of user id ${photo.userId} photos.`
     : `User: ${user.id} has deleted one of their own photos.`
 
   try {

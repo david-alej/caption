@@ -32,7 +32,7 @@ exports.postRegister = async (req, res, next) => {
 
     if (!created) {
       throw new Api500Error(
-        `Client: creating user query failed and was unable to finish.`
+        "Client: creating user query failed and was unable to finish."
       )
     }
 

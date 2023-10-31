@@ -11,13 +11,13 @@ const logErrorMiddleware = async (err, req, res, next) => {
   next(err)
 }
 
-const returnError = (err, req, res, next) => {
+const returnError = (err, req, res) => {
   res.status(err.statusCode || 500).send(err.name)
 }
 
-const isOperationalError = (error) => {
-  if (error instanceof BaseError) {
-    return error.isOperational
+const isOperationalError = (err) => {
+  if (err instanceof BaseError) {
+    return err.isOperational
   }
   return false
 }

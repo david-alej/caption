@@ -1,8 +1,7 @@
 const express = require("express")
 const registerRouter = express.Router()
 const { registerControllers } = require("../controllers/index")
-const { credentialsValidator, usernameValidator } =
-  require("../controllers/index").validators
+const { credentialsValidator } = require("../controllers/index").validators
 
 registerRouter.get("/", registerControllers.getRegister)
 

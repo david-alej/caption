@@ -1,5 +1,5 @@
 const { body, param } = require("express-validator")
-const { Api400Error, Api500Error } = require("../util/index").apiErrors
+const { Api400Error } = require("../util/index").apiErrors
 const { validationResult, matchedData } = require("express-validator")
 
 const sentenceCase = (camelCase) => {
@@ -112,7 +112,7 @@ const captionsMultiInputCheck = (body) => {
 
   if (!Object.keys(body).includes("photoId")) {
     throw Error(
-      `the request body object must include "photoId" if two key-value pairs are given.`
+      'the request body object must include "photoId" if two key-value pairs are given.'
     )
   }
 
@@ -121,7 +121,7 @@ const captionsMultiInputCheck = (body) => {
     !Object.keys(body).includes("userId")
   ) {
     throw Error(
-      `the request body object must include either "username" or "userId" along with "photoId" if two key-value pairs are given.`
+      'the request body object must include either "username" or "userId" along with "photoId" if two key-value pairs are given.'
     )
   }
   return true

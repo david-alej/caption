@@ -1,7 +1,5 @@
 const { Api500Error } = require("./apiErrors")
-// const { sentenceCase } = require("../controllers/index").validators
-
-const Sequelize = require("sequelize")
+const { sentenceCase } = require("../controllers/index").validators
 
 const selfSearch = (userId) => {
   return { where: { userId: userId } }
@@ -26,7 +24,7 @@ const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
   let searchParams = defaultSearch
 
   let afterMsg = "."
-  const numberOfdefinedInputs = 0
+  let numberOfdefinedInputs = 0
 
   for (let i = 0; i < inputs.length; i++) {
     const key = Object.keys(inputs[i])[0]
@@ -55,7 +53,7 @@ const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
     throw new Api500Error(
       `User: ${req.session.user.id} something went wrong with ` +
         nameOfTable +
-        `'s "allowedBodyInputsValidator" function in the validators.`
+        '\'s "allowedBodyInputsValidator" function in the validators.'
     )
   }
 
