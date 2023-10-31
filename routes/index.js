@@ -2,6 +2,7 @@
 
 const captionsRouter = require("./captions")
 const loginRouter = require("./login")
+const logoutRouter = require("./logout")
 const photosRouter = require("./photos")
 const registerRouter = require("./register")
 const usersRouter = require("./users")
@@ -27,6 +28,7 @@ router.use(doubleCsrfProtection)
 router.use("/captions", captionsRouter)
 router.use("/photos", photosRouter)
 router.use("/users", usersRouter)
+router.use("/logout", logoutRouter)
 
 router.use(logErrorMiddleware, returnError)
 

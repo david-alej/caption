@@ -3,7 +3,6 @@ const { generateToken } = require("../util/index").doubleCsrf
 const { authenticate } = require("../util/index").authenticate
 
 exports.getLogin = async (req, res) => {
-  // res.render("login")
   res.status(200).send()
 }
 

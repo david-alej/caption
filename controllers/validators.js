@@ -1,13 +1,8 @@
+/* eslint-disable quotes */
 const { body, param } = require("express-validator")
 const { Api400Error } = require("../util/index").apiErrors
+const { sentenceCase } = require("../util/index").search
 const { validationResult, matchedData } = require("express-validator")
-
-const sentenceCase = (camelCase) => {
-  const result = camelCase.replace(/([A-Z])/g, " $1")
-  return result[0].toUpperCase() + result.substring(1).toLowerCase()
-}
-
-exports.sentenceCase = sentenceCase
 
 const basicCredentialValidator = (
   input,
@@ -112,7 +107,7 @@ const captionsMultiInputCheck = (body) => {
 
   if (!Object.keys(body).includes("photoId")) {
     throw Error(
-      "the request body object must include \"photoId\" if two key-value pairs are given."
+      'the request body object must include "photoId" if two key-value pairs are given.'
     )
   }
 
@@ -121,7 +116,7 @@ const captionsMultiInputCheck = (body) => {
     !Object.keys(body).includes("userId")
   ) {
     throw Error(
-      "the request body object must include either \"username\" or \"userId\" along with \"photoId\" if two key-value pairs are given."
+      'the request body object must include either "username" or "userId" along with "photoId" if two key-value pairs are given.'
     )
   }
   return true
@@ -132,7 +127,7 @@ const allowedBodyInputsValidator = (inputs, isCaptionsRoute = false) => {
 
   for (let i = 0; i < inputs.length; i++) {
     if (parseInt(i) === inputs.length - 1) {
-      afterNonUniqueErrorMsg += "or \"" + inputs[parseInt(i)] + ".\""
+      afterNonUniqueErrorMsg += 'or "' + inputs[parseInt(i)] + '."'
     }
 
     afterNonUniqueErrorMsg += inputs[parseInt(i)] + ", "

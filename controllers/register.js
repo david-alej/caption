@@ -4,7 +4,6 @@ const { Api400Error, Api500Error } = require("../util/index").apiErrors
 const { passwordHash } = require("../util/index").passwordHash
 
 exports.getRegister = async (req, res) => {
-  // res.render("register")
   res.status(200).send()
 }
 

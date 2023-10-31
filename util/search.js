@@ -1,5 +1,11 @@
 const { Api500Error } = require("./apiErrors")
-const { sentenceCase } = require("../controllers/index").validators
+
+const sentenceCase = (camelCase) => {
+  const result = camelCase.replace(/([A-Z])/g, " $1")
+  return result[0].toUpperCase() + result.substring(1).toLowerCase()
+}
+
+exports.sentenceCase = sentenceCase
 
 const selfSearch = (userId) => {
   return { where: { userId: userId } }
@@ -56,7 +62,8 @@ const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
     throw new Api500Error(
       `User: ${req.session.user.id} something went wrong with ` +
         nameOfTable +
-        "'s \"allowedBodyInputsValidator\" function in the validators."
+        // eslint-disable-next-line quotes
+        '\'s "allowedBodyInputsValidator" function in the validators.'
     )
   }
 
