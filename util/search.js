@@ -27,8 +27,8 @@ const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
   let numberOfdefinedInputs = 0
 
   for (let i = 0; i < inputs.length; i++) {
-    const key = Object.keys(inputs[i])[0]
-    const value = Object.values(inputs[i])[0]
+    const key = Object.keys(inputs[parseInt(i)])[0]
+    const value = Object.values(inputs[parseInt(i)])[0]
 
     if (value !== undefined) {
       numberOfdefinedInputs++
@@ -41,11 +41,14 @@ const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
         sentenceCase(key) +
         ` ${value}.`
 
-      searchParams = whereSearch({ ...inputs[0], ...inputs[i] }, otherOptions)
+      searchParams = whereSearch(
+        { ...inputs[0], ...inputs[parseInt(i)] },
+        otherOptions
+      )
     } else if (numberOfdefinedInputs === 1) {
       afterMsg = " with given " + sentenceCase(key) + ` ${value}.`
 
-      searchParams = whereSearch(inputs[i], otherOptions)
+      searchParams = whereSearch(inputs[parseInt(i)], otherOptions)
     }
   }
 
@@ -53,7 +56,7 @@ const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
     throw new Api500Error(
       `User: ${req.session.user.id} something went wrong with ` +
         nameOfTable +
-        '\'s "allowedBodyInputsValidator" function in the validators.'
+        "'s \"allowedBodyInputsValidator\" function in the validators."
     )
   }
 

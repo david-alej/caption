@@ -1,6 +1,7 @@
 require("dotenv").config()
 const S3 = require("aws-sdk/clients/s3")
 const sharp = require("sharp")
+const { Readable } = require("stream")
 
 const bucketName = process.env.AWS_BUCKET_NAME
 const region = process.env.AWS_BUCKET_REGION
@@ -41,7 +42,7 @@ const attachFilesToResponse = (res, photos) => {
   const form = new FormData()
 
   for (let i = 0; i < photos.length; i++) {
-    const { photoFilename, photoName } = photos[i]
+    const { photoFilename, photoName } = photos[parseInt(i)]
 
     const readStream = getFileStream(photoFilename)
 
@@ -51,7 +52,10 @@ const attachFilesToResponse = (res, photos) => {
       .then((resized) => {
         const stream = Readable.from(resized)
         form.append(photoName, stream, photoFilename)
-        form.append(photoName + " - information", JSON.stringify(photos[i]))
+        form.append(
+          photoName + " - information",
+          JSON.stringify(photos[parseInt(i)])
+        )
       })
 
     readStream.pipe(pipeline)

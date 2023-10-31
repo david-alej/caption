@@ -20,11 +20,13 @@
     "sequelize-cli": "^6.6.1",
     "sharp": "^0.32.6",
     "stream": "^0.0.2",
+    "uuid": "^9.0.1",
     "winston": "^3.11.0",
     "winston-logsene": "^2.1.2"
   },
   "devDependencies": {
     "chai": "^4.3.10",
+    "cross-env": "^7.0.3",
     "eslint": "^8.52.0",
     "eslint-plugin-mocha": "^10.2.0",
     "eslint-plugin-node": "^11.1.0",
@@ -37,12 +39,18 @@
   "name": "caption",
   "description": "",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=16.13.2"
+  },
   "main": "index.js",
   "scripts": {
     "start-dev": "nodemon app.js",
-    "test": "mocha",
     "lint": "eslint ./",
-    "lint-fix": "eslint ./ --fix"
+    "lint-fix": "eslint ./ --fix",
+    "migrate": "npx sequelize-cli db:migrate",
+    "migrate:reset": "npx sequelize-cli db:migrate:undo:all && npm run migrate",
+    "test": "cross-env NODE_ENV=test mocha --testTimeout=10000",
+    "pretest": "cross-env NODE_ENV=test npm run migrate:reset"
   },
   "author": "",
   "license": "MIT"

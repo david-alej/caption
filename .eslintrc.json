@@ -19,5 +19,6 @@
     "quotes": ["error", "double"],
     "semi": ["error", "never"]
   },
-  "plugins": ["mocha"]
+  "plugins": ["mocha"],
+  "ignorePatterns": ["database/*"]
 }

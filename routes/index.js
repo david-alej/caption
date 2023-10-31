@@ -1,3 +1,5 @@
+/* eslint no-process-exit: 0 */
+
 const captionsRouter = require("./captions")
 const loginRouter = require("./login")
 const photosRouter = require("./photos")
