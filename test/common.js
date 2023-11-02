@@ -6,7 +6,6 @@ const { httpStatusCodes } = require("../util/index")
 const models = require("../database/models")
 const request = require("supertest")
 const session = require("supertest-session")
-console.log(httpStatusCodes)
 
 exports.app = app
 exports.assert = assert

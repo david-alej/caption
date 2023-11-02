@@ -16,7 +16,7 @@ exports.postLogin = async (req, res, next) => {
     delete user.password
     req.session.user = user
 
-    const csrfToken = generateToken(req, res)
+    const csrfToken = generateToken(req, res, true)
 
     res.json({
       message: `User: ${user.id} is now logged in.`,

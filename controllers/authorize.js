@@ -1,9 +1,9 @@
-const { Api401Error } = require("../util/index").apiErrors
+const { Api400Error } = require("../util/index").apiErrors
 
 exports.authorizedUser = (req, res, next) => {
   if (req.session.authorized) {
     next()
     return
   }
-  throw new Api401Error("Client needs to login to view this page.")
+  throw new Api400Error("Client needs to login to view this page.")
 }
