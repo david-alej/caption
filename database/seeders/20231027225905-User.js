@@ -23,14 +23,14 @@ module.exports = {
         {
           username: "penguinlover",
           password:
-            "$2b$10$w1fpDzFM5B5z8fSL7ZiAL.iNJ1WD4rwr7VGD6YVeteQpZtTi2sHEW", //alaska456
+            "$2b$10$29E11dGlGVqrO5jFyImKT.lgyNGOlunLLz8sMm2VQISZQTSRNWGhO", //Alaska456
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
           username: "yomaster",
           password:
-            "$2b$10$FUJNndz74iZHvdHFau.1ROHVYuwk.lETTUrDTtl7Vk8L1ehTDiT2y", //yoyoyoyo
+            "$2b$10$RrYRSU2.wwzo9onZ9i62CuET9up3m3n9PzS1XNPBQUQ71hdF5JBqi", //yoyoyo1Q
           isAdmin: true,
           createdAt: new Date(),
           updatedAt: new Date(),

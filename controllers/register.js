@@ -13,7 +13,7 @@ exports.postRegister = async (req, res, next) => {
     const { username, password } = validationPerusal(req, "Client:")
 
     const searched = await models.User.findOne({
-      where: { username },
+      where: { username: username },
     })
 
     if (searched) {
@@ -21,7 +21,7 @@ exports.postRegister = async (req, res, next) => {
     }
 
     const hashedPassword = await passwordHash(password, saltRounds)
-    console.log(hashedPassword)
+
     const created = await models.User.create({
       username,
       password: hashedPassword,
@@ -35,7 +35,7 @@ exports.postRegister = async (req, res, next) => {
       )
     }
 
-    res.status(201).json(`User: ${created.dataValues.id} is created.`)
+    res.status(201).send(`User: ${created.dataValues.id} is created.`)
   } catch (err) {
     next(err)
   }

@@ -2,6 +2,7 @@ const authorize = require("./authorize")
 const captionsControllers = require("./captions")
 const errorHandlers = require("./errorHandlers")
 const loginControllers = require("./login")
+const logoutControllers = require("./logout")
 const photosControllers = require("./photos")
 const registerControllers = require("./register")
 const usersControllers = require("./users")
@@ -12,6 +13,7 @@ module.exports = {
   captionsControllers,
   errorHandlers,
   loginControllers,
+  logoutControllers,
   photosControllers,
   registerControllers,
   usersControllers,

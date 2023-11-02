@@ -166,7 +166,7 @@ exports.validationPerusal = (request, preErrorMsg) => {
   const validationError = validationResult(request).array({
     onlyFirstError: true,
   })[0]
-  console.log(validationResult(request).array())
+
   if (validationError) {
     throw new Api400Error(preErrorMsg + " " + validationError.msg)
   }

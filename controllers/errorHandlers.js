@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 const { logger } = require("../util/index")
 const { BaseError } = require("../util/index")
 
@@ -6,13 +8,12 @@ const logError = (err) => {
 }
 
 const logErrorMiddleware = async (err, req, res, next) => {
-  console.log(err)
   logError(err)
   next(err)
 }
 
-const returnError = (err, req, res) => {
-  res.status(err.statusCode || 500).send(err.name)
+const returnError = (err, req, res, next) => {
+  res.status(err.statusCode || 500).send(err.message)
 }
 
 const isOperationalError = (err) => {
