@@ -11,6 +11,10 @@ const {
 const { OK, CREATED, BAD_REQUEST, FORBIDDEN } = httpStatusCodes
 
 describe("Logout routes", () => {
+  after(async function () {
+    await models.User.destroy({ truncate: true })
+  })
+
   describe("Get /", () => {
     it("When the request does not have cookies attached, then unauthorized message is sent #authorize", async function () {
       const expected = "Bad request."

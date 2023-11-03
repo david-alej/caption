@@ -10,7 +10,10 @@ const {
 const { OK, BAD_REQUEST, CREATED } = httpStatusCodes
 
 describe("Register routes", () => {
-  after(function () {})
+  after(async function () {
+    await models.User.destroy({ truncate: true })
+  })
+
   describe("Get /", () => {
     it("When valid request is made, then status is ok", async function () {
       const response = await request(app).get("/register")

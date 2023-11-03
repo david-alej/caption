@@ -1,18 +1,13 @@
 const { validationPerusal } = require("./validators")
 const models = require("../database/models")
 const { authenticate } = require("../util/index").authenticate
-const { Api400Error, Api401Error, Api404Error, Api500Error } =
+const { Api400Error, Api403Error, Api404Error, Api500Error } =
   require("../util/index").apiErrors
 
 exports.paramUsername = async (req, res, next, username) => {
   const user = req.session.user
-  try {
-    if (username === "" || username === undefined) {
-      req.targetUser = user
-      next()
-      return
-    }
 
+  try {
     const searched = await models.User.findOne({
       where: { username: username },
       attributes: { exclude: ["password"] },
@@ -32,12 +27,13 @@ exports.paramUsername = async (req, res, next, username) => {
       ],
       order: [["id", "DESC"]],
     })
+
     if (!searched) {
       throw new Api404Error(
         `User: ${user.id} target username ${username} not found.`
       )
     }
-    req.targetUser = searched.dataValues
+    req.targetUser = JSON.parse(JSON.stringify(searched))
     next()
   } catch (err) {
     next(err)
@@ -72,8 +68,9 @@ exports.getUsers = async (req, res, next) => {
 
 exports.getUser = async (req, res, next) => {
   const targetUser = req.targetUser
+
   try {
-    req.json(targetUser)
+    res.json(targetUser)
   } catch (err) {
     next(err)
   }
@@ -81,24 +78,27 @@ exports.getUser = async (req, res, next) => {
 
 exports.putUser = async (req, res, next) => {
   const user = req.session.user
+
   try {
     const { username, password, newUsername, newPassword } = validationPerusal(
       req,
       `User: ${user.id}`
     )
 
-    const searched = await models.User.findOne({
-      where: { username: newUsername },
-    })
-
-    if (searched) {
-      throw new Api400Error(
-        `User: ${user.id} new username, ${newUsername}, is already in use.`
-      )
-    }
-
     if (!newUsername && !newPassword) {
       throw new Api400Error(`User: ${user.id} did not update any values.`)
+    }
+
+    if (newUsername) {
+      const searched = await models.User.findOne({
+        where: { username: newUsername },
+      })
+
+      if (searched) {
+        throw new Api400Error(
+          `User: ${user.id} new username, ${newUsername}, is already in use.`
+        )
+      }
     }
 
     await authenticate(username, password)
@@ -119,11 +119,9 @@ exports.putUser = async (req, res, next) => {
     if (!updated) {
       throw new Api500Error(`User: ${user.id} update user query did not work.`)
     }
-    res
-      .status(204)
-      .send(
-        `User: ${user.id} has updated either/both their username or password.`
-      )
+    res.send(
+      `User: ${user.id} has updated either/both their username or password.`
+    )
   } catch (err) {
     next(err)
   }
@@ -139,7 +137,7 @@ exports.deleteUser = async (req, res, next) => {
 
   try {
     if (!targetIsSelf && !user.isAdmin) {
-      throw new Api401Error(
+      throw new Api403Error(
         `User: ${user.id} is not authorized to delete a user.`
       )
     }
@@ -161,7 +159,7 @@ exports.deleteUser = async (req, res, next) => {
       )
     }
 
-    res.status(204).send(responseMsg)
+    res.send(responseMsg)
   } catch (err) {
     next(err)
   }

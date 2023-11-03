@@ -9,13 +9,15 @@ const basicCredentialValidator = (
   inputIsParam = false,
   optional = false
 ) => {
+  console.log("\n\n")
   const inputName = sentenceCase(input)
   let requestProperty = inputIsParam ? param : body
   let head = requestProperty(input)
-
+  console.log(input)
   if (!inputIsParam) {
     if (optional) {
-      head = head.if(head.exists())
+      console.log(input)
+      head = head.optional({ nullable: true, checkFalsy: true })
     }
 
     head = head.notEmpty().withMessage(inputName + " must not be empty.")
@@ -34,9 +36,10 @@ const usernameValidator = (
   inputIsParam = false,
   optional = false
 ) => {
+  console.log(input)
   const inputName = sentenceCase(input)
   const head = basicCredentialValidator(input, inputIsParam, optional)
-
+  if (input === "newUsername") console.log(head)
   return head
     .isLength({ min: 4, max: 20 })
     .withMessage(

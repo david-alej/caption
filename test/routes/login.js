@@ -10,6 +10,10 @@ const {
 const { OK, UNAUTHORIZED } = httpStatusCodes
 
 describe("Login routes", () => {
+  after(async function () {
+    await models.User.destroy({ truncate: true })
+  })
+
   describe("Get /", () => {
     it("When valid request is made, then status is ok", async function () {
       const response = await request(app).get("/login")
