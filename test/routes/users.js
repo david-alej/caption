@@ -10,7 +10,7 @@ const {
 } = require("../common")
 
 // eslint-disable-next-line security/detect-non-literal-require
-const userSeeder = require(seedersDirectory + "/20231027225905-User")
+const usersSeeder = require(seedersDirectory + "/20231027225905-User")
 const { OK, CREATED, NOT_FOUND, BAD_REQUEST, FORBIDDEN } = httpStatusCodes
 
 describe("Users route", () => {
@@ -24,9 +24,7 @@ describe("Users route", () => {
   }
 
   before(async function () {
-    console.log(adminCredentials !== userCredentials)
-
-    await userSeeder.up(models.sequelize.getQueryInterface(), null)
+    await usersSeeder.up(models.sequelize.getQueryInterface(), null)
   })
 
   after(async function () {

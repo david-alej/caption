@@ -53,8 +53,6 @@ exports.paramPhotoId = async (req, res, next, photoId) => {
   const user = req.session.user
 
   try {
-    const { photoId } = validationPerusal(req, `User: ${user.id}`)
-
     const searchParams = whereSearch({ id: photoId }, otherOptions)
 
     const searched = await models.Photo.findOne(searchParams)
@@ -65,7 +63,7 @@ exports.paramPhotoId = async (req, res, next, photoId) => {
       )
     }
 
-    req.photo = searched.dataValues
+    req.photo = JSON.parse(JSON.stringify(searched))
 
     next()
   } catch (err) {
@@ -118,8 +116,8 @@ exports.postPhoto = async (req, res, next) => {
 
     const created = await models.Photo.create({
       userId: user.userId,
-      photoName: fileTitle,
-      photoFilename: filename,
+      title: fileTitle,
+      filename: filename,
       createdAt: new Date(),
       updatedAt: new Date(),
     })
@@ -164,6 +162,7 @@ exports.getPhotos = async (req, res, next) => {
     const photos = searched.dataValues
 
     attachFilesToResponse(res, photos)
+    res.send()
   } catch (err) {
     next(err)
   }
@@ -182,7 +181,7 @@ exports.getPhoto = async (req, res, next) => {
 exports.putPhoto = async (req, res, next) => {
   const photo = req.photo
   const user = req.session.user
-  const { photoName } = req.body
+  const { title } = req.body
 
   try {
     if (photo.userId !== user.id) {
@@ -191,7 +190,7 @@ exports.putPhoto = async (req, res, next) => {
       )
     }
 
-    const updatedValues = { photoName, updatedAt: new Date() }
+    const updatedValues = { title, updatedAt: new Date() }
 
     const updated = await models.Photo.update(updatedValues, {
       where: { id: photo.id },
@@ -246,9 +245,9 @@ exports.deletePhotos = async (req, res, next) => {
       )
     }
 
-    const { photoFilename } = deleted.dataValues
+    const { filename } = deleted.dataValues
 
-    await deleteFile(photoFilename)
+    await deleteFile(filename)
 
     res.status(204).send(responseMsg + afterMsg)
   } catch (err) {
@@ -280,9 +279,9 @@ exports.deletePhoto = async (req, res, next) => {
       )
     }
 
-    const { photoFilename } = deleted.dataValues
+    const { filename } = deleted.dataValues
 
-    await deleteFile(photoFilename)
+    await deleteFile(filename)
 
     res.status(204).send(responseMsg)
   } catch (err) {

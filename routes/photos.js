@@ -31,7 +31,7 @@ photosRouter.get("/:photoId", photosControllers.getPhoto)
 
 photosRouter.put(
   "/:photoId",
-  textValidator("photoName"),
+  textValidator("title"),
   photosControllers.putPhoto
 )
 

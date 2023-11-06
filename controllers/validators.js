@@ -9,14 +9,12 @@ const basicCredentialValidator = (
   inputIsParam = false,
   optional = false
 ) => {
-  console.log("\n\n")
   const inputName = sentenceCase(input)
   let requestProperty = inputIsParam ? param : body
   let head = requestProperty(input)
-  console.log(input)
+
   if (!inputIsParam) {
     if (optional) {
-      console.log(input)
       head = head.optional({ nullable: true, checkFalsy: true })
     }
 
@@ -36,10 +34,8 @@ const usernameValidator = (
   inputIsParam = false,
   optional = false
 ) => {
-  console.log(input)
   const inputName = sentenceCase(input)
   const head = basicCredentialValidator(input, inputIsParam, optional)
-  if (input === "newUsername") console.log(head)
   return head
     .isLength({ min: 4, max: 20 })
     .withMessage(
@@ -76,7 +72,7 @@ const basicValidator = (input, inputIsParam = false, optional = false) => {
   let head = requestProperty(input)
 
   if (optional) {
-    head = head.if(head.exists())
+    head = head.optional({ nullable: true, checkFalsy: true })
   }
 
   return { head, inputName }
@@ -135,11 +131,13 @@ const allowedBodyInputsValidator = (inputs, isCaptionsRoute = false) => {
 
     afterNonUniqueErrorMsg += inputs[parseInt(i)] + ", "
   }
-
+  console.log("ya")
   return body()
-    .if(body().exists())
+    .optional()
     .custom((body) => {
+      console.log("yay")
       const keys = inputs
+      console.log("ye")
       const bodyIncludesKeys = Object.keys(body).every((key) => {
         keys.includes(key)
       })
@@ -194,9 +192,9 @@ exports.postPhotosValidator = () => {
 
 exports.getPhotosValidator = () => {
   return [
-    textValidator("photoName", false, true),
+    textValidator("title", false, true),
     usernameValidator("username", false, true),
-    allowedBodyInputsValidator(["photoName", "username"]),
+    allowedBodyInputsValidator(["title", "username"]),
   ]
 }
 

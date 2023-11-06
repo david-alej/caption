@@ -2,4 +2,5 @@
 // require("./register")
 // require("./login")
 // require("./logout")
-require("./users")
+// require("./users")
+require("./photos")
