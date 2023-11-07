@@ -127,19 +127,24 @@ const allowedBodyInputsValidator = (inputs, isCaptionsRoute = false) => {
   for (let i = 0; i < inputs.length; i++) {
     if (parseInt(i) === inputs.length - 1) {
       afterNonUniqueErrorMsg += 'or "' + inputs[parseInt(i)] + '."'
+      continue
     }
 
-    afterNonUniqueErrorMsg += inputs[parseInt(i)] + ", "
+    afterNonUniqueErrorMsg += '"' + inputs[parseInt(i)] + '", '
   }
-  console.log("ya")
+
   return body()
     .optional()
     .custom((body) => {
-      console.log("yay")
       const keys = inputs
-      console.log("ye")
-      const bodyIncludesKeys = Object.keys(body).every((key) => {
-        keys.includes(key)
+      const requestBodyKeys = Object.keys(body)
+      console.log(requestBodyKeys)
+      // if (requestBodyKeys.length === 0 || requestBodyKeys === undefined) {
+      //   return true
+      // }
+
+      const bodyIncludesKeys = requestBodyKeys.every((key) => {
+        return keys.includes(key)
       })
 
       if (!bodyIncludesKeys) {
@@ -187,7 +192,7 @@ exports.newCredentialsValidator = () => {
 }
 
 exports.postPhotosValidator = () => {
-  return [textValidator("photoName")]
+  return [textValidator("title")]
 }
 
 exports.getPhotosValidator = () => {

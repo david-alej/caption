@@ -3,6 +3,7 @@ const S3 = require("aws-sdk/clients/s3")
 const fs = require("fs")
 const path = require("path")
 const sharp = require("sharp")
+const FormData = require("form-data")
 const { Readable } = require("stream")
 const models = require("../database/models")
 
@@ -54,27 +55,30 @@ function getFileStream(fileKey) {
 }
 exports.getFileStream = getFileStream
 
-const attachFilesToResponse = (res, photos) => {
+const attachFilesToResponse = async (res, photos) => {
   const maxWidth = 750,
     maxHeight = 750
 
   const form = new FormData()
 
   for (let i = 0; i < photos.length; i++) {
-    const { photoFilename, photoName } = photos[parseInt(i)]
-
-    const readStream = getFileStream(photoFilename)
+    const { filename, title } = photos[parseInt(i)]
+    console.log(filename)
+    const readStream = getFileStream(filename)
 
     const pipeline = sharp()
+
+    pipeline
       .resize(maxWidth, maxHeight)
       .toBuffer()
       .then((resized) => {
         const stream = Readable.from(resized)
-        form.append(photoName, stream, photoFilename)
+        form.append(title, stream, filename)
         form.append(
-          photoName + " - information",
+          title + " - information",
           JSON.stringify(photos[parseInt(i)])
         )
+        console.log(form)
       })
 
     readStream.pipe(pipeline)
@@ -86,7 +90,7 @@ const attachFilesToResponse = (res, photos) => {
   )
 
   res.setHeader("Content-Type", "text/plain")
-
+  console.log(form)
   form.pipe(res)
 }
 

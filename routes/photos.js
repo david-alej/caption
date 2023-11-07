@@ -3,6 +3,7 @@ const photosRouter = express.Router()
 const {
   integerValidator,
   textValidator,
+  postPhotosValidator,
   getPhotosValidator,
   deletePhotosValidator,
 } = require("../controllers/index").validators
@@ -23,9 +24,14 @@ photosRouter.param(
   photosControllers.paramPhotoId
 )
 
-photosRouter.post("/", upload.single("photo"), photosControllers.postPhoto)
+photosRouter.post(
+  "/",
+  upload.single("photo"),
+  postPhotosValidator(),
+  photosControllers.postPhoto
+)
 
-photosRouter.get("/", getPhotosValidator, photosControllers.getPhotos)
+photosRouter.get("/", getPhotosValidator(), photosControllers.getPhotos)
 
 photosRouter.get("/:photoId", photosControllers.getPhoto)
 
@@ -35,7 +41,11 @@ photosRouter.put(
   photosControllers.putPhoto
 )
 
-photosRouter.delete("/", deletePhotosValidator, photosControllers.deletePhotos)
+photosRouter.delete(
+  "/",
+  deletePhotosValidator(),
+  photosControllers.deletePhotos
+)
 
 photosRouter.delete("/:photoId", photosControllers.deletePhoto)
 

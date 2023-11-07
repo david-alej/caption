@@ -1,10 +1,10 @@
 require("dotenv").config()
-const fs = require("fs")
+// const fs = require("fs")
 const Sequelize = require("sequelize")
-const util = require("util")
+// const util = require("util")
 const sharp = require("sharp")
 const uuidv4 = require("uuid").v4
-const unlinkFile = util.promisify(fs.unlink)
+// const unlinkFile = util.promisify(fs.unlink)
 const { uploadFile, attachFilesToResponse, deleteFile } =
   require("../util/index").s3
 const models = require("../database/models")
@@ -24,7 +24,6 @@ const otherOptions = {
           model: models.User,
           as: "author",
           attributes: { exclude: ["password"] },
-          require: true,
         },
       ],
       order: [["votes", "DESC"]],
@@ -40,12 +39,24 @@ const otherOptions = {
 const topPhotosSearch = {
   attributes: {
     include: [
-      [Sequelize.fn("SUM", Sequelize.col("captions.votes")), "totalVotes"],
+      [
+        models.Sequelize.literal(
+          // eslint-disable-next-line quotes
+          '(SELECT SUM("votes") FROM "Captions" WHERE "photoId" = "Photo"."id")'
+        ),
+        "totalVotes",
+      ],
     ],
   },
-  ...otherOptions,
+  include: [
+    {
+      model: models.Caption,
+      as: "captions",
+      attributes: [],
+    },
+  ],
   group: ["Photo.id"],
-  order: [[Sequelize.col("totalVotes"), "DESC"]],
+  order: [[models.Sequelize.col("totalVotes"), "DESC"]],
   limit: 10,
 }
 
@@ -86,7 +97,7 @@ exports.postPhoto = async (req, res, next) => {
   try {
     validationPerusal(req, preErrorMsg)
 
-    const fileTitle = req.body.title
+    const title = req.body.title
     const fileExtension = originalname.slice(
       ((originalname.lastIndexOf(".") - 1) >>> 0) + 2
     )
@@ -115,14 +126,14 @@ exports.postPhoto = async (req, res, next) => {
       })
 
     const created = await models.Photo.create({
-      userId: user.userId,
-      title: fileTitle,
-      filename: filename,
+      userId: user.id,
+      title,
+      filename,
       createdAt: new Date(),
       updatedAt: new Date(),
     })
 
-    await unlinkFile(file.path)
+    // await unlinkFile(path.join("../public/temp/", originalname))
 
     if (!created) {
       throw new Api500Error(`User: ${user.id} create query did not work.`)
@@ -131,7 +142,7 @@ exports.postPhoto = async (req, res, next) => {
     console.log(result)
 
     res.status(201).json({
-      imagePath: `/photos/${fileTitle}`,
+      imagePath: `/photos/${title}`,
       msg: `User: ${user.id} has uploaded a photo.`,
     })
   } catch (err) {
@@ -152,17 +163,16 @@ exports.getPhotos = async (req, res, next) => {
       otherOptions,
       "photo"
     )
-
+    console.log(searchParams)
     const searched = await models.Photo.findAll(searchParams)
 
     if (!searched) {
       throw new Api401Error(`User: ${user.id} photos were not found` + afterMsg)
     }
 
-    const photos = searched.dataValues
-
+    const photos = JSON.parse(JSON.stringify(searched))
+    console.log(photos)
     attachFilesToResponse(res, photos)
-    res.send()
   } catch (err) {
     next(err)
   }
