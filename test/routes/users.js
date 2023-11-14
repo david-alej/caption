@@ -86,6 +86,21 @@ describe("Users route", () => {
   })
 
   describe("Get /:username", () => {
+    it("When given username is invalid, then the response is bad request #usernameValidator #paramUsername", async function () {
+      const expected = "Bad request."
+      const usernameSearch = "username "
+      const userSession = session(app)
+      await userSession.post("/register").send(userCredentials).expect(CREATED)
+      await userSession.post("/login").send(userCredentials).expect(OK)
+
+      const response = await userSession.get("/users/" + usernameSearch)
+
+      await models.User.destroy({ where: { username: "username" } })
+
+      assert.strictEqual(response.status, BAD_REQUEST)
+      assert.include(response.text, expected)
+    })
+
     it("When given username does not exist in the database, then the response is a not found message #paramUsername", async function () {
       const expected = "Not found."
       const usernameSearch = "nonExisitngUsername"

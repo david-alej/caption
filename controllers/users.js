@@ -1,4 +1,4 @@
-const { validationPerusal } = require("./validators")
+const { validationPerusal, usernameValidator } = require("./validators")
 const models = require("../database/models")
 const { authenticate } = require("../util/index").authenticate
 const { Api400Error, Api403Error, Api404Error, Api500Error } =
@@ -8,6 +8,10 @@ exports.paramUsername = async (req, res, next, username) => {
   const user = req.session.user
 
   try {
+    await usernameValidator("username", true).run(req)
+
+    validationPerusal(req, `User: ${user.id}`)
+
     const searched = await models.User.findOne({
       where: { username: username },
       attributes: { exclude: ["password"] },

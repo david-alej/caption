@@ -138,7 +138,6 @@ const allowedBodyInputsValidator = (inputs, isCaptionsRoute = false) => {
     .custom((body) => {
       const keys = inputs
       const requestBodyKeys = Object.keys(body)
-      console.log(requestBodyKeys)
       // if (requestBodyKeys.length === 0 || requestBodyKeys === undefined) {
       //   return true
       // }

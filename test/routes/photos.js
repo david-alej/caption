@@ -18,7 +18,7 @@ const usersSeeder = require(seedersDirectory + "/20231027225905-User")
 // eslint-disable-next-line security/detect-non-literal-require
 const photosSeeder = require(seedersDirectory + "/20231027225911-Photo.js")
 
-const { OK, CREATED } = httpStatusCodes
+const { OK, CREATED, NOT_FOUND, BAD_REQUEST } = httpStatusCodes
 
 describe("Photos route", () => {
   const userCredentials = {
@@ -65,36 +65,120 @@ describe("Photos route", () => {
   // })
 
   describe("Get /", () => {
-    it("When request is made with credentials and csrf token, then all the photos are returned", async function () {
-      const expected = []
+    it("When valid request is made, then all the photos are returned #attachFilesToResponse", async function () {
+      this.timeout(5 * 1000)
+
+      const expected = [
+        {
+          id: 2,
+          userId: 2,
+          title: "Sales Consultant",
+          filename: "a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg",
+          createdAt: "2023-11-04T20:00:00.000Z",
+          updatedAt: "2023-11-04T20:00:00.000Z",
+          totalVotes: null,
+        },
+        {
+          id: 1,
+          userId: 1,
+          title: "Designer",
+          filename: "744fe784-f556-4c68-a81a-2e5d859e27ef.jpg",
+          createdAt: "2023-11-04T20:00:00.000Z",
+          updatedAt: "2023-11-04T20:00:00.000Z",
+          totalVotes: null,
+        },
+        {
+          id: 3,
+          userId: 3,
+          title: "Me and my siblings",
+          filename: "cc30b9e6-0ae1-4753-86cf-9b81717030c2.jpg",
+          createdAt: "2023-11-04T20:00:00.000Z",
+          updatedAt: "2023-11-04T20:00:00.000Z",
+          totalVotes: null,
+        },
+      ]
 
       const response = await userSession
         .get("/photos/")
         .set("x-csrf-token", csrfToken)
 
-      console.log(response.text)
       assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      for (let i = 0; i < expected.length; i++) {
+        assert.include(response.text, JSON.stringify(expected[parseInt(i)]))
+      }
     })
   })
 
-  // describe("Post /", () => {
-  //   it("When , then ", async function () {
-  //     const expected = []
-  //     const requestBody = {
-  //       title: "title",
-  //     }
-  //     const filename = "use get request"
-  //     const buffer = getObjectData(filename)
+  describe("Get /:photoId", () => {
+    it("When valid request is made but photoId is not an integer, then response is bad request #integerValidator", async function () {
+      const expected = "Bad request."
+      const photoId = "five"
 
-  //     const response = await userSession
-  //       .post("/photos/")
-  //       .set("x-csrf-token", csrfToken)
-  //       .attach("randomName", buffer, "randomName.jpg")
-  //       .send(requestBody)
+      const response = await userSession
+        .get("/photos/" + photoId)
+        .set("x-csrf-token", csrfToken)
 
-  //     assert.strictEqual(response.status, CREATED)
-  //     assert.include(response.text, expected)
-  //   })
-  // })
+      assert.strictEqual(response.status, BAD_REQUEST)
+      assert.include(response.text, expected)
+    })
+
+    it("When valid request is made but photoId does not exists, then response is not found", async function () {
+      const expected = "Not found."
+      const photoId = "5"
+
+      const response = await userSession
+        .get("/photos/" + photoId)
+        .set("x-csrf-token", csrfToken)
+
+      assert.strictEqual(response.status, NOT_FOUND)
+      assert.include(response.text, expected)
+    })
+
+    it("When valid request and photoId is an integer and exists, then the respective photo sent in a multipart form #attachFilesToResponse", async function () {
+      const expected = {
+        id: 2,
+        userId: 2,
+        title: "Sales Consultant",
+        filename: "a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg",
+        createdAt: "2023-11-04T20:00:00.000Z",
+        updatedAt: "2023-11-04T20:00:00.000Z",
+        captions: [],
+        author: {
+          id: 2,
+          username: "Carkeys23307",
+          isAdmin: false,
+          createdAt: "2023-11-02T20:00:00.000Z",
+          updatedAt: "2023-11-02T20:00:00.000Z",
+        },
+      }
+      const photoId = "2"
+
+      const response = await userSession
+        .get("/photos/" + photoId)
+        .set("x-csrf-token", csrfToken)
+
+      assert.strictEqual(response.status, OK)
+      assert.include(response.text, JSON.stringify(expected))
+    })
+  })
+
+  describe("Post /", () => {
+    it("When , then ", async function () {
+      const expected = []
+      const requestBody = {
+        title: "title",
+      }
+      const filename = "use get request"
+      const buffer = getObjectData(filename)
+
+      const response = await userSession
+        .post("/photos/")
+        .set("x-csrf-token", csrfToken)
+        .attach("randomName", buffer, "randomName.jpg")
+        .send(requestBody)
+
+      assert.strictEqual(response.status, CREATED)
+      assert.include(response.text, expected)
+    })
+  })
 })

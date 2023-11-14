@@ -66,7 +66,6 @@ const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
         '\'s "allowedBodyInputsValidator" function in the validators.'
     )
   }
-  console.log(numberOfdefinedInputs, searchParams)
 
   return { afterMsg, searchParams }
 }

@@ -1,11 +1,14 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
 require("dotenv").config()
 const S3 = require("aws-sdk/clients/s3")
 const fs = require("fs")
 const path = require("path")
 const sharp = require("sharp")
 const FormData = require("form-data")
-const { Readable } = require("stream")
+const util = require("util")
+const { pipeline } = require("stream/promises")
 const models = require("../database/models")
+const unlinkFile = util.promisify(fs.unlink)
 
 const bucketName = process.env.AWS_BUCKET_NAME
 const region = process.env.AWS_BUCKET_REGION
@@ -63,25 +66,29 @@ const attachFilesToResponse = async (res, photos) => {
 
   for (let i = 0; i < photos.length; i++) {
     const { filename, title } = photos[parseInt(i)]
-    console.log(filename)
-    const readStream = getFileStream(filename)
+    const filePath = path.join("./public/img/temp", filename)
 
-    const pipeline = sharp()
+    fs.writeFileSync(filePath, "")
 
-    pipeline
+    const file = fs.createWriteStream(filePath)
+
+    await pipeline(getFileStream(filename), file)
+
+    const buffer = fs.readFileSync(filePath, { encoding: "" })
+
+    await sharp(buffer)
       .resize(maxWidth, maxHeight)
+      .webp({ lossless: true })
       .toBuffer()
       .then((resized) => {
-        const stream = Readable.from(resized)
-        form.append(title, stream, filename)
+        form.append(title, resized, filename)
         form.append(
           title + " - information",
           JSON.stringify(photos[parseInt(i)])
         )
-        console.log(form)
       })
 
-    readStream.pipe(pipeline)
+    await unlinkFile(filePath)
   }
 
   res.setHeader(
@@ -90,7 +97,7 @@ const attachFilesToResponse = async (res, photos) => {
   )
 
   res.setHeader("Content-Type", "text/plain")
-  console.log(form)
+
   form.pipe(res)
 }
 

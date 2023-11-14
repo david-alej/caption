@@ -1,7 +1,6 @@
 const express = require("express")
 const photosRouter = express.Router()
 const {
-  integerValidator,
   textValidator,
   postPhotosValidator,
   getPhotosValidator,
@@ -18,11 +17,7 @@ const upload = multer({
   },
 })
 
-photosRouter.param(
-  "photoId",
-  integerValidator("photoId", true),
-  photosControllers.paramPhotoId
-)
+photosRouter.param("photoId", photosControllers.paramPhotoId)
 
 photosRouter.post(
   "/",

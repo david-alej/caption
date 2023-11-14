@@ -1,6 +1,5 @@
 require("dotenv").config()
 // const fs = require("fs")
-const Sequelize = require("sequelize")
 // const util = require("util")
 const sharp = require("sharp")
 const uuidv4 = require("uuid").v4
@@ -8,11 +7,11 @@ const uuidv4 = require("uuid").v4
 const { uploadFile, attachFilesToResponse, deleteFile } =
   require("../util/index").s3
 const models = require("../database/models")
-const { Api400Error, Api401Error, Api403Error, Api500Error } =
+const { Api400Error, Api401Error, Api403Error, Api404Error, Api500Error } =
   require("../util/index").apiErrors
 const { selfSearch, whereSearch, inputsToSearch } =
   require("../util/index").search
-const { validationPerusal } = require("./validators")
+const { validationPerusal, integerValidator } = require("./validators")
 
 const otherOptions = {
   include: [
@@ -64,17 +63,21 @@ exports.paramPhotoId = async (req, res, next, photoId) => {
   const user = req.session.user
 
   try {
+    await integerValidator("photoId", true).run(req)
+
+    validationPerusal(req, `User: ${user.id}`)
+
     const searchParams = whereSearch({ id: photoId }, otherOptions)
 
     const searched = await models.Photo.findOne(searchParams)
 
     if (!searched) {
-      throw new Api401Error(
+      throw new Api404Error(
         `User: ${user.id} photo was not found given photo id ${photoId}.`
       )
     }
 
-    req.photo = JSON.parse(JSON.stringify(searched))
+    req.photo = [JSON.parse(JSON.stringify(searched))]
 
     next()
   } catch (err) {
@@ -163,7 +166,7 @@ exports.getPhotos = async (req, res, next) => {
       otherOptions,
       "photo"
     )
-    console.log(searchParams)
+
     const searched = await models.Photo.findAll(searchParams)
 
     if (!searched) {
@@ -171,8 +174,8 @@ exports.getPhotos = async (req, res, next) => {
     }
 
     const photos = JSON.parse(JSON.stringify(searched))
-    console.log(photos)
-    attachFilesToResponse(res, photos)
+
+    await attachFilesToResponse(res, photos)
   } catch (err) {
     next(err)
   }
