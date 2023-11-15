@@ -2,6 +2,7 @@ const {
   app,
   assert,
   describe,
+  fs,
   httpStatusCodes,
   models,
   seedersDirectory,
@@ -165,17 +166,15 @@ describe("Photos route", () => {
   describe("Post /", () => {
     it("When , then ", async function () {
       const expected = []
-      const requestBody = {
-        title: "title",
-      }
+      const title = "title"
       const filename = "use get request"
       const buffer = getObjectData(filename)
 
       const response = await userSession
         .post("/photos/")
         .set("x-csrf-token", csrfToken)
-        .attach("randomName", buffer, "randomName.jpg")
-        .send(requestBody)
+      // .field("title", title)
+      // .attach("photo", "./public/img/photo-tests/title.jpeg")
 
       assert.strictEqual(response.status, CREATED)
       assert.include(response.text, expected)

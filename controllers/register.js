@@ -35,6 +35,8 @@ exports.postRegister = async (req, res, next) => {
       )
     }
 
+    console.log("\n", created.dataValues, "\n")
+
     res.status(201).send(`User: ${created.dataValues.id} is created.`)
   } catch (err) {
     next(err)

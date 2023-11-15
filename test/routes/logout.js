@@ -112,9 +112,9 @@ describe("Logout routes", () => {
         .post("/logout")
         .set("x-csrf-token", csrfToken)
 
+      assert.strictEqual(response.status, OK)
       assert.include(response.text, expectedOne)
       assert.include(response.text, expectedTwo)
-      assert.strictEqual(response.status, OK)
 
       models.User.destroy({ truncate: true })
     })

@@ -4,7 +4,6 @@ const {
   describe,
   httpStatusCodes,
   models,
-  request,
   seedersDirectory,
   session,
 } = require("../common")
@@ -19,12 +18,25 @@ describe("Users route", () => {
     password: "Password1",
   }
   const adminCredentials = {
-    username: "yomaster",
+    username: "Yomaster",
     password: "yoyoyo1Q",
   }
+  let userSession = ""
+  let csrfToken = ""
 
   before(async function () {
     await usersSeeder.up(models.sequelize.getQueryInterface(), null)
+
+    userSession = session(app)
+
+    await userSession.post("/register").send(userCredentials).expect(CREATED)
+
+    const loginResponse = await userSession
+      .post("/login")
+      .send(userCredentials)
+      .expect(OK)
+
+    csrfToken = JSON.parse(loginResponse.text).csrfToken
   })
 
   after(async function () {
@@ -67,13 +79,10 @@ describe("Users route", () => {
           updatedAt: "2023-11-02T20:00:00.000Z",
         },
       ]
-      const userSession = session(app)
-      await userSession.post("/register").send(userCredentials).expect(CREATED)
-      await userSession.post("/login").send(userCredentials).expect(OK)
 
-      const response = await userSession.get("/users")
-
-      await models.User.destroy({ where: { username: "username" } })
+      const response = await userSession
+        .get("/users")
+        .set("x-csrf-token", csrfToken)
 
       assert.strictEqual(response.status, OK)
       for (let i = 0; i < expected.length; i++) {
@@ -88,14 +97,11 @@ describe("Users route", () => {
   describe("Get /:username", () => {
     it("When given username is invalid, then the response is bad request #usernameValidator #paramUsername", async function () {
       const expected = "Bad request."
-      const usernameSearch = "username "
-      const userSession = session(app)
-      await userSession.post("/register").send(userCredentials).expect(CREATED)
-      await userSession.post("/login").send(userCredentials).expect(OK)
+      const usernameSearch = "usernam e"
 
-      const response = await userSession.get("/users/" + usernameSearch)
-
-      await models.User.destroy({ where: { username: "username" } })
+      const response = await userSession
+        .get("/users/" + usernameSearch)
+        .set("x-csrf-token", csrfToken)
 
       assert.strictEqual(response.status, BAD_REQUEST)
       assert.include(response.text, expected)
@@ -104,13 +110,10 @@ describe("Users route", () => {
     it("When given username does not exist in the database, then the response is a not found message #paramUsername", async function () {
       const expected = "Not found."
       const usernameSearch = "nonExisitngUsername"
-      const userSession = session(app)
-      await userSession.post("/register").send(userCredentials).expect(CREATED)
-      await userSession.post("/login").send(userCredentials).expect(OK)
 
-      const response = await userSession.get("/users/" + usernameSearch)
-
-      await models.User.destroy({ where: { username: "username" } })
+      const response = await userSession
+        .get("/users/" + usernameSearch)
+        .set("x-csrf-token", csrfToken)
 
       assert.strictEqual(response.status, NOT_FOUND)
       assert.include(response.text, expected)
@@ -124,13 +127,10 @@ describe("Users route", () => {
         createdAt: "2023-11-02T20:00:00.000Z",
         updatedAt: "2023-11-02T20:00:00.000Z",
       }
-      const userSession = session(app)
-      await userSession.post("/register").send(userCredentials).expect(CREATED)
-      await userSession.post("/login").send(userCredentials).expect(OK)
 
-      const response = await userSession.get("/users/" + usernameSearch)
-
-      await models.User.destroy({ where: { username: "username" } })
+      const response = await userSession
+        .get("/users/" + usernameSearch)
+        .set("x-csrf-token", csrfToken)
 
       assert.strictEqual(response.status, OK)
       assert.include(JSON.parse(response.text), expected)
@@ -138,23 +138,19 @@ describe("Users route", () => {
   })
 
   describe("Put /", () => {
+    const userNewCredentials = {
+      newUsername: "username1",
+      newPassword: "Password1",
+    }
+
     it("When no new credentials are added, then response is a bad request", async function () {
       const requestBody = userCredentials
       const expected = "Bad request."
-      const userSession = session(app)
-      await userSession.post("/register").send(userCredentials).expect(CREATED)
-      const loginResponse = await userSession
-        .post("/login")
-        .send(userCredentials)
-        .expect(OK)
-      const csrfToken = JSON.parse(loginResponse.text).csrfToken
 
       const response = await userSession
         .put("/users/")
         .set("x-csrf-token", csrfToken)
         .send(requestBody)
-
-      await models.User.destroy({ where: { username: "username" } })
 
       assert.strictEqual(response.status, BAD_REQUEST)
       assert.strictEqual(response.text, expected)
@@ -163,121 +159,122 @@ describe("Users route", () => {
     it("When a new username is entered but it already exists, then response is a bad request", async function () {
       const requestBody = { ...userCredentials, newUsername: "penguinlover" }
       const expected = "Bad request."
-      const userSession = session(app)
-      await userSession.post("/register").send(userCredentials).expect(CREATED)
-      const loginResponse = await userSession
-        .post("/login")
-        .send(userCredentials)
-        .expect(OK)
-      const csrfToken = JSON.parse(loginResponse.text).csrfToken
 
       const response = await userSession
         .put("/users/")
         .set("x-csrf-token", csrfToken)
         .send(requestBody)
-
-      await models.User.destroy({ where: { username: "username" } })
 
       assert.strictEqual(response.status, BAD_REQUEST)
       assert.strictEqual(response.text, expected)
     })
 
     it("When a valid new username is provided, then response is ok", async function () {
-      const newUsername = "Username"
+      const { username, password } = userCredentials
+      const { newUsername } = userNewCredentials
       const requestBody = { ...userCredentials, newUsername }
-      const expectedOne = "User: "
-      const expectedTwo = " has updated either/both their username or password."
-      const userSession = session(app)
-      await userSession.post("/register").send(userCredentials).expect(CREATED)
-      const loginResponse = await userSession
-        .post("/login")
-        .send(userCredentials)
-        .expect(OK)
-      const csrfToken = JSON.parse(loginResponse.text).csrfToken
-
-      const response = await userSession
-        .put("/users/")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
-
-      await models.User.destroy({ where: { username: newUsername } })
-
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expectedOne)
-      assert.include(response.text, expectedTwo)
-    })
-
-    it("When a valid new password is provided, then response is ok", async function () {
-      const requestBody = { ...userCredentials, newPassword: "Password2" }
-      const expectedOne = "User: "
-      const expectedTwo = " has updated either/both their username or password."
-      const userSession = session(app)
-      await userSession.post("/register").send(userCredentials).expect(CREATED)
-      const loginResponse = await userSession
-        .post("/login")
-        .send(userCredentials)
-        .expect(OK)
-      const csrfToken = JSON.parse(loginResponse.text).csrfToken
-
-      const response = await userSession
-        .put("/users/")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
-
-      await models.User.destroy({ where: { username: "username" } })
-
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expectedOne)
-      assert.include(response.text, expectedTwo)
-    })
-
-    it("When both new credentiald are added and valid, then response is ok", async function () {
-      const newUsername = "Username"
-      const requestBody = {
-        ...userCredentials,
-        newUsername,
-        newPassword: "Password2",
+      const teardownRequestBody = {
+        username: newUsername,
+        password,
+        newUsername: username,
       }
       const expectedOne = "User: "
       const expectedTwo = " has updated either/both their username or password."
-      const userSession = session(app)
-      await userSession.post("/register").send(userCredentials).expect(CREATED)
-      const loginResponse = await userSession
-        .post("/login")
-        .send(userCredentials)
-        .expect(OK)
-      const csrfToken = JSON.parse(loginResponse.text).csrfToken
 
       const response = await userSession
         .put("/users/")
         .set("x-csrf-token", csrfToken)
         .send(requestBody)
 
-      await models.User.destroy({ where: { username: newUsername } })
+      assert.strictEqual(response.status, OK)
+      assert.include(response.text, expectedOne)
+      assert.include(response.text, expectedTwo)
+      const user = await models.User.findOne({
+        where: { username: newUsername },
+      })
+
+      await userSession
+        .put("/users/")
+        .set("x-csrf-token", csrfToken)
+        .send(teardownRequestBody)
+        .expect(OK)
+    })
+
+    it("When a valid new password is provided, then response is ok", async function () {
+      const { username, password } = userCredentials
+      const { newPassword } = userNewCredentials
+      const requestBody = { ...userCredentials, newPassword }
+      const teardownRequestBody = {
+        username,
+        password: newPassword,
+        newPassword: password,
+      }
+      const expectedOne = "User: "
+      const expectedTwo = " has updated either/both their username or password."
+
+      const response = await userSession
+        .put("/users/")
+        .set("x-csrf-token", csrfToken)
+        .send(requestBody)
 
       assert.strictEqual(response.status, OK)
       assert.include(response.text, expectedOne)
       assert.include(response.text, expectedTwo)
+
+      await userSession
+        .put("/users/")
+        .set("x-csrf-token", csrfToken)
+        .send(teardownRequestBody)
+        .expect(OK)
+    })
+
+    it("When both new credentiald are added and valid, then response is ok", async function () {
+      const { username, password } = userCredentials
+      const { newUsername, newPassword } = userNewCredentials
+      const requestBody = {
+        ...userCredentials,
+        newUsername,
+        newPassword,
+      }
+      const teardownRequestBody = {
+        username: newUsername,
+        password: newPassword,
+        newUsername: username,
+        newPassword: password,
+      }
+      const expectedOne = "User: "
+      const expectedTwo = " has updated either/both their username or password."
+
+      const response = await userSession
+        .put("/users/")
+        .set("x-csrf-token", csrfToken)
+        .send(requestBody)
+
+      assert.strictEqual(response.status, OK)
+      assert.include(response.text, expectedOne)
+      assert.include(response.text, expectedTwo)
+
+      await userSession
+        .put("/users/")
+        .set("x-csrf-token", csrfToken)
+        .send(teardownRequestBody)
+        .expect(OK)
     })
   })
 
   describe("Delete /:username", () => {
+    const newUserCredentials = {
+      username: "Username",
+      password: "Password1",
+    }
+
     it("When regular user tries to delete other user, then response is forbidden", async function () {
       const expected = "Forbidden."
       const usernameSearch = "rina.dark"
-      const userSession = session(app)
-      await userSession.post("/register").send(userCredentials).expect(CREATED)
-      const loginResponse = await userSession
-        .post("/login")
-        .send(userCredentials)
-        .expect(OK)
-      const csrfToken = JSON.parse(loginResponse.text).csrfToken
 
       const response = await userSession
         .delete("/users/" + usernameSearch)
         .set("x-csrf-token", csrfToken)
-
-      await models.User.destroy({ where: { username: "username" } })
 
       assert.strictEqual(response.status, FORBIDDEN)
       assert.include(response.text, expected)
@@ -285,14 +282,11 @@ describe("Users route", () => {
 
     it("When username given is the logged in user, then user is deleted with a response message", async function () {
       const expected = " has deleted their own account."
-      const usernameSearch = "username"
-      const userSession = session(app)
-      await userSession.post("/register").send(userCredentials).expect(CREATED)
-      const loginResponse = await userSession
-        .post("/login")
-        .send(userCredentials)
-        .expect(OK)
-      const csrfToken = JSON.parse(loginResponse.text).csrfToken
+      const usernameSearch = newUserCredentials.username
+      await session(app)
+        .post("/register")
+        .send(newUserCredentials)
+        .expect(CREATED)
 
       const response = await userSession
         .delete("/users/" + usernameSearch)
@@ -305,18 +299,26 @@ describe("Users route", () => {
 
     it("When admin inputs username to delete another user, then user is deleted with a response message", async function () {
       const expected = " has deleted user"
-      const usernameSearch = "username"
+      newUserCredentials.username = "Username2"
+      const usernameSearch = newUserCredentials.username
+      await session(app)
+        .post("/register")
+        .send(newUserCredentials)
+        .expect(CREATED)
       const adminSession = session(app)
-      await request(app).post("/register").send(userCredentials).expect(CREATED)
-      const loginResponse = await adminSession
+      await adminSession
+        .post("/register")
+        .send(adminCredentials)
+        .expect(CREATED)
+      const adminLoginResponse = await adminSession
         .post("/login")
         .send(adminCredentials)
         .expect(OK)
-      const csrfToken = JSON.parse(loginResponse.text).csrfToken
+      const adminCsrfToken = JSON.parse(adminLoginResponse.text).csrfToken
 
       const response = await adminSession
         .delete("/users/" + usernameSearch)
-        .set("x-csrf-token", csrfToken)
+        .set("x-csrf-token", adminCsrfToken)
         .send(adminCredentials)
 
       assert.strictEqual(response.status, OK)

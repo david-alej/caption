@@ -7,9 +7,9 @@ const { invalidCsrfTokenError, generateToken, doubleCsrfProtection } =
     secret: process.env.CSRF_SECRET,
     cookieOptions: {
       sameSite: "strict",
-      secure: process.env.NODE_ENV !== "production", //set this like this becuase the app I am munually testing endpoints on can only save the cookies if they are secure
+      secure: process.env.NODE_ENV === "production", //set this like this becuase the app I am munually testing endpoints on can only save the cookies if they are secure
       signed: true,
-      maxAge: 1000 * 60 * 10,
+      maxAge: 1000 * 60 * 30,
     },
   })
 console.log("secure cookies: ", process.env.NODE_ENV === "production")

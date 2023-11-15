@@ -3,6 +3,7 @@ const models = require("../database/models")
 const { authenticate } = require("../util/index").authenticate
 const { Api400Error, Api403Error, Api404Error, Api500Error } =
   require("../util/index").apiErrors
+const { passwordHash } = require("../util/index").passwordHash
 
 exports.paramUsername = async (req, res, next, username) => {
   const user = req.session.user
@@ -82,12 +83,11 @@ exports.getUser = async (req, res, next) => {
 
 exports.putUser = async (req, res, next) => {
   const user = req.session.user
+  const saltRounds = 10
 
   try {
-    const { username, password, newUsername, newPassword } = validationPerusal(
-      req,
-      `User: ${user.id}`
-    )
+    validationPerusal(req, `User: ${user.id}`)
+    const { username, password, newUsername, newPassword } = req.body
 
     if (!newUsername && !newPassword) {
       throw new Api400Error(`User: ${user.id} did not update any values.`)
@@ -107,13 +107,22 @@ exports.putUser = async (req, res, next) => {
 
     await authenticate(username, password)
 
-    const updatedValues = { username, password, updatedAt: new Date() }
+    const hashedPassword = await passwordHash(password, saltRounds)
+
+    const updatedValues = {
+      username,
+      password: hashedPassword,
+      updatedAt: new Date(),
+    }
+
     if (newUsername) {
       updatedValues.username = newUsername
     }
 
     if (newPassword) {
-      updatedValues.password = newPassword
+      const hashedNewPassword = await passwordHash(newPassword, saltRounds)
+
+      updatedValues.password = hashedNewPassword
     }
 
     const updated = await models.User.update(updatedValues, {
