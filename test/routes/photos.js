@@ -4,20 +4,9 @@ const {
   describe,
   httpStatusCodes,
   models,
-  seedersDirectory,
   session,
 } = require("../common")
-const {
-  seedS3Images,
-  deleteAllS3Images,
-  deleteFile,
-  getObjectData,
-} = require("../../util/s3")
-
-// eslint-disable-next-line security/detect-non-literal-require
-const usersSeeder = require(seedersDirectory + "/20231027225905-User")
-// eslint-disable-next-line security/detect-non-literal-require
-const photosSeeder = require(seedersDirectory + "/20231027225911-Photo.js")
+const { deleteFile, getObjectData } = require("../../s3")
 
 const { OK, CREATED, NOT_FOUND, BAD_REQUEST, FORBIDDEN } = httpStatusCodes
 
@@ -33,16 +22,12 @@ describe("Photos route", () => {
 
   let userSession = ""
   let csrfToken = ""
+  let loggedInUserId = ""
+
+  let adminSession = ""
+  let adminCsrfToken = ""
 
   before(async function () {
-    this.timeout(5 * 1000)
-
-    await usersSeeder.up(models.sequelize.getQueryInterface(), null)
-
-    await photosSeeder.up(models.sequelize.getQueryInterface(), null)
-
-    await seedS3Images()
-
     userSession = session(app)
 
     await userSession.post("/register").send(userCredentials).expect(CREATED)
@@ -53,16 +38,32 @@ describe("Photos route", () => {
       .expect(OK)
 
     csrfToken = JSON.parse(loginResponse.text).csrfToken
+
+    const searched = await models.User.findOne({
+      where: { username: userCredentials.username },
+    })
+    loggedInUserId = searched.dataValues.id
+
+    adminSession = session(app)
+
+    const adminLoginResponse = await adminSession
+      .post("/login")
+      .send(adminCredentials)
+      .expect(OK)
+
+    adminCsrfToken = JSON.parse(adminLoginResponse.text).csrfToken
   })
 
   after(async function () {
-    this.timeout(4000)
+    await userSession
+      .delete("/users/" + userCredentials.username)
+      .set("x-csrf-token", csrfToken)
+      .expect(OK)
 
-    await deleteAllS3Images()
-
-    await models.User.truncate()
-
-    await models.Photo.truncate()
+    await adminSession
+      .post("/logout")
+      .set("x-csrf-token", adminCsrfToken)
+      .expect(OK)
   })
 
   describe("Get /", () => {
@@ -211,6 +212,8 @@ describe("Photos route", () => {
     })
 
     it("When an allowed image type is uploaded as the file, then photo is created and the url to the photo is attached to the response ", async function () {
+      this.timeout(5 * 1000)
+
       const title = "title"
       const expected = `/photos/${title}`
       const filePath = "./public/img/photo-tests/title.jpeg"
@@ -258,7 +261,7 @@ describe("Photos route", () => {
       const filePath2 = "./public/img/photo-tests/WOW.png"
       const expectedOne = "has deleted all of the"
       const expectedTwo = null
-      const userIdCredentials = { userId: 5 }
+      const userIdCredentials = { userId: loggedInUserId }
       await userSession
         .post("/photos/")
         .set("x-csrf-token", csrfToken)
@@ -297,7 +300,7 @@ describe("Photos route", () => {
       const filePath2 = "./public/img/photo-tests/WOW.png"
       const expectedOne = "has deleted all of the"
       const expectedTwo = null
-      const userIdCredentials = { userId: 5 }
+      const userIdCredentials = { userId: loggedInUserId }
       await userSession
         .post("/photos/")
         .set("x-csrf-token", csrfToken)
@@ -329,7 +332,7 @@ describe("Photos route", () => {
     })
 
     it("When an admin inputs their another user's user id, then all of photos of the choosen user are deleted ", async function () {
-      this.timeout(6 * 1000)
+      this.timeout(7 * 1000)
 
       const title1 = "title"
       const title2 = "World Of Warcraft"
@@ -337,13 +340,7 @@ describe("Photos route", () => {
       const filePath2 = "./public/img/photo-tests/WOW.png"
       const expectedOne = "has deleted all of the"
       const expectedTwo = null
-      const targetUserIdCredentials = { userId: 5 }
-      const adminSession = session(app)
-      const adminLoginResponse = await adminSession
-        .post("/login")
-        .send(adminCredentials)
-        .expect(OK)
-      const adminCsrfToken = JSON.parse(adminLoginResponse.text).csrfToken
+      const targetUserIdCredentials = { userId: loggedInUserId }
       await userSession
         .post("/photos/")
         .set("x-csrf-token", csrfToken)
@@ -377,7 +374,41 @@ describe("Photos route", () => {
     })
   })
 
-  describe("Delete /", () => {
-    it(" ", async function () {})
+  describe("Delete /:username", () => {
+    it("When valid request is made but given photo id in route parameters is a photo not owned by the logged in user, then response is forbidden ", async function () {
+      const expected = "Forbidden."
+      const photoId = "1"
+
+      const response = await userSession
+        .delete("/photos/" + photoId)
+        .set("x-csrf-token", csrfToken)
+
+      assert.strictEqual(response.status, FORBIDDEN)
+      assert.strictEqual(response.text, expected)
+    })
+
+    it("When valid request is made and given photo id in route parameters is a photo owned by the logged in user, then photo with respective id is deleted ", async function () {
+      const expected = "has deleted one of "
+      const title = "title"
+      const filePath = "./public/img/photo-tests/title.jpeg"
+      await userSession
+        .post("/photos/")
+        .set("x-csrf-token", csrfToken)
+        .field("title", title)
+        .attach("photo", filePath)
+        .expect(201)
+      const searched = await models.Photo.findOne({
+        where: { userId: loggedInUserId },
+      })
+      console.log(searched.dataValues)
+      const photoId = searched.dataValues.id.toString()
+
+      const response = await adminSession
+        .delete("/photos/" + photoId)
+        .set("x-csrf-token", adminCsrfToken)
+
+      assert.strictEqual(response.status, OK)
+      assert.include(response.text, expected)
+    })
   })
 })

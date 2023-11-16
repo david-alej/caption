@@ -4,6 +4,7 @@ const { authenticate } = require("../util/index").authenticate
 const { Api400Error, Api403Error, Api404Error, Api500Error } =
   require("../util/index").apiErrors
 const { passwordHash } = require("../util/index").passwordHash
+const { generateToken } = require("../util/index").doubleCsrf
 
 exports.paramUsername = async (req, res, next, username) => {
   const user = req.session.user
@@ -170,6 +171,12 @@ exports.deleteUser = async (req, res, next) => {
       throw new Api500Error(
         `User: ${user.id} delete a user query did not work because query went wrong or the target user is an admin.`
       )
+    }
+
+    if (targetIsSelf) {
+      req.session.authorized = false
+
+      generateToken(req, res, true)
     }
 
     res.send(responseMsg)

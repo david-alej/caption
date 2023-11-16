@@ -6,7 +6,6 @@ const httpLogger = require("./httpLogger")
 const httpStatusCodes = require("./httpStatusCodes")
 const logger = require("./logger")
 const passwordHash = require("./passwordHash")
-const s3 = require("./s3")
 const search = require("./search")
 
 module.exports = {
@@ -18,6 +17,5 @@ module.exports = {
   httpStatusCodes,
   logger,
   passwordHash,
-  s3,
   search,
 }

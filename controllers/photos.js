@@ -1,11 +1,7 @@
 require("dotenv").config()
-// const fs = require("fs")
-// const util = require("util")
 const sharp = require("sharp")
 const uuidv4 = require("uuid").v4
-// const unlinkFile = util.promisify(fs.unlink)
-const { uploadFile, attachFilesToResponse, deleteFile } =
-  require("../util/index").s3
+const { uploadFile, attachFilesToResponse, deleteFile } = require("../s3/index")
 const models = require("../database/models")
 const { Api400Error, Api401Error, Api403Error, Api404Error, Api500Error } =
   require("../util/index").apiErrors
@@ -294,7 +290,7 @@ exports.deletePhoto = async (req, res, next) => {
 
     await deleteFile(filename)
 
-    res.status(204).send(responseMsg)
+    res.send(responseMsg)
   } catch (err) {
     next(err)
   }

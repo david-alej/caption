@@ -6,6 +6,7 @@ const fs = require("fs")
 const { httpStatusCodes } = require("../util/index")
 const models = require("../database/models")
 const request = require("supertest")
+const s3 = require("../s3/index")
 const session = require("supertest-session")
 const seedersDirectory = "../../database/seeders"
 
@@ -16,5 +17,6 @@ exports.fs = fs
 exports.httpStatusCodes = httpStatusCodes
 exports.models = models
 exports.request = request
+exports.s3 = s3
 exports.session = session
 exports.seedersDirectory = seedersDirectory

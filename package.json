@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "aws-sdk": "^2.1477.0",
+    "@aws-sdk/client-s3": "^3.451.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "csrf-csrf": "^3.0.1",
@@ -49,10 +49,11 @@
     "lint": "eslint ./",
     "lint-fix": "eslint ./ --fix",
     "migrate": "npx sequelize-cli db:migrate",
-    "migrate:reset": "npx sequelize-cli db:migrate:undo:all && npm run migrate",
-    "test": "cross-env NODE_ENV=test mocha ./test/**/index.js --testTimeout=10000",
-    "pretest": "cross-env NODE_ENV=test npm run migrate:reset"
+    "seed": "npx sequelize-cli db:seed:all",
+    "seed:migrate:reset": "npx sequelize-cli db:migrate:undo:all && npm run migrate && npm run seed",
+    "test": "cross-env NODE_ENV=test mocha ./test/main.js --testTimeout=10000",
+    "pretest": "cross-env NODE_ENV=test npm run seed:migrate:reset"
   },
-  "author": "",
+  "author": "David Alejandro",
   "license": "MIT"
 }

@@ -1,13 +1,18 @@
 /* eslint-disable security/detect-non-literal-fs-filename */
 require("dotenv").config()
-const S3 = require("aws-sdk/clients/s3")
+const {
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  S3Client,
+  ListObjectsV2Command,
+} = require("@aws-sdk/client-s3")
 const fs = require("fs")
 const path = require("path")
 const sharp = require("sharp")
 const FormData = require("form-data")
 const util = require("util")
 const { pipeline } = require("stream/promises")
-const models = require("../database/models")
 const unlinkFile = util.promisify(fs.unlink)
 
 const bucketName = process.env.AWS_BUCKET_NAME
@@ -15,38 +20,27 @@ const region = process.env.AWS_BUCKET_REGION
 const accessKeyId = process.env.AWS_ACCESS_KEY
 const secretAccessKey = process.env.AWS_SECRET_KEY
 
-const s3 = new S3({
+const client = new S3Client({
   region,
-  accessKeyId,
-  secretAccessKey,
+  credentials: {
+    accessKeyId,
+    secretAccessKey,
+  },
 })
 
-function uploadFile(buffer, filename) {
+const uploadFile = async (buffer, filename) => {
   const uploadParams = {
     Bucket: bucketName,
     Body: buffer,
     Key: filename,
   }
 
-  return s3.upload(uploadParams).promise()
+  const command = new PutObjectCommand(uploadParams)
+
+  await client.send(command)
 }
+
 exports.uploadFile = uploadFile
-
-const getObjectData = async (fileKey) => {
-  const downloadParams = {
-    Key: fileKey,
-    Bucket: bucketName,
-  }
-  try {
-    const data = await s3.getObject(downloadParams).promise()
-
-    return data.Body.toString("utf-8")
-  } catch (err) {
-    return null
-  }
-}
-
-exports.getObjectData = getObjectData
 
 function getFileStream(fileKey) {
   const downloadParams = {
@@ -54,9 +48,58 @@ function getFileStream(fileKey) {
     Bucket: bucketName,
   }
 
-  return s3.getObject(downloadParams).createReadStream()
+  const command = new GetObjectCommand(downloadParams)
+
+  return client.send(command)
 }
+
 exports.getFileStream = getFileStream
+
+const getObjectData = async (fileKey) => {
+  try {
+    const response = await getFileStream(fileKey)
+
+    const str = await response.Body.transformToString()
+
+    return str
+  } catch (err) {
+    return null
+  }
+}
+
+exports.getObjectData = getObjectData
+
+const getAllObjectKeys = async () => {
+  const command = new ListObjectsV2Command({
+    Bucket: bucketName,
+  })
+
+  try {
+    let isTruncated = true
+    let keys = []
+
+    while (isTruncated) {
+      const { Contents, IsTruncated, NextContinuationToken } =
+        await client.send(command)
+
+      if (Contents) {
+        Contents.map((c) => keys.push(c.Key))
+      }
+
+      isTruncated = IsTruncated
+
+      command.input.ContinuationToken = NextContinuationToken
+    }
+
+    return keys
+  } catch (err) {
+    console.error(err)
+
+    return null
+  }
+}
+
+exports.getAllObjectKeys = getAllObjectKeys
 
 const attachFilesToResponse = async (res, photos) => {
   const maxWidth = 750,
@@ -71,8 +114,9 @@ const attachFilesToResponse = async (res, photos) => {
     fs.writeFileSync(filePath, "")
 
     const file = fs.createWriteStream(filePath)
+    const response = await getFileStream(filename)
 
-    await pipeline(getFileStream(filename), file)
+    await pipeline(response.Body, file)
 
     const buffer = fs.readFileSync(filePath, { encoding: "" })
 
@@ -108,7 +152,10 @@ const deleteFile = (fileKey) => {
     Key: fileKey,
     Bucket: bucketName,
   }
-  return s3.deleteObject(deleteParams).promise()
+
+  const command = new DeleteObjectCommand(deleteParams)
+
+  return client.send(command)
 }
 
 exports.deleteFile = deleteFile
@@ -153,12 +200,10 @@ const seedS3Images = async () => {
 exports.seedS3Images = seedS3Images
 
 const deleteAllS3Images = async () => {
-  const searched = await models.Photo.findAll()
+  const filenames = await getAllObjectKeys()
 
-  const photos = JSON.parse(JSON.stringify(searched))
-
-  for (const photo of photos) {
-    await deleteFile(photo.filename)
+  for (const filename of filenames) {
+    await deleteFile(filename)
   }
 }
 
