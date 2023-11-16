@@ -15,9 +15,13 @@ captionsRouter.param(
   captionsControllers.paramCaptionId
 )
 
-captionsRouter.post("/", postCaptionsValidator, captionsControllers.postCaption)
+captionsRouter.post(
+  "/",
+  postCaptionsValidator(),
+  captionsControllers.postCaption
+)
 
-captionsRouter.get("/", getCaptionsValidator, captionsControllers.getCaptions)
+captionsRouter.get("/", getCaptionsValidator(), captionsControllers.getCaptions)
 
 captionsRouter.get("/:photoId", captionsControllers.getCaption)
 
@@ -29,7 +33,7 @@ captionsRouter.put(
 
 captionsRouter.delete(
   "/",
-  deleteCaptionsValidator,
+  deleteCaptionsValidator(),
   captionsControllers.deleteCaptions
 )
 

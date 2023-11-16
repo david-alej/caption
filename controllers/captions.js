@@ -25,7 +25,7 @@ exports.paramCaptionId = async (req, res, next, captionId) => {
   const user = req.session.user
 
   try {
-    const { captionId } = validationPerusal(req, `User: ${user.id}`)
+    validationPerusal(req, `User: ${user.id}`)
 
     const searchParams = whereSearch({ id: captionId }, ...otherOptions)
 

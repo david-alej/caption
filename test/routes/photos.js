@@ -69,7 +69,7 @@ describe("Photos route", () => {
   })
 
   describe("Get /", () => {
-    it("When two or more valid request body inputs are put into the request body, then all the top voted photos are returned #attachFilesToResponse", async function () {
+    it("When two or more valid request body inputs are put into the request body, then response is bad request #allowedBodyInputsValidator", async function () {
       const expected = "Bad request."
       const requestBody = {
         userId: 3,
@@ -82,7 +82,7 @@ describe("Photos route", () => {
       assert.strictEqual(response.text, expected)
     })
 
-    it("When valid request is made with no valid request body inputs, then all the top voted photos are returned #allowedBodyInputsValidator", async function () {
+    it("When valid request is made with no valid request body inputs, then all the top voted photos are returned ", async function () {
       this.timeout(5 * 1000)
 
       const expected = [

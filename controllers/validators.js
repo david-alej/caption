@@ -126,6 +126,7 @@ const allowedBodyInputsValidator = (
   isCaptionsRoute = false,
   maxAllowedInputs = false
 ) => {
+  console.log(maxAllowedInputs)
   if (!maxAllowedInputs) {
     maxAllowedInputs = allowedInputs.length - 1
   }
@@ -146,11 +147,12 @@ const allowedBodyInputsValidator = (
     .custom((body) => {
       const requestBodyKeys = Object.keys(body)
 
-      const bodyIncludesAllowedInputs = requestBodyKeys.filter((key) => {
+      const allowedInputsInBody = requestBodyKeys.filter((key) => {
+        console.log(allowedInputs, key, allowedInputs.includes(key))
         return allowedInputs.includes(key)
       })
 
-      const numberOfBodyAllowedInputs = bodyIncludesAllowedInputs.length
+      const numberOfBodyAllowedInputs = allowedInputsInBody.length
 
       if (numberOfBodyAllowedInputs <= 1) {
         return true
