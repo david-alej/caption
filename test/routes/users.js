@@ -18,7 +18,7 @@ describe("Users route", () => {
     password: "Password1",
   }
   const adminCredentials = {
-    username: "Yomaster",
+    username: "yomaster",
     password: "yoyoyo1Q",
   }
   let userSession = ""
@@ -80,9 +80,7 @@ describe("Users route", () => {
         },
       ]
 
-      const response = await userSession
-        .get("/users")
-        .set("x-csrf-token", csrfToken)
+      const response = await userSession.get("/users")
 
       assert.strictEqual(response.status, OK)
       for (let i = 0; i < expected.length; i++) {
@@ -99,9 +97,7 @@ describe("Users route", () => {
       const expected = "Bad request."
       const usernameSearch = "usernam e"
 
-      const response = await userSession
-        .get("/users/" + usernameSearch)
-        .set("x-csrf-token", csrfToken)
+      const response = await userSession.get("/users/" + usernameSearch)
 
       assert.strictEqual(response.status, BAD_REQUEST)
       assert.include(response.text, expected)
@@ -111,9 +107,7 @@ describe("Users route", () => {
       const expected = "Not found."
       const usernameSearch = "nonExisitngUsername"
 
-      const response = await userSession
-        .get("/users/" + usernameSearch)
-        .set("x-csrf-token", csrfToken)
+      const response = await userSession.get("/users/" + usernameSearch)
 
       assert.strictEqual(response.status, NOT_FOUND)
       assert.include(response.text, expected)
@@ -128,9 +122,7 @@ describe("Users route", () => {
         updatedAt: "2023-11-02T20:00:00.000Z",
       }
 
-      const response = await userSession
-        .get("/users/" + usernameSearch)
-        .set("x-csrf-token", csrfToken)
+      const response = await userSession.get("/users/" + usernameSearch)
 
       assert.strictEqual(response.status, OK)
       assert.include(JSON.parse(response.text), expected)
@@ -189,9 +181,6 @@ describe("Users route", () => {
       assert.strictEqual(response.status, OK)
       assert.include(response.text, expectedOne)
       assert.include(response.text, expectedTwo)
-      const user = await models.User.findOne({
-        where: { username: newUsername },
-      })
 
       await userSession
         .put("/users/")
@@ -283,14 +272,19 @@ describe("Users route", () => {
     it("When username given is the logged in user, then user is deleted with a response message", async function () {
       const expected = " has deleted their own account."
       const usernameSearch = newUserCredentials.username
-      await session(app)
+      const newUserSession = session(app)
+      await newUserSession
         .post("/register")
         .send(newUserCredentials)
         .expect(CREATED)
+      const newLoginResponse = await newUserSession
+        .post("/login")
+        .send(newUserCredentials)
+      const newCsrfToken = JSON.parse(newLoginResponse.text).csrfToken
 
-      const response = await userSession
+      const response = await newUserSession
         .delete("/users/" + usernameSearch)
-        .set("x-csrf-token", csrfToken)
+        .set("x-csrf-token", newCsrfToken)
         .send(userCredentials)
 
       assert.strictEqual(response.status, OK)
@@ -306,10 +300,6 @@ describe("Users route", () => {
         .send(newUserCredentials)
         .expect(CREATED)
       const adminSession = session(app)
-      await adminSession
-        .post("/register")
-        .send(adminCredentials)
-        .expect(CREATED)
       const adminLoginResponse = await adminSession
         .post("/login")
         .send(adminCredentials)

@@ -121,49 +121,51 @@ const captionsMultiInputCheck = (body) => {
   return true
 }
 
-const allowedBodyInputsValidator = (inputs, isCaptionsRoute = false) => {
+const allowedBodyInputsValidator = (
+  allowedInputs,
+  isCaptionsRoute = false,
+  maxAllowedInputs = false
+) => {
+  if (!maxAllowedInputs) {
+    maxAllowedInputs = allowedInputs.length - 1
+  }
+
   let afterNonUniqueErrorMsg = ""
 
-  for (let i = 0; i < inputs.length; i++) {
-    if (parseInt(i) === inputs.length - 1) {
-      afterNonUniqueErrorMsg += 'or "' + inputs[parseInt(i)] + '."'
+  for (let i = 0; i < allowedInputs.length; i++) {
+    if (parseInt(i) === allowedInputs.length - 1) {
+      afterNonUniqueErrorMsg += 'or "' + allowedInputs[parseInt(i)] + '."'
       continue
     }
 
-    afterNonUniqueErrorMsg += '"' + inputs[parseInt(i)] + '", '
+    afterNonUniqueErrorMsg += '"' + allowedInputs[parseInt(i)] + '", '
   }
 
   return body()
     .optional()
     .custom((body) => {
-      const keys = inputs
       const requestBodyKeys = Object.keys(body)
-      // if (requestBodyKeys.length === 0 || requestBodyKeys === undefined) {
-      //   return true
-      // }
 
-      const bodyIncludesKeys = requestBodyKeys.every((key) => {
-        return keys.includes(key)
+      const bodyIncludesAllowedInputs = requestBodyKeys.filter((key) => {
+        return allowedInputs.includes(key)
       })
 
-      if (!bodyIncludesKeys) {
-        throw Error(
-          "the request body key-value pair must either be " +
+      const numberOfBodyAllowedInputs = bodyIncludesAllowedInputs.length
+
+      if (numberOfBodyAllowedInputs <= 1) {
+        return true
+      }
+
+      if (numberOfBodyAllowedInputs > maxAllowedInputs) {
+        throw new Error(
+          `the request body object only allows ${maxAllowedInputs} or less than of the following: ` +
             afterNonUniqueErrorMsg
         )
       }
 
-      const numberOfBodyKeys = Object.keys(body).length
-
-      if (numberOfBodyKeys <= 1) {
-        return true
-      }
-
       if (isCaptionsRoute) return captionsMultiInputCheck(body)
 
-      throw Error(
-        "the request body object must be non-existent or only have one key-value pair."
-      )
+      return true
     })
 }
 
@@ -197,17 +199,13 @@ exports.postPhotosValidator = () => {
 exports.getPhotosValidator = () => {
   return [
     textValidator("title", false, true),
-    usernameValidator("username", false, true),
-    allowedBodyInputsValidator(["title", "username"]),
+    integerValidator("userId", false, true),
+    allowedBodyInputsValidator(["title", "userId"], false, 1),
   ]
 }
 
 exports.deletePhotosValidator = () => {
-  return [
-    usernameValidator("username", false, true),
-    integerValidator("userId", false, true),
-    allowedBodyInputsValidator(["username", "userId"]),
-  ]
+  return [integerValidator("userId", false, true)]
 }
 
 exports.postCaptionsValidator = () => {
@@ -219,7 +217,7 @@ exports.getCaptionsValidator = () => {
     usernameValidator("username", false, true),
     integerValidator("userId", false, true),
     integerValidator("photoId", false, true),
-    allowedBodyInputsValidator(["username", "userId", "photoId"], true),
+    allowedBodyInputsValidator(["username", "userId", "photoId"], true, 2),
   ]
 }
 
@@ -228,6 +226,6 @@ exports.deleteCaptionsValidator = () => {
     usernameValidator("username", false, true),
     integerValidator("userId", false, true),
     integerValidator("photoId", false, true),
-    allowedBodyInputsValidator(["username", "userId", "photoId"], true),
+    allowedBodyInputsValidator(["username", "userId", "photoId"], true, 2),
   ]
 }

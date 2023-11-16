@@ -28,43 +28,40 @@ const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
   const inputs = [{ userId }, { username }, { photoId }]
 
   let searchParams = defaultSearch
+  let afterMsg = ""
 
-  let afterMsg = "."
-  let numberOfdefinedInputs = 0
+  const definedInputs = inputs.filter((input) => {
+    return Object.values(input)[0] !== undefined
+  })
 
-  for (let i = 0; i < inputs.length; i++) {
-    const key = Object.keys(inputs[parseInt(i)])[0]
-    const value = Object.values(inputs[parseInt(i)])[0]
-
-    if (value !== undefined) {
-      numberOfdefinedInputs++
-    }
-
-    if (numberOfdefinedInputs === 2) {
-      afterMsg =
-        afterMsg.substring(0, afterMsg.length - 1) +
-        ", and " +
-        sentenceCase(key) +
-        ` ${value}.`
-
-      searchParams = whereSearch(
-        { ...inputs[0], ...inputs[parseInt(i)] },
-        otherOptions
-      )
-    } else if (numberOfdefinedInputs === 1) {
-      afterMsg = " with given " + sentenceCase(key) + ` ${value}.`
-
-      searchParams = whereSearch(inputs[parseInt(i)], otherOptions)
-    }
+  if (definedInputs.length === 0) {
+    return { afterMsg, searchParams }
   }
 
-  if (numberOfdefinedInputs > 2) {
+  if (definedInputs.length > 2) {
     throw new Api500Error(
       `User: ${req.session.user.id} something went wrong with ` +
         nameOfTable +
         // eslint-disable-next-line quotes
         '\'s "allowedBodyInputsValidator" function in the validators.'
     )
+  }
+
+  searchParams = whereSearch(...definedInputs, otherOptions)
+
+  afterMsg =
+    "with given " +
+    sentenceCase(Object.keys(definedInputs[0])[0]) +
+    ` ${Object.values(definedInputs[0])[0]}.`
+
+  definedInputs.shift()
+
+  if (definedInputs.length === 2) {
+    afterMsg =
+      afterMsg.substring(0, afterMsg.length - 1) +
+      ", and " +
+      sentenceCase(Object.keys(definedInputs[0])[0]) +
+      `= ${Object.values(definedInputs[0])[0]}.`
   }
 
   return { afterMsg, searchParams }

@@ -92,8 +92,6 @@ exports.postPhoto = async (req, res, next) => {
   const { buffer, originalname, mimetype } = file
   const filename = uuidv4() + ".webp"
 
-  console.log(file)
-
   const allowedFiles = ["png", "jpeg", "jpg", "gif"]
   const allowedFileTypes = ["image/png", "image/jpeg", "image/jpg", "image/gif"]
 
@@ -120,12 +118,12 @@ exports.postPhoto = async (req, res, next) => {
       sharpInput.push({ animated: true })
     }
 
-    const result = await sharp(...sharpInput)
+    await sharp(...sharpInput)
       .resize({ width: 150 })
       .webp({ lossless: true })
       .toBuffer()
       .then(async (resized) => {
-        uploadFile(resized, filename)
+        await uploadFile(resized, filename)
       })
 
     const created = await models.Photo.create({
@@ -136,13 +134,9 @@ exports.postPhoto = async (req, res, next) => {
       updatedAt: new Date(),
     })
 
-    // await unlinkFile(path.join("../public/temp/", originalname))
-
     if (!created) {
       throw new Api500Error(`User: ${user.id} create query did not work.`)
     }
-
-    console.log(result)
 
     res.status(201).json({
       imagePath: `/photos/${title}`,
@@ -226,43 +220,47 @@ exports.deletePhotos = async (req, res, next) => {
   const user = req.session.user
   const preErrorMsg = `User: ${user.id}`
   let targetIsSelf =
-    req.body === undefined
-      ? true
-      : user.username === req.body.username || user.id === req.body.userId
+    req.body.userId === undefined ? true : user.id === req.body.userId
   const responseMsg = targetIsSelf
     ? `User: ${user.id} has deleted all of their own photos associated`
     : `User: ${user.id} has deleted all of the photos of a user associated`
 
   try {
-    if (!targetIsSelf || !user.isAdmin) {
+    if (!targetIsSelf && !user.isAdmin) {
       throw new Api403Error(
         `User: ${user.id} cannot delete photos that does not belong to them.`
       )
     }
 
-    await validationPerusal(req, preErrorMsg)
+    validationPerusal(req, preErrorMsg)
 
     const { afterMsg, searchParams } = inputsToSearch(
       req,
       selfSearch(user.id),
-      otherOptions,
+      {},
       "photo"
     )
+
+    const searched = await models.Photo.findAll(searchParams)
+
+    const filenames = JSON.parse(JSON.stringify(searched)).map((photo) => {
+      return photo.filename
+    })
+
+    for (let i = 0; i < filenames.length; i++) {
+      await deleteFile(filenames[parseInt(i)])
+    }
 
     const deleted = await models.Photo.destroy(searchParams)
 
     if (!deleted) {
       throw new Api500Error(
-        `User: ${user.id} delete photos query did not work given a user` +
+        `User: ${user.id} delete photos query did not work given a user ` +
           afterMsg
       )
     }
 
-    const { filename } = deleted.dataValues
-
-    await deleteFile(filename)
-
-    res.status(204).send(responseMsg + afterMsg)
+    res.send(responseMsg + afterMsg)
   } catch (err) {
     next(err)
   }
@@ -276,7 +274,7 @@ exports.deletePhoto = async (req, res, next) => {
     : `User: ${user.id} has deleted one of their own photos.`
 
   try {
-    if (photo.userId !== user.id || !user.isAdmin) {
+    if (photo.userId !== user.id && !user.isAdmin) {
       throw new Api403Error(
         `User: ${user.id} cannot delete a photo that does not belong to them.`
       )
