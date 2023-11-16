@@ -10,10 +10,6 @@ const {
 const { OK, BAD_REQUEST, CREATED } = httpStatusCodes
 
 describe("Register routes", () => {
-  after(async function () {
-    await models.User.destroy({ truncate: true })
-  })
-
   describe("Get /", () => {
     it("When valid request is made, then status is ok", async function () {
       const response = await request(app).get("/register")
@@ -21,6 +17,7 @@ describe("Register routes", () => {
       assert.strictEqual(response.status, OK)
     })
   })
+
   describe("Post /", () => {
     it("When one of the credentials (username) is empty an empty string, then response is a bad request #basicCredentialValidator #credentialsValidator", async function () {
       const expected = "Bad request."
@@ -31,8 +28,8 @@ describe("Register routes", () => {
         .type("form")
         .send(credentials)
 
-      assert.strictEqual(response.text, expected)
       assert.strictEqual(response.status, BAD_REQUEST)
+      assert.strictEqual(response.text, expected)
     })
 
     it("When one of the credentials (password) is undefined, then response is a bad request #basicCredentialValidator #credentialsValidator", async function () {
@@ -44,8 +41,8 @@ describe("Register routes", () => {
         .type("form")
         .send(credentials)
 
-      assert.strictEqual(response.text, expected)
       assert.strictEqual(response.status, BAD_REQUEST)
+      assert.strictEqual(response.text, expected)
     })
 
     it("When one of the creditials (username) inlcudes a space, then response is a bad request #basicCredentialValidator #credentialsValidator", async function () {
@@ -57,8 +54,8 @@ describe("Register routes", () => {
         .type("form")
         .send(credentials)
 
-      assert.strictEqual(response.text, expected)
       assert.strictEqual(response.status, BAD_REQUEST)
+      assert.strictEqual(response.text, expected)
     })
 
     it("When username has less than 4 characters, then response is a bad request #usernameValidator #credentialsValidator", async function () {
@@ -70,8 +67,8 @@ describe("Register routes", () => {
         .type("form")
         .send(credentials)
 
-      assert.strictEqual(response.text, expected)
       assert.strictEqual(response.status, BAD_REQUEST)
+      assert.strictEqual(response.text, expected)
     })
 
     it("When username has more than 20 characters, then response is a bad request #usernameValidator #credentialsValidator", async function () {
@@ -86,8 +83,8 @@ describe("Register routes", () => {
         .type("form")
         .send(credentials)
 
-      assert.strictEqual(response.text, expected)
       assert.strictEqual(response.status, BAD_REQUEST)
+      assert.strictEqual(response.text, expected)
     })
 
     it("When password has less than 8 characters, then response is a bad request #passwordValidator #credentialsValidator", async function () {
@@ -99,8 +96,8 @@ describe("Register routes", () => {
         .type("form")
         .send(credentials)
 
-      assert.strictEqual(response.text, expected)
       assert.strictEqual(response.status, BAD_REQUEST)
+      assert.strictEqual(response.text, expected)
     })
 
     it("When password has more than 20 characters, then response is a bad request #passwordValidator #credentialsValidator", async function () {
@@ -115,8 +112,8 @@ describe("Register routes", () => {
         .type("form")
         .send(credentials)
 
-      assert.strictEqual(response.text, expected)
       assert.strictEqual(response.status, BAD_REQUEST)
+      assert.strictEqual(response.text, expected)
     })
 
     it("When password does not contain a number, then response is a bad request #passwordValidator #credentialsValidator", async function () {
@@ -131,8 +128,8 @@ describe("Register routes", () => {
         .type("form")
         .send(credentials)
 
-      assert.strictEqual(response.text, expected)
       assert.strictEqual(response.status, BAD_REQUEST)
+      assert.strictEqual(response.text, expected)
     })
 
     it("When password does not contain an uppercase letter, then response is a bad request #passwordValidator #credentialsValidator", async function () {
@@ -147,39 +144,17 @@ describe("Register routes", () => {
         .type("form")
         .send(credentials)
 
-      console.log(response.text)
-      assert.strictEqual(response.text, expected)
       assert.strictEqual(response.status, BAD_REQUEST)
-    })
-
-    it("When credentials are validated, then user is created #credentialsValidator", async function () {
-      const expected = "User: 1 is created."
-      const credentials = {
-        username: "yomaster",
-        password: "password1Q",
-      }
-
-      const response = await request(app)
-        .post("/register")
-        .type("form")
-        .send(credentials)
-
       assert.strictEqual(response.text, expected)
-      assert.strictEqual(response.status, CREATED)
-
-      models.User.destroy({ truncate: true })
     })
 
     it("When credentials are validated but username is already in use, then response is a bad request", async function () {
       const expected = "Bad request."
       const setupCredentials = {
-        username: "yomaster1",
+        username: "commonUsername",
         password: "password1Q",
       }
-      const credentials = {
-        username: "yomaster1",
-        password: "password1Q",
-      }
+      const credentials = setupCredentials
 
       await request(app).post("/register").type("form").send(setupCredentials)
 
@@ -188,10 +163,28 @@ describe("Register routes", () => {
         .type("form")
         .send(credentials)
 
-      assert.strictEqual(response.text, expected)
       assert.strictEqual(response.status, BAD_REQUEST)
+      assert.strictEqual(response.text, expected)
 
-      models.User.destroy({ truncate: true })
+      models.User.destroy({ where: { username: setupCredentials.username } })
+    })
+
+    it("When credentials are validated, then user is created #credentialsValidator", async function () {
+      const expected = "is created."
+      const credentials = {
+        username: "newUser",
+        password: "password1Q",
+      }
+
+      const response = await request(app)
+        .post("/register")
+        .type("form")
+        .send(credentials)
+
+      assert.strictEqual(response.status, CREATED)
+      assert.include(response.text, expected)
+
+      models.User.destroy({ where: { username: credentials.username } })
     })
   })
 })

@@ -1,7 +1,7 @@
 const { generateToken } = require("../util/index").doubleCsrf
 
 exports.getLogout = async (req, res) => {
-  res.status(200).send()
+  res.send()
 }
 
 exports.postLogout = async (req, res, next) => {
@@ -11,7 +11,7 @@ exports.postLogout = async (req, res, next) => {
 
     generateToken(req, res, true)
 
-    res.json(`User: ${user.id} is now logged out.`)
+    res.send(`User: ${user.id} is now logged out.`)
   } catch (err) {
     next(err)
   }

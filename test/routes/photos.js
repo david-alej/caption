@@ -48,6 +48,7 @@ describe("Photos route", () => {
 
     const adminLoginResponse = await adminSession
       .post("/login")
+      .set("x-csrf-token", adminCsrfToken)
       .send(adminCredentials)
       .expect(OK)
 

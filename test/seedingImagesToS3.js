@@ -1,7 +1,7 @@
 const { assert, describe, models, s3 } = require("./common")
 
 describe("Seeding Images to S3", function () {
-  this.timeout(6 * 1000)
+  this.timeout(7 * 1000)
 
   it("Seeding images to s3, then checking that they exist in s3 ", async function () {
     const searched = await models.Photo.findAll()

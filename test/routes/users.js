@@ -2,14 +2,11 @@ const {
   app,
   assert,
   describe,
-  httpStatusCodes,
   models,
-  seedersDirectory,
+  httpStatusCodes,
   session,
 } = require("../common")
 
-// eslint-disable-next-line security/detect-non-literal-require
-const usersSeeder = require(seedersDirectory + "/20231027225905-User")
 const { OK, CREATED, NOT_FOUND, BAD_REQUEST, FORBIDDEN } = httpStatusCodes
 
 describe("Users route", () => {
@@ -25,8 +22,6 @@ describe("Users route", () => {
   let csrfToken = ""
 
   before(async function () {
-    await usersSeeder.up(models.sequelize.getQueryInterface(), null)
-
     userSession = session(app)
 
     await userSession.post("/register").send(userCredentials).expect(CREATED)
@@ -40,7 +35,9 @@ describe("Users route", () => {
   })
 
   after(async function () {
-    await models.User.destroy({ truncate: true })
+    await userSession.post("/logout").set("x-csrf-token", csrfToken).expect(OK)
+
+    await models.User.destroy({ where: { username: userCredentials.username } })
   })
 
   describe("Get /", () => {
@@ -313,6 +310,11 @@ describe("Users route", () => {
 
       assert.strictEqual(response.status, OK)
       assert.include(response.text, expected)
+
+      await adminSession
+        .post("/logout")
+        .set("x-csrf-token", adminCsrfToken)
+        .expect(OK)
     })
   })
 })
