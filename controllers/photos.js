@@ -73,7 +73,7 @@ exports.paramPhotoId = async (req, res, next, photoId) => {
       )
     }
 
-    req.photo = [JSON.parse(JSON.stringify(searched))]
+    req.photo = JSON.parse(JSON.stringify(searched))
 
     next()
   } catch (err) {
@@ -175,7 +175,7 @@ exports.getPhoto = async (req, res, next) => {
   const photo = req.photo
 
   try {
-    attachFilesToResponse(res, photo)
+    attachFilesToResponse(res, [photo])
   } catch (err) {
     next(err)
   }
@@ -286,9 +286,7 @@ exports.deletePhoto = async (req, res, next) => {
       )
     }
 
-    const { filename } = deleted.dataValues
-
-    await deleteFile(filename)
+    await deleteFile(photo.filename)
 
     res.send(responseMsg)
   } catch (err) {

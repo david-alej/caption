@@ -58,6 +58,7 @@ describe("Photos route", () => {
     await userSession
       .delete("/users/" + userCredentials.username)
       .set("x-csrf-token", csrfToken)
+      .send(userCredentials)
       .expect(OK)
 
     await adminSession
@@ -67,7 +68,20 @@ describe("Photos route", () => {
   })
 
   describe("Get /", () => {
-    it("When valid request is made with no valid request body inputs, then all the top voted photos are returned #attachFilesToResponse", async function () {
+    it("When two or more valid request body inputs are put into the request body, then all the top voted photos are returned #attachFilesToResponse", async function () {
+      const expected = "Bad request."
+      const requestBody = {
+        userId: 3,
+        title: "Me and my siblings",
+      }
+
+      const response = await userSession.get("/photos/").send(requestBody)
+
+      assert.strictEqual(response.status, BAD_REQUEST)
+      assert.strictEqual(response.text, expected)
+    })
+
+    it("When valid request is made with no valid request body inputs, then all the top voted photos are returned #allowedBodyInputsValidator", async function () {
       this.timeout(5 * 1000)
 
       const expected = [
@@ -387,7 +401,7 @@ describe("Photos route", () => {
       assert.strictEqual(response.text, expected)
     })
 
-    it("When valid request is made and given photo id in route parameters is a photo owned by the logged in user, then photo with respective id is deleted ", async function () {
+    it("When the logged in user tries to delete one of their photo's by photo id, then photo with respective id is deleted ", async function () {
       const expected = "has deleted one of "
       const title = "title"
       const filePath = "./public/img/photo-tests/title.jpeg"
@@ -400,8 +414,30 @@ describe("Photos route", () => {
       const searched = await models.Photo.findOne({
         where: { userId: loggedInUserId },
       })
-      console.log(searched.dataValues)
-      const photoId = searched.dataValues.id.toString()
+      const photoId = searched.dataValues.id
+
+      const response = await userSession
+        .delete("/photos/" + photoId)
+        .set("x-csrf-token", csrfToken)
+
+      assert.strictEqual(response.status, OK)
+      assert.include(response.text, expected)
+    })
+
+    it("When an admin tries to delete an another users photo by photo id, then the users respective photo is deleted ", async function () {
+      const expected = "has deleted one of "
+      const title = "title"
+      const filePath = "./public/img/photo-tests/title.jpeg"
+      await userSession
+        .post("/photos/")
+        .set("x-csrf-token", csrfToken)
+        .field("title", title)
+        .attach("photo", filePath)
+        .expect(201)
+      const searched = await models.Photo.findOne({
+        where: { userId: loggedInUserId },
+      })
+      const photoId = searched.dataValues.id
 
       const response = await adminSession
         .delete("/photos/" + photoId)
@@ -409,6 +445,69 @@ describe("Photos route", () => {
 
       assert.strictEqual(response.status, OK)
       assert.include(response.text, expected)
+    })
+  })
+
+  describe("Put /", () => {
+    it("When users trues to update a different user's photo by given photo id, then response is forbidden", async function () {
+      const expected = "Forbidden."
+      const newTitle = "New title"
+      const requestBody = { title: newTitle }
+      const photoId = 1
+
+      const response = await userSession
+        .put("/photos/" + photoId)
+        .set("x-csrf-token", csrfToken)
+        .send(requestBody)
+
+      assert.strictEqual(response.status, FORBIDDEN)
+      assert.strictEqual(response.text, expected)
+    })
+
+    it("When admin tries to update a user's photo by photo id, then response is forbidden ", async function () {
+      const expected = "Forbidden."
+      const photoId = 1
+      const newTitle = "New title"
+      const requestBody = { title: newTitle }
+
+      const response = await userSession
+        .put("/photos/" + photoId)
+        .set("x-csrf-token", csrfToken)
+        .send(requestBody)
+
+      assert.strictEqual(response.status, FORBIDDEN)
+      assert.include(response.text, expected)
+    })
+
+    it("When user tries to update one of their photo's by photo id, then the users respective photo is deleted ", async function () {
+      const title = "title"
+      const filePath = "./public/img/photo-tests/title.jpeg"
+      await userSession
+        .post("/photos/")
+        .set("x-csrf-token", csrfToken)
+        .field("title", title)
+        .attach("photo", filePath)
+        .expect(201)
+      const searched = await models.Photo.findOne({
+        where: { userId: loggedInUserId },
+      })
+      const photoId = searched.dataValues.id
+      const expected = "has updated one of their photo with id " + photoId + "."
+      const newTitle = "New title"
+      const requestBody = { title: newTitle }
+
+      const response = await userSession
+        .put("/photos/" + photoId)
+        .set("x-csrf-token", csrfToken)
+        .send(requestBody)
+
+      assert.strictEqual(response.status, OK)
+      assert.include(response.text, expected)
+
+      await userSession
+        .delete("/photos/" + photoId)
+        .set("x-csrf-token", csrfToken)
+        .expect(OK)
     })
   })
 })
