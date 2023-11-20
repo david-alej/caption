@@ -389,7 +389,7 @@ describe("Photos route", () => {
     })
   })
 
-  describe("Delete /:username", () => {
+  describe("Delete /:photoId", () => {
     it("When valid request is made but given photo id in route parameters is a photo not owned by the logged in user, then response is forbidden ", async function () {
       const expected = "Forbidden."
       const photoId = "1"
@@ -411,7 +411,7 @@ describe("Photos route", () => {
         .set("x-csrf-token", csrfToken)
         .field("title", title)
         .attach("photo", filePath)
-        .expect(201)
+        .expect(CREATED)
       const searched = await models.Photo.findOne({
         where: { userId: loggedInUserId },
       })

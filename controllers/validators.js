@@ -97,27 +97,16 @@ const textValidator = (input, inputIsParam = false, optional = false) => {
 
 exports.textValidator = textValidator
 
-const captionsMultiInputCheck = (body) => {
-  if (Object.keys(body).length > 2) {
-    throw Error(
-      "the request body object must be non-existent, one, or two key-value pairs."
-    )
-  }
-
-  if (!Object.keys(body).includes("photoId")) {
-    throw Error(
-      'the request body object must include "photoId" if two key-value pairs are given.'
-    )
-  }
-
+const captionsMultiInputCheck = (allowedInputsInBody) => {
   if (
-    !Object.keys(body).includes("username") ||
-    !Object.keys(body).includes("userId")
+    !allowedInputsInBody.includes("userId") &&
+    !allowedInputsInBody.includes("photoId")
   ) {
     throw Error(
-      'the request body object must include either "username" or "userId" along with "photoId" if two key-value pairs are given.'
+      'the request body object must include "photoId" and "userId" if two key-value pairs are given.'
     )
   }
+
   return true
 }
 
@@ -126,7 +115,6 @@ const allowedBodyInputsValidator = (
   isCaptionsRoute = false,
   maxAllowedInputs = false
 ) => {
-  console.log(maxAllowedInputs)
   if (!maxAllowedInputs) {
     maxAllowedInputs = allowedInputs.length - 1
   }
@@ -148,7 +136,6 @@ const allowedBodyInputsValidator = (
       const requestBodyKeys = Object.keys(body)
 
       const allowedInputsInBody = requestBodyKeys.filter((key) => {
-        console.log(allowedInputs, key, allowedInputs.includes(key))
         return allowedInputs.includes(key)
       })
 
@@ -165,7 +152,7 @@ const allowedBodyInputsValidator = (
         )
       }
 
-      if (isCaptionsRoute) return captionsMultiInputCheck(body)
+      if (isCaptionsRoute) return captionsMultiInputCheck(allowedInputsInBody)
 
       return true
     })
@@ -211,23 +198,21 @@ exports.deletePhotosValidator = () => {
 }
 
 exports.postCaptionsValidator = () => {
-  return [integerValidator("photoId"), textValidator("captionText")]
+  return [integerValidator("photoId"), textValidator("text")]
 }
 
 exports.getCaptionsValidator = () => {
   return [
-    usernameValidator("username", false, true),
     integerValidator("userId", false, true),
     integerValidator("photoId", false, true),
-    allowedBodyInputsValidator(["username", "userId", "photoId"], true, 2),
+    allowedBodyInputsValidator(["userId", "photoId"], true, 2),
   ]
 }
 
 exports.deleteCaptionsValidator = () => {
   return [
-    usernameValidator("username", false, true),
     integerValidator("userId", false, true),
     integerValidator("photoId", false, true),
-    allowedBodyInputsValidator(["username", "userId", "photoId"], true, 2),
+    allowedBodyInputsValidator(["userId", "photoId"], true, 2),
   ]
 }

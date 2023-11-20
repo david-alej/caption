@@ -2,18 +2,13 @@ const express = require("express")
 const captionsRouter = express.Router()
 const { captionsControllers } = require("../controllers/index")
 const {
-  integerValidator,
   textValidator,
   postCaptionsValidator,
   getCaptionsValidator,
   deleteCaptionsValidator,
 } = require("../controllers/index").validators
 
-captionsRouter.param(
-  "captionId",
-  integerValidator("captionId", true),
-  captionsControllers.paramCaptionId
-)
+captionsRouter.param("captionId", captionsControllers.paramCaptionId)
 
 captionsRouter.post(
   "/",
@@ -23,7 +18,7 @@ captionsRouter.post(
 
 captionsRouter.get("/", getCaptionsValidator(), captionsControllers.getCaptions)
 
-captionsRouter.get("/:photoId", captionsControllers.getCaption)
+captionsRouter.get("/:captionId", captionsControllers.getCaption)
 
 captionsRouter.put(
   "/:photoId",
@@ -37,6 +32,6 @@ captionsRouter.delete(
   captionsControllers.deleteCaptions
 )
 
-captionsRouter.delete("/:photoId", captionsControllers.deleteCaption)
+captionsRouter.delete("/:captionId", captionsControllers.deleteCaption)
 
 module.exports = captionsRouter

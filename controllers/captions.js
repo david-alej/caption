@@ -1,6 +1,6 @@
-const { validationPerusal } = require("./validators")
+const { validationPerusal, integerValidator } = require("./validators")
 const models = require("../database/models")
-const { Api401Error, Api403Error, Api500Error } =
+const { Api401Error, Api403Error, Api404Error, Api500Error } =
   require("../util/index").apiErrors
 const { selfSearch, whereSearch, inputsToSearch } =
   require("../util/index").search
@@ -25,14 +25,16 @@ exports.paramCaptionId = async (req, res, next, captionId) => {
   const user = req.session.user
 
   try {
+    await integerValidator("captionId", true).run(req)
+
     validationPerusal(req, `User: ${user.id}`)
 
-    const searchParams = whereSearch({ id: captionId }, ...otherOptions)
+    const searchParams = whereSearch({ id: captionId }, otherOptions)
 
     const searched = await models.Caption.findOne(searchParams)
 
     if (!searched) {
-      throw new Api401Error(
+      throw new Api404Error(
         `User: ${user.id} caption was not found given caption id ${captionId}.`
       )
     }
@@ -52,12 +54,12 @@ exports.postCaption = async (req, res, next) => {
   try {
     validationPerusal(req, preErrorMsg)
 
-    const { photoId, captionText } = req.body
+    const { photoId, text } = req.body
 
     const values = {
       userId: user.id,
       photoId,
-      captionText,
+      text,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -146,22 +148,21 @@ exports.putCaption = async (req, res, next) => {
 exports.deleteCaptions = async (req, res, next) => {
   const user = req.session.user
   const preErrorMsg = `User: ${user.id}`
-  const targetIsSelf =
-    req.body === undefined
-      ? true
-      : user.username === req.body.username || user.id === req.body.userId
+  const targetIsSelf = user.isAdmin
+    ? user.id === req.body.userId
+    : req.body.userId === undefined || user.id === req.body.userId
   const responseMsg = targetIsSelf
     ? `User: ${user.id} has deleted all of their own captions associated`
     : `User: ${user.id} has deleted all of the captions associated`
 
   try {
-    if (!targetIsSelf || !user.isAdmin) {
+    if (!targetIsSelf && !user.isAdmin) {
       throw new Api403Error(
         `User: ${user.id} cannot delete photos that does not belong to them.`
       )
     }
 
-    await validationPerusal(req, preErrorMsg)
+    validationPerusal(req, preErrorMsg)
 
     const { afterMsg, searchParams } = inputsToSearch(
       req,
@@ -170,7 +171,7 @@ exports.deleteCaptions = async (req, res, next) => {
       "caption"
     )
 
-    const deleted = await models.Photo.destroy(searchParams)
+    const deleted = await models.Caption.destroy(searchParams)
 
     if (!deleted) {
       throw new Api500Error(
@@ -178,7 +179,7 @@ exports.deleteCaptions = async (req, res, next) => {
       )
     }
 
-    res.status(204).send(responseMsg + afterMsg)
+    res.send(responseMsg + afterMsg)
   } catch (err) {
     next(err)
   }

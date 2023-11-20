@@ -30,7 +30,7 @@ const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
   let searchParams = defaultSearch
   let afterMsg = ""
 
-  const definedInputs = inputs.filter((input) => {
+  let definedInputs = inputs.filter((input) => {
     return Object.values(input)[0] !== undefined
   })
 
@@ -47,21 +47,29 @@ const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
     )
   }
 
-  searchParams = whereSearch(...definedInputs, otherOptions)
+  definedInputs = definedInputs.reduce(
+    (obj, item) => ({
+      ...obj,
+      ...item,
+    }),
+    {}
+  )
 
-  afterMsg =
-    "with given " +
-    sentenceCase(Object.keys(definedInputs[0])[0]) +
-    ` ${Object.values(definedInputs[0])[0]}.`
+  searchParams = whereSearch(definedInputs, otherOptions)
 
-  definedInputs.shift()
+  const inputKeys = Object.keys(definedInputs)
+  const inputValues = Object.values(definedInputs)
+  afterMsg = "with given " + sentenceCase(inputKeys[0]) + `= ${inputValues[0]}.`
 
-  if (definedInputs.length === 2) {
+  inputKeys.shift()
+  inputValues.shift()
+
+  if (definedInputs.length === 1) {
     afterMsg =
       afterMsg.substring(0, afterMsg.length - 1) +
       ", and " +
-      sentenceCase(Object.keys(definedInputs[0])[0]) +
-      `= ${Object.values(definedInputs[0])[0]}.`
+      sentenceCase(inputKeys[0]) +
+      `= ${inputValues[0]}.`
   }
 
   return { afterMsg, searchParams }
