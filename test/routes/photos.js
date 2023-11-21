@@ -4,6 +4,7 @@ const {
   describe,
   httpStatusCodes,
   models,
+  server,
   session,
 } = require("../common")
 const { deleteFile, getObjectData } = require("../../s3")
@@ -66,6 +67,8 @@ describe("Photos route", () => {
       .post("/logout")
       .set("x-csrf-token", adminCsrfToken)
       .expect(OK)
+
+    server.close()
   })
 
   describe("Get /", () => {
@@ -93,7 +96,7 @@ describe("Photos route", () => {
           filename: "a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg",
           createdAt: "2023-11-04T20:00:00.000Z",
           updatedAt: "2023-11-04T20:00:00.000Z",
-          totalVotes: null,
+          totalVotes: "0",
         },
         {
           id: 1,
@@ -102,7 +105,7 @@ describe("Photos route", () => {
           filename: "744fe784-f556-4c68-a81a-2e5d859e27ef.jpg",
           createdAt: "2023-11-04T20:00:00.000Z",
           updatedAt: "2023-11-04T20:00:00.000Z",
-          totalVotes: null,
+          totalVotes: "0",
         },
         {
           id: 3,
@@ -111,7 +114,7 @@ describe("Photos route", () => {
           filename: "cc30b9e6-0ae1-4753-86cf-9b81717030c2.jpg",
           createdAt: "2023-11-04T20:00:00.000Z",
           updatedAt: "2023-11-04T20:00:00.000Z",
-          totalVotes: null,
+          totalVotes: "0",
         },
       ]
 
@@ -152,7 +155,7 @@ describe("Photos route", () => {
         filename: "cc30b9e6-0ae1-4753-86cf-9b81717030c2.jpg",
         createdAt: "2023-11-04T20:00:00.000Z",
         updatedAt: "2023-11-04T20:00:00.000Z",
-        totalVotes: null,
+        totalVotes: "0",
       })
       const requestBody = { title: "Me and my siblings" }
 
@@ -192,7 +195,56 @@ describe("Photos route", () => {
         filename: "a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg",
         createdAt: "2023-11-04T20:00:00.000Z",
         updatedAt: "2023-11-04T20:00:00.000Z",
-        captions: [],
+        captions: [
+          {
+            id: 1,
+            userId: 1,
+            photoId: 2,
+            text: "Why is the dog on a chair",
+            votes: 0,
+            createdAt: "2023-11-04T20:01:00.000Z",
+            updatedAt: "2023-11-04T20:01:00.000Z",
+            author: {
+              id: 1,
+              username: "rina.dark",
+              isAdmin: false,
+              createdAt: "2023-11-02T20:00:00.000Z",
+              updatedAt: "2023-11-02T20:00:00.000Z",
+            },
+          },
+          {
+            id: 5,
+            userId: 4,
+            photoId: 2,
+            text: "yo",
+            votes: 0,
+            createdAt: "2023-11-04T20:01:00.000Z",
+            updatedAt: "2023-11-04T20:01:00.000Z",
+            author: {
+              id: 4,
+              username: "yomaster",
+              isAdmin: true,
+              createdAt: "2023-11-02T20:00:00.000Z",
+              updatedAt: "2023-11-02T20:00:00.000Z",
+            },
+          },
+          {
+            id: 6,
+            userId: 4,
+            photoId: 2,
+            text: "That is a good salesboy",
+            votes: 0,
+            createdAt: "2023-11-04T20:01:00.000Z",
+            updatedAt: "2023-11-04T20:01:00.000Z",
+            author: {
+              id: 4,
+              username: "yomaster",
+              isAdmin: true,
+              createdAt: "2023-11-02T20:00:00.000Z",
+              updatedAt: "2023-11-02T20:00:00.000Z",
+            },
+          },
+        ],
         author: {
           id: 2,
           username: "Carkeys23307",

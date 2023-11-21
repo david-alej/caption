@@ -21,8 +21,8 @@ captionsRouter.get("/", getCaptionsValidator(), captionsControllers.getCaptions)
 captionsRouter.get("/:captionId", captionsControllers.getCaption)
 
 captionsRouter.put(
-  "/:photoId",
-  textValidator("captionText"),
+  "/:captionId",
+  textValidator("text"),
   captionsControllers.putCaption
 )
 

@@ -1,5 +1,5 @@
 /* eslint-disable node/no-unpublished-require */
-const app = require("../app")
+const { app, server } = require("../app")
 const { assert } = require("chai")
 const { describe } = require("mocha")
 const fs = require("fs")
@@ -18,5 +18,6 @@ exports.httpStatusCodes = httpStatusCodes
 exports.models = models
 exports.request = request
 exports.s3 = s3
+exports.server = server
 exports.session = session
 exports.seedersDirectory = seedersDirectory

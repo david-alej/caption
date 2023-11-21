@@ -1,5 +1,3 @@
-require("./seedingImagesToS3")
-require("./util")
-require("./controllers/index")
+require("./starting")
 require("./routes/index")
-require("./unseedingImagesToS3")
+require("./ending")

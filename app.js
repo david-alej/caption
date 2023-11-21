@@ -8,22 +8,22 @@ require("dotenv").config()
 
 const PORT = process.env.PORT || 3300
 
-app.set("trust proxy", 1)
+// app.set("trust proxy", 1)
 
-https
-  .createServer(
-    {
-      key: privateKey,
-      cert: privateCertificate,
-    },
-    app
-  )
-  .listen(PORT, () => {
-    console.log(`Server is live at https://localhost:${PORT}`)
-  })
+const server = https.createServer(
+  {
+    key: privateKey,
+    cert: privateCertificate,
+  },
+  app
+)
+
+server.listen(PORT, () => {
+  console.log(`Server is live at https://localhost:${PORT}`)
+})
 
 // app.listen(PORT, () => {
 //   console.log(`Server is live at http://localhost:${PORT}`)
 // })
 
-module.exports = app
+module.exports = { app, server }

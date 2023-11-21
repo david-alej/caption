@@ -5,6 +5,7 @@ const {
   httpStatusCodes,
   models,
   request,
+  server,
   session,
 } = require("../common")
 
@@ -34,6 +35,8 @@ describe("Logout routes", () => {
 
   after(async function () {
     await models.User.destroy({ where: { username: userCredentials.username } })
+
+    server.close()
   })
 
   describe("Get /", () => {

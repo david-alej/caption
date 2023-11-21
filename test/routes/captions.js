@@ -4,6 +4,7 @@ const {
   describe,
   httpStatusCodes,
   models,
+  server,
   session,
 } = require("../common")
 
@@ -65,6 +66,8 @@ describe("Captions route", () => {
       .post("/logout")
       .set("x-csrf-token", adminCsrfToken)
       .expect(OK)
+
+    server.close()
   })
 
   describe("Get /", () => {
@@ -508,6 +511,120 @@ describe("Captions route", () => {
       const response = await adminSession
         .delete("/captions")
         .set("x-csrf-token", adminCsrfToken)
+        .send(requestBody)
+
+      assert.strictEqual(response.status, OK)
+      assert.include(response.text, expected)
+    })
+  })
+
+  describe("Delete /:captionId", () => {
+    it("When user tries to delete other user's caption, then response is forbidden", async function () {
+      const expected = "Forbidden."
+      const captionId = 5
+
+      const response = await userSession
+        .delete("/captions/" + captionId)
+        .set("x-csrf-token", csrfToken)
+
+      assert.strictEqual(response.status, FORBIDDEN)
+      assert.strictEqual(response.text, expected)
+    })
+
+    it("When user tries to delete one of their caption's given a caption id, then respective caption is deleted", async function () {
+      const expected = "has deleted one of their own captions."
+      const photoId = 1
+      const text = "That is really cool art"
+      const requestBody = {
+        photoId,
+        text,
+      }
+      await userSession
+        .post("/captions")
+        .set("x-csrf-token", csrfToken)
+        .send(requestBody)
+        .expect(CREATED)
+      const searched = await models.Caption.findOne({
+        where: { photoId, text },
+      })
+      const captionId = searched.dataValues.id
+
+      const response = await userSession
+        .delete("/captions/" + captionId)
+        .set("x-csrf-token", csrfToken)
+
+      assert.strictEqual(response.status, OK)
+      assert.include(response.text, expected)
+    })
+
+    it("When admin tries to delete another user's caption given caption id, then respective caption is deleted", async function () {
+      const expected = "has deleted one of user id"
+      const photoId = 1
+      const text = "Awesome"
+      const requestBody = {
+        photoId,
+        text,
+      }
+      await userSession
+        .post("/captions")
+        .set("x-csrf-token", csrfToken)
+        .send(requestBody)
+        .expect(CREATED)
+      const searched = await models.Caption.findOne({
+        where: { photoId, text },
+      })
+      const captionId = searched.dataValues.id
+
+      const response = await adminSession
+        .delete("/captions/" + captionId)
+        .set("x-csrf-token", adminCsrfToken)
+
+      assert.strictEqual(response.status, OK)
+      assert.include(response.text, expected)
+    })
+  })
+
+  describe("Put /:captionId", () => {
+    it("When user tries to update another user's caption, then response is forbidden", async function () {
+      const expected = "Forbidden."
+      const captionId = 1
+      const requestBody = {
+        text: "Not awesome, the best",
+      }
+
+      const response = await userSession
+        .put("/captions/" + captionId)
+        .set("x-csrf-token", csrfToken)
+        .send(requestBody)
+
+      assert.strictEqual(response.status, FORBIDDEN)
+      assert.strictEqual(response.text, expected)
+    })
+
+    it("When user tries to update one of their own caption's given a caption id and new caption text, then respective caption is updated", async function () {
+      const expected = "has updated one of their caption with id"
+      const photoId = 1
+      const text = "Awesome"
+      const requestBody1 = {
+        photoId,
+        text,
+      }
+      await userSession
+        .post("/captions")
+        .set("x-csrf-token", csrfToken)
+        .send(requestBody1)
+        .expect(CREATED)
+      const searched = await models.Caption.findOne({
+        where: { photoId, text },
+      })
+      const captionId = searched.dataValues.id
+      const requestBody = {
+        text: "Not awesome, the best",
+      }
+
+      const response = await userSession
+        .put("/captions/" + captionId)
+        .set("x-csrf-token", csrfToken)
         .send(requestBody)
 
       assert.strictEqual(response.status, OK)

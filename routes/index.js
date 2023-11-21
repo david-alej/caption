@@ -16,7 +16,7 @@ const { Router } = require("express")
 const router = Router()
 
 router.get("/", (req, res) => {
-  res.send("Hurray")
+  res.send("Welcome to the social media app Caption!!")
 })
 
 router.use("/login", loginRouter)

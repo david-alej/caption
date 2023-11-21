@@ -64,7 +64,7 @@ exports.postCaption = async (req, res, next) => {
       updatedAt: new Date(),
     }
 
-    const created = models.Caption.create(values)
+    const created = await models.Caption.create(values)
 
     if (!created) {
       throw new Api500Error(`User: ${user.id} create query did not work.`)
@@ -94,7 +94,7 @@ exports.getCaptions = async (req, res, next) => {
 
     if (!searched) {
       throw new Api401Error(
-        `User: ${user.id} captions were not found` + afterMsg
+        `User: ${user.id} captions were not found ` + afterMsg
       )
     }
 
@@ -175,7 +175,7 @@ exports.deleteCaptions = async (req, res, next) => {
 
     if (!deleted) {
       throw new Api500Error(
-        `User: ${user.id} delete photos query did not work` + afterMsg
+        `User: ${user.id} delete photos query did not work ` + afterMsg
       )
     }
 
@@ -188,12 +188,13 @@ exports.deleteCaptions = async (req, res, next) => {
 exports.deleteCaption = async (req, res, next) => {
   const caption = req.caption
   const user = req.session.user
-  const responseMsg = user.isAdmin
-    ? `User: ${user.id} has deleted one of user id ${caption.userId} captions.`
-    : `User: ${user.id} has deleted one of their own captions.`
+  const targetIsSelf = caption.userId === user.id
+  const responseMsg = targetIsSelf
+    ? `User: ${user.id} has deleted one of their own captions.`
+    : `User: ${user.id} has deleted one of user id ${caption.userId} captions.`
 
   try {
-    if (caption.userId !== user.id || !user.isAdmin) {
+    if (!targetIsSelf && !user.isAdmin) {
       throw new Api403Error(
         `User: ${user.id} cannot delete a caption that does not belong to them.`
       )
@@ -209,7 +210,7 @@ exports.deleteCaption = async (req, res, next) => {
       )
     }
 
-    res.status(204).send(responseMsg)
+    res.send(responseMsg)
   } catch (err) {
     next(err)
   }

@@ -5,11 +5,16 @@ const {
   httpStatusCodes,
   models,
   request,
+  server,
 } = require("../common")
 
 const { OK, BAD_REQUEST, CREATED } = httpStatusCodes
 
 describe("Register routes", () => {
+  after(async function () {
+    server.close()
+  })
+
   describe("Get /", () => {
     it("When valid request is made, then status is ok", async function () {
       const response = await request(app).get("/register")

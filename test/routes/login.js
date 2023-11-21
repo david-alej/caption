@@ -5,11 +5,16 @@ const {
   httpStatusCodes,
   models,
   request,
+  server,
 } = require("../common")
 
 const { OK, UNAUTHORIZED } = httpStatusCodes
 
 describe("Login routes", () => {
+  after(async function () {
+    server.close()
+  })
+
   describe("Get /", () => {
     it("When valid request is made, then status is ok", async function () {
       const response = await request(app).get("/login")
@@ -55,7 +60,7 @@ describe("Login routes", () => {
       assert.strictEqual(response.text, expected)
       assert.strictEqual(response.status, UNAUTHORIZED)
 
-      models.User.destroy({ where: { username: credentials.username } })
+      await models.User.destroy({ where: { username: credentials.username } })
     })
 
     it("When authentication works, then user is logged in #authenticate", async function () {
@@ -77,7 +82,7 @@ describe("Login routes", () => {
       assert.include(response.text, expectedTwo)
       assert.strictEqual(response.status, OK)
 
-      models.User.destroy({ where: { username: credentials.username } })
+      await models.User.destroy({ where: { username: credentials.username } })
     })
   })
 })

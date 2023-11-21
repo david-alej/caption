@@ -4,6 +4,7 @@ const {
   describe,
   models,
   httpStatusCodes,
+  server,
   session,
 } = require("../common")
 
@@ -38,6 +39,8 @@ describe("Users route", () => {
     await userSession.post("/logout").set("x-csrf-token", csrfToken).expect(OK)
 
     await models.User.destroy({ where: { username: userCredentials.username } })
+
+    server.close()
   })
 
   describe("Get /", () => {
