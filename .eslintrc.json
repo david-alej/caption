@@ -20,5 +20,5 @@
     "semi": ["error", "never"]
   },
   "plugins": ["mocha"],
-  "ignorePatterns": ["database/*"]
+  "ignorePatterns": ["database/*", "coverage/*"]
 }

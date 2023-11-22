@@ -1,27 +1,41 @@
 const {
-  app,
-  assert,
+  axios,
+  initializeWebServer,
+  stopWebServer,
   describe,
+  expect,
   httpStatusCodes,
-  request,
-  server,
 } = require("../common")
 
 const { OK } = httpStatusCodes
 
 describe("Starting page", () => {
+  let axiosAPIClient
+
+  before(async function () {
+    const apiConnection = await initializeWebServer()
+
+    const axiosConfig = {
+      baseURL: `https://localhost:${apiConnection.port}`,
+      validateStatus: () => true,
+    }
+
+    axiosAPIClient = axios.create(axiosConfig)
+  })
+
   after(async function () {
-    server.close()
+    await stopWebServer()
   })
 
   describe("/", () => {
     it("When request is made for the starting page, then response is ok with a message", async function () {
       const expected = "Welcome to the social media app Caption!!"
 
-      const response = await request(app).get("/")
+      const { data: responseData, status: responseStatus } =
+        await axiosAPIClient.get("/")
 
-      assert.strictEqual(response.status, OK)
-      assert.strictEqual(response.text, expected)
+      expect(responseStatus).to.equal(OK)
+      expect(responseData).to.equal(expected)
     })
   })
 })

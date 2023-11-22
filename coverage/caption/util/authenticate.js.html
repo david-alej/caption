@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">41.17% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>17/17</span>
+                <span class='fraction'>7/17</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>3/3</span>
+                <span class='fraction'>0/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">41.17% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>17/17</span>
+                <span class='fraction'>7/17</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -105,35 +105,35 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">22x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">21x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">21x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">21x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">21x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -141,36 +141,36 @@
 const models = require("../database/models")
 const { Api401Error } = require("./apiErrors")
 &nbsp;
-const usernameExists = async (username) =&gt; {
-  const user = await models.User.findOne({
+const usernameExists = <span class="fstat-no" title="function not covered" >as</span>ync (username) =&gt; {
+  const user = <span class="cstat-no" title="statement not covered" >await models.User.findOne({</span>
     where: {
       username,
     },
   })
 &nbsp;
-  if (!user) {
-    throw new Api401Error(`Client: username ${username} not found.`)
+<span class="cstat-no" title="statement not covered" >  if (!user) {</span>
+<span class="cstat-no" title="statement not covered" >    throw new Api401Error(`Client: username ${username} not found.`)</span>
   }
 &nbsp;
-  return user.dataValues
+<span class="cstat-no" title="statement not covered" >  return user.dataValues</span>
 }
 &nbsp;
-const correctPassword = async (user, password) =&gt; {
-  const passwordsMatch = await bcrypt.compare(password, user.password)
+const correctPassword = <span class="fstat-no" title="function not covered" >as</span>ync (user, password) =&gt; {
+  const passwordsMatch = <span class="cstat-no" title="statement not covered" >await bcrypt.compare(password, user.password)</span>
 &nbsp;
-  if (!passwordsMatch) {
-    throw new Api401Error(
+<span class="cstat-no" title="statement not covered" >  if (!passwordsMatch) {</span>
+<span class="cstat-no" title="statement not covered" >    throw new Api401Error(</span>
       `Client: with chosen user id ${user.id} has input an incorrect password.`
     )
   }
 }
 &nbsp;
-const authenticate = async (username, password) =&gt; {
-  const user = await usernameExists(username)
+const authenticate = <span class="fstat-no" title="function not covered" >as</span>ync (username, password) =&gt; {
+  const user = <span class="cstat-no" title="statement not covered" >await usernameExists(username)</span>
 &nbsp;
-  await correctPassword(user, password)
+<span class="cstat-no" title="statement not covered" >  await correctPassword(user, password)</span>
 &nbsp;
-  return user
+<span class="cstat-no" title="statement not covered" >  return user</span>
 }
 &nbsp;
 module.exports = { usernameExists, correctPassword, authenticate }
@@ -181,7 +181,7 @@ module.exports = { usernameExists, correctPassword, authenticate }
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-11-20T22:19:59.978Z
+                at 2023-11-22T00:22:23.832Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

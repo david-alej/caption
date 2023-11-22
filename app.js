@@ -6,24 +6,35 @@ const privateCertificate = fs.readFileSync("cert.pem")
 
 require("dotenv").config()
 
-const PORT = process.env.PORT || 3300
+let server = ""
 
-// app.set("trust proxy", 1)
+const initializeWebServer = () => {
+  return new Promise((resolve) => {
+    const PORT = process.env.PORT || 0
 
-const server = https.createServer(
-  {
-    key: privateKey,
-    cert: privateCertificate,
-  },
-  app
-)
+    // app.set("trust proxy", 1)
 
-server.listen(PORT, () => {
-  console.log(`Server is live at https://localhost:${PORT}`)
-})
+    const server = https.createServer(
+      {
+        key: privateKey,
+        cert: privateCertificate,
+      },
+      app
+    )
 
-// app.listen(PORT, () => {
-//   console.log(`Server is live at http://localhost:${PORT}`)
-// })
+    server.listen(PORT, () => {
+      console.log(`Server is live at https://localhost:${PORT}`)
+      resolve(server.address())
+    })
+  })
+}
 
-module.exports = { app, server }
+const stopWebServer = () => {
+  return new Promise((resolve) => {
+    server.close(() => {
+      resolve()
+    })
+  })
+}
+
+module.exports = { initializeWebServer, stopWebServer }

@@ -25,6 +25,7 @@
     "winston-logsene": "^2.1.2"
   },
   "devDependencies": {
+    "axios": "^1.6.2",
     "chai": "^4.3.10",
     "cross-env": "^7.0.3",
     "eslint": "^8.52.0",
@@ -34,9 +35,7 @@
     "eslint-plugin-security": "^1.7.1",
     "mocha": "^10.2.0",
     "nodemon": "^3.0.1",
-    "nyc": "^15.1.0",
-    "supertest": "^6.3.3",
-    "supertest-session": "^5.0.1"
+    "nyc": "^15.1.0"
   },
   "name": "caption",
   "description": "",

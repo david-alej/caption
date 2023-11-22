@@ -1,23 +1,12 @@
 /* eslint-disable node/no-unpublished-require */
-const { app, server } = require("../app")
-const { assert } = require("chai")
-const { describe } = require("mocha")
-const fs = require("fs")
-const { httpStatusCodes } = require("../util/index")
-const models = require("../database/models")
-const request = require("supertest")
-const s3 = require("../s3/index")
-const session = require("supertest-session")
-const seedersDirectory = "../../database/seeders"
-
-exports.app = app
-exports.assert = assert
-exports.describe = describe
-exports.fs = fs
-exports.httpStatusCodes = httpStatusCodes
-exports.models = models
-exports.request = request
-exports.s3 = s3
-exports.server = server
-exports.session = session
-exports.seedersDirectory = seedersDirectory
+module.exports = {
+  axios: require("axios"),
+  initializeWebServer: require("../app").initializeWebServer,
+  stopWebServer: require("../app").stopWebServer,
+  expect: require("chai").expect,
+  describe: require("mocha").describe,
+  fs: require("fs"),
+  httpStatusCodes: require("../util/index").httpStatusCodes,
+  models: require("../database/models"),
+  s3: require("../s3/index"),
+}

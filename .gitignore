@@ -4,3 +4,4 @@ package-lock.json
 *.pem
 testing.js
 testing.html
+.nyc_output/
