@@ -1,6 +1,7 @@
 const express = require("express")
 const session = require("express-session")
 const helmet = require("helmet")
+const cors = require("cors")
 const cookieParser = require("cookie-parser")
 
 const routes = require("../routes/index")
@@ -33,6 +34,8 @@ app.use(
 app.use(cookieParser(process.env.COOKIES_SECRET)) //process.env.COOKIES_SECRET
 
 app.use(helmet())
+
+app.use(cors({ origin: "https://localhost:3300", credentials: true }))
 
 app.use("/", routes)
 

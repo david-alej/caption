@@ -10,7 +10,7 @@ let server = ""
 
 const initializeWebServer = () => {
   return new Promise((resolve) => {
-    const PORT = process.env.PORT || 0
+    const PORT = process.env.PORT || 3300
 
     // app.set("trust proxy", 1)
 

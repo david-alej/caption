@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.91% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>56/59</span>
+                <span class='fraction'>56/56</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.91% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>56/59</span>
+                <span class='fraction'>56/56</span>
             </div>
         
             
@@ -189,21 +189,7 @@
 <a name='L124'></a><a href='#L124'>124</a>
 <a name='L125'></a><a href='#L125'>125</a>
 <a name='L126'></a><a href='#L126'>126</a>
-<a name='L127'></a><a href='#L127'>127</a>
-<a name='L128'></a><a href='#L128'>128</a>
-<a name='L129'></a><a href='#L129'>129</a>
-<a name='L130'></a><a href='#L130'>130</a>
-<a name='L131'></a><a href='#L131'>131</a>
-<a name='L132'></a><a href='#L132'>132</a>
-<a name='L133'></a><a href='#L133'>133</a>
-<a name='L134'></a><a href='#L134'>134</a>
-<a name='L135'></a><a href='#L135'>135</a>
-<a name='L136'></a><a href='#L136'>136</a>
-<a name='L137'></a><a href='#L137'>137</a>
-<a name='L138'></a><a href='#L138'>138</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L127'></a><a href='#L127'>127</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -222,10 +208,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -244,12 +228,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -322,25 +300,22 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const {
-  app,
-  assert,
-  request,
   axios,
   axiosConfig,
   initializeWebServer,
@@ -359,13 +334,11 @@ describe("Logout routes", function () {
 &nbsp;
   let client
   let csrfToken
-  let noCookiesClient
-  let setHeaders = { headers: { cookie: "" } }
+  let setHeaders = { headers: {} }
 &nbsp;
   before(async function () {
     userCredentials.username = generateUsername()
     userCredentials.password = generatePassword()
-    userCredentials.withCredentials = true
 &nbsp;
     const apiConnection = await initializeWebServer()
 &nbsp;
@@ -381,15 +354,9 @@ describe("Logout routes", function () {
       headers,
     } = await client.post("/login", userCredentials)
 &nbsp;
-    setHeaders.headers.cookie = headers["set-cookie"]
+    setHeaders.headers.Cookie = headers["set-cookie"]
 &nbsp;
     csrfToken = data.csrfToken
-&nbsp;
-    userCredentials.username = generateUsername()
-    userCredentials.password = generatePassword()
-    axiosConfig.withCredentials = false
-&nbsp;
-    noCookiesClient = axios.create(axiosConfig)
 &nbsp;
     expect(status).to.equal(CREATED)
     expect(status1).to.equal(OK)
@@ -413,16 +380,16 @@ describe("Logout routes", function () {
         username: generateUsername(),
         password: generatePassword(),
       }
-      const { status: registerStatus } = await noCookiesClient.post(
+      const { status: registerStatus } = await client.post(
         "/register",
         newCredentials
       )
-      const { status: loginStatus } = await noCookiesClient.post(
+      const { status: loginStatus } = await client.post(
         "/login",
         newCredentials
       )
 &nbsp;
-      const { status, data } = await noCookiesClient.get("/logout")
+      const { status, data } = await client.get("/logout")
 &nbsp;
       const deleted = await models.User.destroy({
         where: { username: newCredentials.username },
@@ -456,21 +423,21 @@ describe("Logout routes", function () {
     it('When request does have cookies but does not include a "x-csrf-token" with csrf token, then the response is "invalid csrf token" #doubleCsrfProtection', async function () {
       const expected = "invalid csrf token"
 &nbsp;
-      const { status, data } = await client.post("/logout", setHeaders)
+      const { status, data } = await client.post("/logout", {}, setHeaders)
 &nbsp;
       expect(status).to.equal(FORBIDDEN)
-<span class="cstat-no" title="statement not covered" >      expect(data).to.equal(expected)</span>
+      expect(data).to.equal(expected)
     })
 &nbsp;
     it("When a valid request is made (has cookies and csrf-token as a header), then user is logged out", async function () {
       const expected = " is now logged out."
+      const configs = setHeaders
+      configs.headers["x-csrf-token"] = csrfToken
 &nbsp;
-      const response = await client
-        .post("/logout")
-        .set("x-csrf-token", csrfToken)
+      const { status, data } = await client.post("/logout", {}, configs)
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      assert.strictEqual(response.status, OK)</span>
-<span class="cstat-no" title="statement not covered" >      assert.include(response.text, expected)</span>
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
     })
   })
 })
@@ -481,7 +448,7 @@ describe("Logout routes", function () {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-11-23T01:03:59.290Z
+                at 2023-11-23T16:24:51.450Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

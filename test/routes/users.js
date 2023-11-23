@@ -1,53 +1,95 @@
 const {
   app,
   assert,
-  describe,
-  models,
-  httpStatusCodes,
   server,
   session,
+  axios,
+  axiosConfig,
+  initializeWebServer,
+  stopWebServer,
+  expect,
+  httpStatusCodes,
+  models,
+  generatePassword,
+  generateUsername,
 } = require("../common")
 
 const { OK, CREATED, NOT_FOUND, BAD_REQUEST, FORBIDDEN } = httpStatusCodes
 
-describe("Users route", () => {
-  const userCredentials = {
-    username: "username",
-    password: "Password1",
-  }
+describe("Users route", function () {
+  const userCredentials = {}
   const adminCredentials = {
     username: "yomaster",
     password: "yoyoyo1Q",
   }
-  let userSession = ""
-  let csrfToken = ""
+
+  let client
+  let setHeaders = { headers: {} }
 
   before(async function () {
-    userSession = session(app)
+    userCredentials.username = generateUsername()
+    userCredentials.password = generatePassword()
 
-    await userSession.post("/register").send(userCredentials).expect(CREATED)
+    const apiConnection = await initializeWebServer()
 
-    const loginResponse = await userSession
-      .post("/login")
-      .send(userCredentials)
-      .expect(OK)
+    axiosConfig.baseURL += apiConnection.port
 
-    csrfToken = JSON.parse(loginResponse.text).csrfToken
+    client = axios.create(axiosConfig)
+
+    const { status } = await client.post("/register", userCredentials)
+
+    const {
+      status: status1,
+      data,
+      headers,
+    } = await client.post("/login", userCredentials)
+
+    setHeaders.headers.Cookie = headers["set-cookie"]
+    setHeaders.headers["x-csrf-token"] = data.csrfToken
+
+    expect(status).to.equal(CREATED)
+    expect(status1).to.equal(OK)
   })
 
   after(async function () {
-    await userSession.post("/logout").set("x-csrf-token", csrfToken).expect(OK)
+    const deleted = await models.User.destroy({
+      where: { username: userCredentials.username },
+    })
 
-    await models.User.destroy({ where: { username: userCredentials.username } })
+    await stopWebServer()
 
-    server.close()
+    expect(deleted).to.equal(1)
   })
 
-  describe("Get /", () => {
+  const userSchema = {
+    title: "Users schema",
+    type: "array",
+    items: {
+      type: "object",
+      required: [
+        "id",
+        "username",
+        "isAdmin",
+        "createdAt",
+        "updatedAt",
+        "photos",
+      ],
+      properties: {
+        photos: {
+          type: "array",
+          items: {
+            type: "object",
+          },
+        },
+      },
+    },
+  }
+
+  describe("Get /", function () {
     it("When an authorized request is made, then all the users are in the response", async function () {
       const expected = [
         {
-          username: "username",
+          username: userCredentials.username,
           isAdmin: false,
         },
         {
@@ -80,37 +122,43 @@ describe("Users route", () => {
         },
       ]
 
-      const response = await userSession.get("/users")
+      const { status, data } = await client.get("/users", setHeaders)
 
-      assert.strictEqual(response.status, OK)
+      expect(status).to.equal(OK)
+      expect(data).to.be.jsonSchema(userSchema)
       for (let i = 0; i < expected.length; i++) {
-        assert.include(
-          JSON.parse(response.text)[parseInt(i)],
-          expected[parseInt(i)]
-        )
+        const resultObject = data[parseInt(i)]
+        const expectedObject = expected[parseInt(i)]
+        expect(resultObject).to.include(expectedObject)
       }
     })
   })
 
-  describe("Get /:username", () => {
+  describe("Get /:username", function () {
     it("When given username is invalid, then the response is bad request #usernameValidator #paramUsername", async function () {
       const expected = "Bad request."
       const usernameSearch = "usernam e"
 
-      const response = await userSession.get("/users/" + usernameSearch)
+      const { status, data } = await client.get(
+        "/users/" + usernameSearch,
+        setHeaders
+      )
 
-      assert.strictEqual(response.status, BAD_REQUEST)
-      assert.include(response.text, expected)
+      expect(status).to.equal(BAD_REQUEST)
+      expect(data).to.equal(expected)
     })
 
     it("When given username does not exist in the database, then the response is a not found message #paramUsername", async function () {
       const expected = "Not found."
       const usernameSearch = "nonExisitngUsername"
 
-      const response = await userSession.get("/users/" + usernameSearch)
+      const { status, data } = await client.get(
+        "/users/" + usernameSearch,
+        setHeaders
+      )
 
-      assert.strictEqual(response.status, NOT_FOUND)
-      assert.include(response.text, expected)
+      expect(status).to.equal(NOT_FOUND)
+      expect(data).to.equal(expected)
     })
 
     it("When given username does exist in the database, then the user is in the response", async function () {
@@ -122,136 +170,155 @@ describe("Users route", () => {
         updatedAt: "2023-11-02T20:00:00.000Z",
       }
 
-      const response = await userSession.get("/users/" + usernameSearch)
+      const { status, data } = await client.get(
+        "/users/" + usernameSearch,
+        setHeaders
+      )
 
-      assert.strictEqual(response.status, OK)
-      assert.include(JSON.parse(response.text), expected)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
     })
   })
 
-  describe("Put /", () => {
-    const userNewCredentials = {
-      newUsername: "username1",
-      newPassword: "Password1",
-    }
+  describe("Put /", function () {
+    const putUserCredentials = {}
+    const putUserNewCredentials = {}
+
+    let putSetHeaders = { headers: {} }
+
+    beforeEach(async function () {
+      putUserCredentials.username = generateUsername()
+      putUserCredentials.password = generatePassword()
+      putUserNewCredentials.newUsername = generateUsername()
+      putUserNewCredentials.newPassword = generatePassword()
+
+      const { status } = await client.post("/register", putUserCredentials)
+
+      const {
+        status: status1,
+        data,
+        headers,
+      } = await client.post("/login", putUserCredentials)
+
+      putSetHeaders.headers.Cookie = headers["set-cookie"]
+      putSetHeaders.headers["x-csrf-token"] = data.csrfToken
+
+      expect(status).to.equal(CREATED)
+      expect(status1).to.equal(OK)
+    })
+
+    afterEach(async function () {
+      const deleted = await models.User.destroy({
+        where: { username: putUserCredentials.username },
+      })
+
+      expect(deleted).to.equal(1)
+    })
 
     it("When no new credentials are added, then response is a bad request", async function () {
-      const requestBody = userCredentials
       const expected = "Bad request."
+      const requestBody = putUserCredentials
 
-      const response = await userSession
-        .put("/users/")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
+      const { status, data } = await client.put(
+        "/users/",
+        requestBody,
+        putSetHeaders
+      )
 
-      assert.strictEqual(response.status, BAD_REQUEST)
-      assert.strictEqual(response.text, expected)
+      expect(status).to.equal(BAD_REQUEST)
+      expect(data).to.equal(expected)
     })
 
     it("When a new username is entered but it already exists, then response is a bad request", async function () {
-      const requestBody = { ...userCredentials, newUsername: "penguinlover" }
+      const requestBody = {
+        ...putUserCredentials,
+        newUsername: putUserCredentials.username,
+      }
       const expected = "Bad request."
 
-      const response = await userSession
-        .put("/users/")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
+      const { status, data } = await client.put(
+        "/users/",
+        requestBody,
+        putSetHeaders
+      )
 
-      assert.strictEqual(response.status, BAD_REQUEST)
-      assert.strictEqual(response.text, expected)
+      expect(status).to.equal(BAD_REQUEST)
+      expect(data).to.equal(expected)
     })
 
     it("When a valid new username is provided, then response is ok", async function () {
-      const { username, password } = userCredentials
-      const { newUsername } = userNewCredentials
-      const requestBody = { ...userCredentials, newUsername }
-      const teardownRequestBody = {
+      const { password } = putUserCredentials
+      const { newUsername } = putUserNewCredentials
+      const requestBody = { ...putUserCredentials, newUsername }
+      const expected = " has updated either/both their username or password."
+
+      const { status, data } = await client.put(
+        "/users/",
+        requestBody,
+        putSetHeaders
+      )
+
+      const { status: status1 } = await client.post("/login", {
         username: newUsername,
-        password,
-        newUsername: username,
-      }
-      const expectedOne = "User: "
-      const expectedTwo = " has updated either/both their username or password."
+        password: password,
+      })
+      putUserCredentials.username = newUsername
 
-      const response = await userSession
-        .put("/users/")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
-
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expectedOne)
-      assert.include(response.text, expectedTwo)
-
-      await userSession
-        .put("/users/")
-        .set("x-csrf-token", csrfToken)
-        .send(teardownRequestBody)
-        .expect(OK)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(status1).to.equal(OK)
     })
 
     it("When a valid new password is provided, then response is ok", async function () {
-      const { username, password } = userCredentials
-      const { newPassword } = userNewCredentials
-      const requestBody = { ...userCredentials, newPassword }
-      const teardownRequestBody = {
-        username,
+      const { username } = putUserCredentials
+      const { newPassword } = putUserNewCredentials
+      const requestBody = { ...putUserCredentials, newPassword }
+      const expected = " has updated either/both their username or password."
+
+      const { status, data } = await client.put(
+        "/users/",
+        requestBody,
+        putSetHeaders
+      )
+
+      const { status: status1 } = await client.post("/login", {
+        username: username,
         password: newPassword,
-        newPassword: password,
-      }
-      const expectedOne = "User: "
-      const expectedTwo = " has updated either/both their username or password."
+      })
 
-      const response = await userSession
-        .put("/users/")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
-
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expectedOne)
-      assert.include(response.text, expectedTwo)
-
-      await userSession
-        .put("/users/")
-        .set("x-csrf-token", csrfToken)
-        .send(teardownRequestBody)
-        .expect(OK)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(status1).to.equal(OK)
     })
 
     it("When both new credentiald are added and valid, then response is ok", async function () {
-      const { username, password } = userCredentials
-      const { newUsername, newPassword } = userNewCredentials
+      const { newUsername, newPassword } = putUserNewCredentials
       const requestBody = {
-        ...userCredentials,
+        ...putUserCredentials,
         newUsername,
         newPassword,
       }
-      const teardownRequestBody = {
+      const expected = " has updated either/both their username or password."
+
+      const { status, data } = await client.put(
+        "/users/",
+        requestBody,
+        putSetHeaders
+      )
+
+      const { status: status1 } = await client.post("/login", {
         username: newUsername,
         password: newPassword,
-        newUsername: username,
-        newPassword: password,
-      }
-      const expectedOne = "User: "
-      const expectedTwo = " has updated either/both their username or password."
+      })
+      putUserCredentials.username = newUsername
 
-      const response = await userSession
-        .put("/users/")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
-
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expectedOne)
-      assert.include(response.text, expectedTwo)
-
-      await userSession
-        .put("/users/")
-        .set("x-csrf-token", csrfToken)
-        .send(teardownRequestBody)
-        .expect(OK)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(status1).to.equal(OK)
     })
   })
 
-  describe("Delete /:username", () => {
+  describe.only("Delete /:username", function () {
     const newUserCredentials = {
       username: "Username",
       password: "Password1",

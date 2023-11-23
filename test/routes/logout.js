@@ -1,7 +1,4 @@
 const {
-  app,
-  assert,
-  request,
   axios,
   axiosConfig,
   initializeWebServer,
@@ -20,13 +17,11 @@ describe("Logout routes", function () {
 
   let client
   let csrfToken
-  let noCookiesClient
-  let setHeaders = { headers: { cookie: "" } }
+  let setHeaders = { headers: {} }
 
   before(async function () {
     userCredentials.username = generateUsername()
     userCredentials.password = generatePassword()
-    userCredentials.withCredentials = true
 
     const apiConnection = await initializeWebServer()
 
@@ -42,15 +37,9 @@ describe("Logout routes", function () {
       headers,
     } = await client.post("/login", userCredentials)
 
-    setHeaders.headers.cookie = headers["set-cookie"]
+    setHeaders.headers.Cookie = headers["set-cookie"]
 
     csrfToken = data.csrfToken
-
-    userCredentials.username = generateUsername()
-    userCredentials.password = generatePassword()
-    axiosConfig.withCredentials = false
-
-    noCookiesClient = axios.create(axiosConfig)
 
     expect(status).to.equal(CREATED)
     expect(status1).to.equal(OK)
@@ -74,16 +63,16 @@ describe("Logout routes", function () {
         username: generateUsername(),
         password: generatePassword(),
       }
-      const { status: registerStatus } = await noCookiesClient.post(
+      const { status: registerStatus } = await client.post(
         "/register",
         newCredentials
       )
-      const { status: loginStatus } = await noCookiesClient.post(
+      const { status: loginStatus } = await client.post(
         "/login",
         newCredentials
       )
 
-      const { status, data } = await noCookiesClient.get("/logout")
+      const { status, data } = await client.get("/logout")
 
       const deleted = await models.User.destroy({
         where: { username: newCredentials.username },
@@ -117,7 +106,7 @@ describe("Logout routes", function () {
     it('When request does have cookies but does not include a "x-csrf-token" with csrf token, then the response is "invalid csrf token" #doubleCsrfProtection', async function () {
       const expected = "invalid csrf token"
 
-      const { status, data } = await client.post("/logout", setHeaders)
+      const { status, data } = await client.post("/logout", {}, setHeaders)
 
       expect(status).to.equal(FORBIDDEN)
       expect(data).to.equal(expected)
@@ -125,13 +114,13 @@ describe("Logout routes", function () {
 
     it("When a valid request is made (has cookies and csrf-token as a header), then user is logged out", async function () {
       const expected = " is now logged out."
+      const configs = setHeaders
+      configs.headers["x-csrf-token"] = csrfToken
 
-      const response = await client
-        .post("/logout")
-        .set("x-csrf-token", csrfToken)
+      const { status, data } = await client.post("/logout", {}, configs)
 
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
     })
   })
 })

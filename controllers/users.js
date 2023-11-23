@@ -88,6 +88,7 @@ exports.putUser = async (req, res, next) => {
 
   try {
     validationPerusal(req, `User: ${user.id}`)
+
     const { username, password, newUsername, newPassword } = req.body
 
     if (!newUsername && !newPassword) {
@@ -108,11 +109,7 @@ exports.putUser = async (req, res, next) => {
 
     await authenticate(username, password)
 
-    const hashedPassword = await passwordHash(password, saltRounds)
-
     const updatedValues = {
-      username,
-      password: hashedPassword,
       updatedAt: new Date(),
     }
 
@@ -133,6 +130,7 @@ exports.putUser = async (req, res, next) => {
     if (!updated) {
       throw new Api500Error(`User: ${user.id} update user query did not work.`)
     }
+
     res.send(
       `User: ${user.id} has updated either/both their username or password.`
     )
