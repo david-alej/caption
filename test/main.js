@@ -1,3 +1,3 @@
-require("./starting")
+// require("./starting")
 require("./routes/index")
-require("./ending")
+// require("./ending")

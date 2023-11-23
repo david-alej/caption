@@ -1,29 +1,41 @@
 const {
-  app,
-  assert,
-  describe,
+  axios,
+  axiosConfig,
+  initializeWebServer,
+  stopWebServer,
+  expect,
   httpStatusCodes,
   models,
-  request,
-  server,
+  generatePassword,
+  generateUsername,
 } = require("../common")
 
 const { OK, UNAUTHORIZED } = httpStatusCodes
 
-describe("Login routes", () => {
-  after(async function () {
-    server.close()
+describe("Login routes", function () {
+  let axiosAPIClient
+
+  before(async function () {
+    const apiConnection = await initializeWebServer()
+
+    axiosConfig.baseURL += apiConnection.port
+
+    axiosAPIClient = axios.create(axiosConfig)
   })
 
-  describe("Get /", () => {
-    it("When valid request is made, then status is ok", async function () {
-      const response = await request(app).get("/login")
+  after(async function () {
+    await stopWebServer()
+  })
 
-      assert.strictEqual(response.status, OK)
+  describe("Get /", function () {
+    it("When valid request is made, then status is ok", async function () {
+      const { status } = await axiosAPIClient.get("/login")
+
+      expect(status).to.equal(OK)
     })
   })
 
-  describe("Post /", () => {
+  describe("Post /", function () {
     it("When username that does not exist, then response is an unauthorized #usernameExists #authenticate", async function () {
       const expected = "Unauthorized."
       const credentials = {
@@ -31,58 +43,59 @@ describe("Login routes", () => {
         password: "blahblah1Q",
       }
 
-      const response = await request(app)
-        .post("/login")
-        .type("form")
-        .send(credentials)
+      const { data, status } = await axiosAPIClient.post("/login", credentials)
 
-      assert.strictEqual(response.text, expected)
-      assert.strictEqual(response.status, UNAUTHORIZED)
+      expect(status).to.equal(UNAUTHORIZED)
+      expect(data).to.equal(expected)
     })
 
     it("When password does not match existing password, then response is unauthorized #correctPassword #authenticate", async function () {
       const expected = "Unauthorized."
+      const expectedOne = 1
       const setupCredentials = {
-        username: "username",
-        password: "Password0",
+        username: generateUsername(),
+        password: generatePassword(),
       }
       const credentials = {
-        username: "username",
+        username: setupCredentials.username,
         password: "wrongPassword0",
       }
+      await axiosAPIClient.post("/register", setupCredentials)
 
-      await request(app).post("/register").type("form").send(setupCredentials)
-      const response = await request(app)
-        .post("/login")
-        .type("form")
-        .send(credentials)
+      const { status, data } = await axiosAPIClient.post("/login", credentials)
 
-      assert.strictEqual(response.text, expected)
-      assert.strictEqual(response.status, UNAUTHORIZED)
+      const deleted = await models.User.destroy({
+        where: { username: setupCredentials.username },
+      })
 
-      await models.User.destroy({ where: { username: credentials.username } })
+      expect(status).to.equal(UNAUTHORIZED)
+      expect(data).to.equal(expected)
+      expect(deleted).to.equal(expectedOne)
     })
 
     it("When authentication works, then user is logged in #authenticate", async function () {
       const expectedOne = "User: "
       const expectedTwo = " is now logged in."
+      const expectedThree = 1
       const setupCredentials = {
-        username: "username",
-        password: "Password0",
+        username: generateUsername(),
+        password: generatePassword(),
       }
+      console.log(setupCredentials.password)
       const credentials = setupCredentials
+      await axiosAPIClient.post("/register", setupCredentials)
 
-      await request(app).post("/register").type("form").send(setupCredentials)
-      const response = await request(app)
-        .post("/login")
-        .type("form")
-        .send(credentials)
+      const { status, data } = await axiosAPIClient.post("/login", credentials)
 
-      assert.include(response.text, expectedOne)
-      assert.include(response.text, expectedTwo)
-      assert.strictEqual(response.status, OK)
+      const deleted = await models.User.destroy({
+        where: { username: setupCredentials.username },
+      })
 
-      await models.User.destroy({ where: { username: credentials.username } })
+      expect(status).to.equal(OK)
+      expect(data.message)
+        .to.include.all.string(expectedOne)
+        .and.string(expectedTwo)
+      expect(deleted).to.equal(expectedThree)
     })
   })
 })

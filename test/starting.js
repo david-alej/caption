@@ -1,10 +1,6 @@
-const { assert, describe, models, s3, server } = require("./common")
+const { expect, models, s3 } = require("./common")
 
-describe("Starting tests", () => {
-  after(async function () {
-    server.close()
-  })
-
+describe("Starting tests", function () {
   describe("Seeding Images to S3", function () {
     this.timeout(7 * 1000)
 
@@ -13,7 +9,6 @@ describe("Starting tests", () => {
       const filenames = JSON.parse(JSON.stringify(searched)).map((photo) => {
         return photo.filename
       })
-      const notExpected = null
       const photosFromS3 = []
 
       await s3.seedS3Images()
@@ -23,7 +18,7 @@ describe("Starting tests", () => {
       }
 
       for (const photo of photosFromS3) {
-        assert.notStrictEqual(photo, notExpected)
+        expect(photo).to.be.a("string")
       }
     })
   })

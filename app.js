@@ -14,18 +14,21 @@ const initializeWebServer = () => {
 
     // app.set("trust proxy", 1)
 
-    const server = https.createServer(
-      {
-        key: privateKey,
-        cert: privateCertificate,
-      },
-      app
-    )
+    server = https
+      .createServer(
+        {
+          key: privateKey,
+          cert: privateCertificate,
+        },
+        app
+      )
+      .listen(PORT, () => {
+        console.log(
+          `Server is live at https://localhost:${server.address().port}`
+        )
 
-    server.listen(PORT, () => {
-      console.log(`Server is live at https://localhost:${PORT}`)
-      resolve(server.address())
-    })
+        resolve(server.address())
+      })
   })
 }
 
@@ -37,4 +40,4 @@ const stopWebServer = () => {
   })
 }
 
-module.exports = { initializeWebServer, stopWebServer }
+module.exports = { initializeWebServer, stopWebServer, privateCertificate }

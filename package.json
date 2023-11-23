@@ -25,12 +25,17 @@
     "winston-logsene": "^2.1.2"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.3.1",
     "axios": "^1.6.2",
     "chai": "^4.3.10",
+    "chai-datetime": "^1.8.0",
+    "chai-json-schema": "^1.5.1",
     "cross-env": "^7.0.3",
     "eslint": "^8.52.0",
+    "eslint-plugin-chai-expect": "^3.0.0",
     "eslint-plugin-mocha": "^10.2.0",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-require": "^0.0.1",
     "eslint-plugin-security": "^1.7.1",
     "mocha": "^10.2.0",

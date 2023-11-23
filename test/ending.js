@@ -1,10 +1,6 @@
-const { assert, describe, s3, server } = require("./common")
+const { expect, s3 } = require("./common")
 
-describe("Ending tests", () => {
-  after(async function () {
-    server.close()
-  })
-
+describe("Ending tests", function () {
   describe("Deleting all Images in S3", function () {
     it("Checking if images are present in the S3 bucket are only the seeded images ", async function () {
       const expected = true
@@ -19,7 +15,7 @@ describe("Ending tests", () => {
         return seededS3Images.includes(filename)
       })
 
-      assert.strictEqual(noNewImagesOnS3, expected)
+      expect(noNewImagesOnS3).to.be.equal(expected)
     })
 
     it("Deleting images, then checking that they where deleted", async function () {
@@ -29,7 +25,7 @@ describe("Ending tests", () => {
       const filenames = await s3.getAllObjectKeys()
       const numberOfImagesInS3 = filenames ? filenames.length : null
 
-      assert.strictEqual(numberOfImagesInS3, expected)
+      expect(numberOfImagesInS3).to.be.equal(expected)
     })
   })
 })
