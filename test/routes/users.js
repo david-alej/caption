@@ -1,8 +1,4 @@
 const {
-  app,
-  assert,
-  server,
-  session,
   axios,
   axiosConfig,
   initializeWebServer,
@@ -318,73 +314,99 @@ describe("Users route", function () {
     })
   })
 
-  describe.only("Delete /:username", function () {
-    const newUserCredentials = {
-      username: "Username",
-      password: "Password1",
-    }
+  describe("Delete /:username", function () {
+    const deleteUserCredentials = {}
+    let deleteSetHeaders = { headers: {} }
+
+    beforeEach(async function () {
+      deleteUserCredentials.username = generateUsername()
+      deleteUserCredentials.password = generatePassword()
+
+      const { status } = await client.post("/register", deleteUserCredentials)
+
+      const {
+        status: status1,
+        data,
+        headers,
+      } = await client.post("/login", deleteUserCredentials)
+
+      deleteSetHeaders.headers.Cookie = headers["set-cookie"]
+      deleteSetHeaders.headers["x-csrf-token"] = data.csrfToken
+
+      expect(status).to.equal(CREATED)
+      expect(status1).to.equal(OK)
+    })
 
     it("When regular user tries to delete other user, then response is forbidden", async function () {
       const expected = "Forbidden."
-      const usernameSearch = "rina.dark"
+      const expectedOne = 1
+      const usernameSearch = deleteUserCredentials.username
 
-      const response = await userSession
-        .delete("/users/" + usernameSearch)
-        .set("x-csrf-token", csrfToken)
+      const { status, data } = await client.delete(
+        "/users/" + usernameSearch,
+        setHeaders
+      )
 
-      assert.strictEqual(response.status, FORBIDDEN)
-      assert.include(response.text, expected)
+      const deleted = await models.User.destroy({
+        where: { username: deleteUserCredentials.username },
+      })
+
+      expect(status).to.equal(FORBIDDEN)
+      expect(data).to.equal(expected)
+      expect(deleted).to.equal(expectedOne)
     })
 
     it("When username given is the logged in user, then user is deleted with a response message", async function () {
       const expected = " has deleted their own account."
-      const usernameSearch = newUserCredentials.username
-      const newUserSession = session(app)
-      await newUserSession
-        .post("/register")
-        .send(newUserCredentials)
-        .expect(CREATED)
-      const newLoginResponse = await newUserSession
-        .post("/login")
-        .send(newUserCredentials)
-      const newCsrfToken = JSON.parse(newLoginResponse.text).csrfToken
+      const expectedOne = null
+      const usernameSearch = deleteUserCredentials.username
+      const requestBody = deleteUserCredentials
+      deleteSetHeaders.data = requestBody
 
-      const response = await newUserSession
-        .delete("/users/" + usernameSearch)
-        .set("x-csrf-token", newCsrfToken)
-        .send(userCredentials)
+      const { status, data } = await client.delete(
+        "/users/" + usernameSearch,
+        deleteSetHeaders
+      )
 
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      const searched = await models.User.findOne({
+        where: {
+          username: deleteUserCredentials.username,
+        },
+      })
+
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(searched).to.equal(expectedOne)
     })
 
     it("When admin inputs username to delete another user, then user is deleted with a response message", async function () {
       const expected = " has deleted user"
-      newUserCredentials.username = "Username2"
-      const usernameSearch = newUserCredentials.username
-      await session(app)
-        .post("/register")
-        .send(newUserCredentials)
-        .expect(CREATED)
-      const adminSession = session(app)
-      const adminLoginResponse = await adminSession
-        .post("/login")
-        .send(adminCredentials)
-        .expect(OK)
-      const adminCsrfToken = JSON.parse(adminLoginResponse.text).csrfToken
+      const expectedOne = null
+      const usernameSearch = deleteUserCredentials.username
+      const { data: data1, headers: headers1 } = await client.post(
+        "/login",
+        adminCredentials
+      )
+      const adminSetHeaders = {
+        headers: {
+          Cookie: headers1["set-cookie"],
+          "x-csrf-Token": data1.csrfToken,
+        },
+        data: adminCredentials,
+      }
 
-      const response = await adminSession
-        .delete("/users/" + usernameSearch)
-        .set("x-csrf-token", adminCsrfToken)
-        .send(adminCredentials)
+      const { status, data } = await client.delete(
+        "/users/" + usernameSearch,
+        adminSetHeaders
+      )
 
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      const searched = await models.User.findOne({
+        where: { username: usernameSearch },
+      })
 
-      await adminSession
-        .post("/logout")
-        .set("x-csrf-token", adminCsrfToken)
-        .expect(OK)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(searched).to.equal(expectedOne)
     })
   })
 })

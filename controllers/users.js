@@ -154,7 +154,9 @@ exports.deleteUser = async (req, res, next) => {
       )
     }
 
-    const { username, password } = validationPerusal(req, `User: ${user.id}`)
+    validationPerusal(req, `User: ${user.id}`)
+
+    const { username, password } = req.body
 
     await authenticate(username, password)
 

@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80.68% </span>
+                <span class="strong">82.95% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>71/88</span>
+                <span class='fraction'>73/88</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">59.09% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>22/44</span>
+                <span class='fraction'>26/44</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">81.39% </span>
+                <span class="strong">83.72% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>70/86</span>
+                <span class='fraction'>72/86</span>
             </div>
         
             
@@ -292,11 +292,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">10x</span>
-<span class="cline-any cline-yes">10x</span>
-<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">16x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">16x</span>
 <span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -304,11 +304,11 @@
 <span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">10x</span>
-<span class="cline-any cline-yes">45x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">71x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">45x</span>
+<span class="cline-any cline-yes">68x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -317,9 +317,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">11x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -442,15 +442,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">35x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">35x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">34x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -511,10 +511,10 @@ const basicCredentialValidator = (
   optional = <span class="branch-0 cbranch-no" title="branch not covered" >false</span>
 ) =&gt; {
   const inputName = sentenceCase(input)
-  let requestProperty = inputIsParam ? <span class="branch-0 cbranch-no" title="branch not covered" >param </span>: body
+  let requestProperty = inputIsParam ? param : body
   let head = requestProperty(input)
 &nbsp;
-  <span class="missing-if-branch" title="else path not taken" >E</span>if (!inputIsParam) {
+  if (!inputIsParam) {
     if (optional) {
       head = head.optional({ nullable: true, checkFalsy: true })
     }
@@ -523,8 +523,8 @@ const basicCredentialValidator = (
   }
 &nbsp;
   return head.custom((value) =&gt; {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (value.includes(" ")) {
-<span class="cstat-no" title="statement not covered" >      throw new Error(inputName + " must no have any blank spaces.")</span>
+    if (value.includes(" ")) {
+      throw new Error(inputName + " must no have any blank spaces.")
     }
     return true
   })
@@ -664,8 +664,8 @@ exports.validationPerusal = (request, preErrorMsg) =&gt; {
     onlyFirstError: true,
   })[0]
 &nbsp;
-  <span class="missing-if-branch" title="if path not taken" >I</span>if (validationError) {
-<span class="cstat-no" title="statement not covered" >    throw new Api400Error(preErrorMsg + " " + validationError.msg)</span>
+  if (validationError) {
+    throw new Api400Error(preErrorMsg + " " + validationError.msg)
   }
 &nbsp;
   return matchedData(request)
@@ -724,7 +724,7 @@ exports.deleteCaptionsValidator = () =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-11-23T21:31:25.916Z
+                at 2023-11-24T17:23:59.857Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
