@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">46.66% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>16/16</span>
+                <span class='fraction'>7/15</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">40% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>5/5</span>
+                <span class='fraction'>2/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">46.66% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>16/16</span>
+                <span class='fraction'>7/15</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -100,11 +100,7 @@
 <a name='L35'></a><a href='#L35'>35</a>
 <a name='L36'></a><a href='#L36'>36</a>
 <a name='L37'></a><a href='#L37'>37</a>
-<a name='L38'></a><a href='#L38'>38</a>
-<a name='L39'></a><a href='#L39'>39</a>
-<a name='L40'></a><a href='#L40'>40</a>
-<a name='L41'></a><a href='#L41'>41</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L38'></a><a href='#L38'>38</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -119,34 +115,31 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const {
   axios,
   axiosConfig,
-  describe,
   expect,
   httpStatusCodes,
   initializeWebServer,
@@ -155,31 +148,29 @@
 &nbsp;
 const { OK } = httpStatusCodes
 &nbsp;
-describe("Starting page", () =&gt; {
+describe("Starting page", function () {
   let axiosAPIClient
 &nbsp;
-  before(async function () {
-    const apiConnection = await initializeWebServer()
+  before(<span class="fstat-no" title="function not covered" >as</span>ync function () {
+    const apiConnection = <span class="cstat-no" title="statement not covered" >await initializeWebServer()</span>
 &nbsp;
-    axiosConfig.baseURL += apiConnection.port
-    console.log(axiosConfig.baseURL)
+<span class="cstat-no" title="statement not covered" >    axiosConfig.baseURL += apiConnection.port</span>
 &nbsp;
-    axiosAPIClient = axios.create(axiosConfig)
+<span class="cstat-no" title="statement not covered" >    axiosAPIClient = axios.create(axiosConfig)</span>
   })
 &nbsp;
-  after(async function () {
-    await stopWebServer()
+  after(<span class="fstat-no" title="function not covered" >as</span>ync function () {
+<span class="cstat-no" title="statement not covered" >    await stopWebServer()</span>
   })
 &nbsp;
-  describe("/", () =&gt; {
-    it("When request is made for the starting page, then response is ok with a message", async function () {
-      const expected = "Welcome to the social media app Caption!!"
+  describe("/", function () {
+    it("When request is made for the starting page, then response is ok with a message", <span class="fstat-no" title="function not covered" >as</span>ync function () {
+      const expected = <span class="cstat-no" title="statement not covered" >"Welcome to the social media app Caption!!"</span>
 &nbsp;
-      const { data: responseData, status: responseStatus } =
-        await axiosAPIClient.get("/")
+      const { data, status } = <span class="cstat-no" title="statement not covered" >await axiosAPIClient.get("/")</span>
 &nbsp;
-      expect(responseStatus).to.equal(OK)
-      expect(responseData).to.equal(expected)
+<span class="cstat-no" title="statement not covered" >      expect(status).to.equal(OK)</span>
+<span class="cstat-no" title="statement not covered" >      expect(data).to.equal(expected)</span>
     })
   })
 })
@@ -190,7 +181,7 @@ describe("Starting page", () =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-11-22T16:53:50.429Z
+                at 2023-11-27T14:01:11.124Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

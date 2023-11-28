@@ -147,7 +147,7 @@ const attachFilesToResponse = async (res, photos) => {
 
 exports.attachFilesToResponse = attachFilesToResponse
 
-const deleteFile = (fileKey) => {
+const deleteFile = async (fileKey) => {
   const deleteParams = {
     Key: fileKey,
     Bucket: bucketName,
@@ -155,7 +155,8 @@ const deleteFile = (fileKey) => {
 
   const command = new DeleteObjectCommand(deleteParams)
 
-  return client.send(command)
+  const response = await client.send(command)
+  return response.$metadata
 }
 
 exports.deleteFile = deleteFile
@@ -172,6 +173,7 @@ const seedS3Images = async () => {
       console.log(filename, "exists already in S3.")
       continue
     }
+
     const filePath = path.join(baseDirectory, filename)
 
     const fileExtension = filename.slice(
@@ -194,6 +196,8 @@ const seedS3Images = async () => {
       .then(async (resized) => {
         uploadFile(resized, filename)
       })
+
+    console.log(filename + " is seeded into the S3 bucket.")
   }
 }
 
@@ -204,6 +208,8 @@ const deleteAllS3Images = async () => {
 
   for (const filename of filenames) {
     await deleteFile(filename)
+
+    console.log(filename + " is deleted from the S3 bucket.")
   }
 }
 

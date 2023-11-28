@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">33.33% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>15/15</span>
+                <span class='fraction'>5/15</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>2/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">33.33% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>15/15</span>
+                <span class='fraction'>5/15</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -95,45 +95,45 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const { expect, describe, models, s3 } = require("./common")
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const { expect, models, s3 } = require("./common")
 &nbsp;
-describe("Starting tests", () =&gt; {
+describe("Starting tests", function () {
   describe("Seeding Images to S3", function () {
     this.timeout(7 * 1000)
 &nbsp;
-    it("Seeding images to s3, then checking that they exist in s3 ", async function () {
-      const searched = await models.Photo.findAll()
-      const filenames = JSON.parse(JSON.stringify(searched)).map((photo) =&gt; {
-        return photo.filename
+    it("Seeding images to s3, then checking that they exist in s3 ", <span class="fstat-no" title="function not covered" >as</span>ync function () {
+      const searched = <span class="cstat-no" title="statement not covered" >await models.Photo.findAll()</span>
+      const filenames = <span class="cstat-no" title="statement not covered" >JSON.parse(JSON.stringify(searched)).map(<span class="fstat-no" title="function not covered" >(p</span>hoto) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        return photo.filename</span>
       })
-      const photosFromS3 = []
+      const photosFromS3 = <span class="cstat-no" title="statement not covered" >[]</span>
 &nbsp;
-      await s3.seedS3Images()
-      for (const filename of filenames) {
-        const photo = await s3.getObjectData(filename)
-        photosFromS3.push(photo)
+<span class="cstat-no" title="statement not covered" >      await s3.seedS3Images()</span>
+<span class="cstat-no" title="statement not covered" >      for (const filename of filenames) {</span>
+        const photo = <span class="cstat-no" title="statement not covered" >await s3.getObjectData(filename)</span>
+<span class="cstat-no" title="statement not covered" >        photosFromS3.push(photo)</span>
       }
 &nbsp;
-      for (const photo of photosFromS3) {
-        expect(photo).to.be.a("string")
+<span class="cstat-no" title="statement not covered" >      for (const photo of photosFromS3) {</span>
+<span class="cstat-no" title="statement not covered" >        expect(photo).to.be.a("string")</span>
       }
     })
   })
@@ -145,7 +145,7 @@ describe("Starting tests", () =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-11-22T16:53:50.429Z
+                at 2023-11-27T14:32:09.914Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

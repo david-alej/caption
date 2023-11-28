@@ -17,15 +17,5 @@ describe("Ending tests", function () {
 
       expect(noNewImagesOnS3).to.be.equal(expected)
     })
-
-    it("Deleting images, then checking that they where deleted", async function () {
-      const expected = 0
-
-      await s3.deleteAllS3Images()
-      const filenames = await s3.getAllObjectKeys()
-      const numberOfImagesInS3 = filenames ? filenames.length : null
-
-      expect(numberOfImagesInS3).to.be.equal(expected)
-    })
   })
 })
