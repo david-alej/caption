@@ -11,14 +11,16 @@ const {
 const { OK, BAD_REQUEST, CREATED } = httpStatusCodes
 
 describe("Register routes", function () {
-  let axiosAPIClient
+  let client
 
   before(async function () {
     const apiConnection = await initializeWebServer()
 
-    axiosConfig.baseURL += apiConnection.port
+    const currentAxiosConfig = { ...axiosConfig }
 
-    axiosAPIClient = axios.create(axiosConfig)
+    currentAxiosConfig.baseURL += apiConnection.port
+
+    client = axios.create(currentAxiosConfig)
   })
 
   after(async function () {
@@ -27,7 +29,7 @@ describe("Register routes", function () {
 
   describe("Get /", function () {
     it("When valid request is made, then status is ok", async function () {
-      const { status } = await axiosAPIClient.get("/register")
+      const { status } = await client.get("/register")
 
       expect(status).to.equal(OK)
     })
@@ -73,10 +75,7 @@ describe("Register routes", function () {
       const expected = "Bad request."
       const credentials = { username: "", password: "password" }
 
-      const { status, data } = await axiosAPIClient.post(
-        "/register",
-        credentials
-      )
+      const { status, data } = await client.post("/register", credentials)
 
       expect(status).to.equal(BAD_REQUEST)
       expect(data).to.equal(expected)
@@ -86,10 +85,7 @@ describe("Register routes", function () {
       const expected = "Bad request."
       const credentials = { username: "username" }
 
-      const { status, data } = await axiosAPIClient.post(
-        "/register",
-        credentials
-      )
+      const { status, data } = await client.post("/register", credentials)
 
       expect(status).to.equal(BAD_REQUEST)
       expect(data).to.equal(expected)
@@ -99,10 +95,7 @@ describe("Register routes", function () {
       const expected = "Bad request."
       const credentials = { username: "username ", password: "password" }
 
-      const { status, data } = await axiosAPIClient.post(
-        "/register",
-        credentials
-      )
+      const { status, data } = await client.post("/register", credentials)
 
       expect(status).to.equal(BAD_REQUEST)
       expect(data).to.equal(expected)
@@ -112,10 +105,7 @@ describe("Register routes", function () {
       const expected = "Bad request."
       const credentials = { username: "use", password: "password" }
 
-      const { status, data } = await axiosAPIClient.post(
-        "/register",
-        credentials
-      )
+      const { status, data } = await client.post("/register", credentials)
 
       expect(status).to.equal(BAD_REQUEST)
       expect(data).to.equal(expected)
@@ -128,10 +118,7 @@ describe("Register routes", function () {
         password: "password",
       }
 
-      const { status, data } = await axiosAPIClient.post(
-        "/register",
-        credentials
-      )
+      const { status, data } = await client.post("/register", credentials)
 
       expect(status).to.equal(BAD_REQUEST)
       expect(data).to.equal(expected)
@@ -141,10 +128,7 @@ describe("Register routes", function () {
       const expected = "Bad request."
       const credentials = { username: "username", password: "passwor" }
 
-      const { status, data } = await axiosAPIClient.post(
-        "/register",
-        credentials
-      )
+      const { status, data } = await client.post("/register", credentials)
 
       expect(status).to.equal(BAD_REQUEST)
       expect(data).to.equal(expected)
@@ -157,10 +141,7 @@ describe("Register routes", function () {
         password: "overExceedCharacterLimit",
       }
 
-      const { status, data } = await axiosAPIClient.post(
-        "/register",
-        credentials
-      )
+      const { status, data } = await client.post("/register", credentials)
 
       expect(status).to.equal(BAD_REQUEST)
       expect(data).to.equal(expected)
@@ -173,10 +154,7 @@ describe("Register routes", function () {
         password: "password",
       }
 
-      const { status, data } = await axiosAPIClient.post(
-        "/register",
-        credentials
-      )
+      const { status, data } = await client.post("/register", credentials)
 
       expect(status).to.equal(BAD_REQUEST)
       expect(data).to.equal(expected)
@@ -189,10 +167,7 @@ describe("Register routes", function () {
         password: "password1",
       }
 
-      const { status, data } = await axiosAPIClient.post(
-        "/register",
-        credentials
-      )
+      const { status, data } = await client.post("/register", credentials)
 
       expect(status).to.equal(BAD_REQUEST)
       expect(data).to.equal(expected)
@@ -206,12 +181,9 @@ describe("Register routes", function () {
       }
       const credentials = setupCredentials
 
-      await axiosAPIClient.post("/register", setupCredentials)
+      await client.post("/register", setupCredentials)
 
-      const { status, data } = await axiosAPIClient.post(
-        "/register",
-        credentials
-      )
+      const { status, data } = await client.post("/register", credentials)
 
       expect(status).to.equal(BAD_REQUEST)
       expect(data).to.equal(expected)
@@ -227,10 +199,7 @@ describe("Register routes", function () {
         password: "password1Q",
       }
 
-      const { status, data } = await axiosAPIClient.post(
-        "/register",
-        credentials
-      )
+      const { status, data } = await client.post("/register", credentials)
       const searched = await models.User.findOne({
         where: { username: credentials.username },
       })

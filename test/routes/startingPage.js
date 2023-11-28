@@ -10,14 +10,16 @@ const {
 const { OK } = httpStatusCodes
 
 describe("Starting page", function () {
-  let axiosAPIClient
+  let client
 
   before(async function () {
     const apiConnection = await initializeWebServer()
 
-    axiosConfig.baseURL += apiConnection.port
+    const currentAxiosConfig = { ...axiosConfig }
 
-    axiosAPIClient = axios.create(axiosConfig)
+    currentAxiosConfig.baseURL += apiConnection.port
+
+    client = axios.create(currentAxiosConfig)
   })
 
   after(async function () {
@@ -28,7 +30,7 @@ describe("Starting page", function () {
     it("When request is made for the starting page, then response is ok with a message", async function () {
       const expected = "Welcome to the social media app Caption!!"
 
-      const { data, status } = await axiosAPIClient.get("/")
+      const { data, status } = await client.get("/")
 
       expect(status).to.equal(OK)
       expect(data).to.equal(expected)

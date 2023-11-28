@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">46.66% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>7/15</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">40% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>2/5</span>
+                <span class='fraction'>5/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">46.66% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>7/15</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -100,7 +100,9 @@
 <a name='L35'></a><a href='#L35'>35</a>
 <a name='L36'></a><a href='#L36'>36</a>
 <a name='L37'></a><a href='#L37'>37</a>
-<a name='L38'></a><a href='#L38'>38</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -115,25 +117,27 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -149,28 +153,30 @@
 const { OK } = httpStatusCodes
 &nbsp;
 describe("Starting page", function () {
-  let axiosAPIClient
+  let client
 &nbsp;
-  before(<span class="fstat-no" title="function not covered" >as</span>ync function () {
-    const apiConnection = <span class="cstat-no" title="statement not covered" >await initializeWebServer()</span>
+  before(async function () {
+    const apiConnection = await initializeWebServer()
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    axiosConfig.baseURL += apiConnection.port</span>
+    const currentAxiosConfig = { ...axiosConfig }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    axiosAPIClient = axios.create(axiosConfig)</span>
+    currentAxiosConfig.baseURL += apiConnection.port
+&nbsp;
+    client = axios.create(currentAxiosConfig)
   })
 &nbsp;
-  after(<span class="fstat-no" title="function not covered" >as</span>ync function () {
-<span class="cstat-no" title="statement not covered" >    await stopWebServer()</span>
+  after(async function () {
+    await stopWebServer()
   })
 &nbsp;
   describe("/", function () {
-    it("When request is made for the starting page, then response is ok with a message", <span class="fstat-no" title="function not covered" >as</span>ync function () {
-      const expected = <span class="cstat-no" title="statement not covered" >"Welcome to the social media app Caption!!"</span>
+    it("When request is made for the starting page, then response is ok with a message", async function () {
+      const expected = "Welcome to the social media app Caption!!"
 &nbsp;
-      const { data, status } = <span class="cstat-no" title="statement not covered" >await axiosAPIClient.get("/")</span>
+      const { data, status } = await client.get("/")
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      expect(status).to.equal(OK)</span>
-<span class="cstat-no" title="statement not covered" >      expect(data).to.equal(expected)</span>
+      expect(status).to.equal(OK)
+      expect(data).to.equal(expected)
     })
   })
 })
@@ -181,7 +187,7 @@ describe("Starting page", function () {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-11-27T14:01:11.124Z
+                at 2023-11-28T16:12:45.633Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

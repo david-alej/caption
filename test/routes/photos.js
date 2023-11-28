@@ -34,9 +34,11 @@ describe("Photos route", function () {
 
     const apiConnection = await initializeWebServer()
 
-    axiosConfig.baseURL += apiConnection.port
+    const currentAxiosConfig = { ...axiosConfig }
 
-    client = axios.create(axiosConfig)
+    currentAxiosConfig.baseURL += apiConnection.port
+
+    client = axios.create(currentAxiosConfig)
 
     const { status } = await client.post("/register", userCredentials)
 

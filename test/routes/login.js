@@ -13,14 +13,16 @@ const {
 const { OK, UNAUTHORIZED } = httpStatusCodes
 
 describe("Login routes", function () {
-  let axiosAPIClient
+  let client
 
   before(async function () {
     const apiConnection = await initializeWebServer()
 
-    axiosConfig.baseURL += apiConnection.port
+    const currentAxiosConfig = { ...axiosConfig }
 
-    axiosAPIClient = axios.create(axiosConfig)
+    currentAxiosConfig.baseURL += apiConnection.port
+
+    client = axios.create(currentAxiosConfig)
   })
 
   after(async function () {
@@ -29,7 +31,7 @@ describe("Login routes", function () {
 
   describe("Get /", function () {
     it("When valid request is made, then status is ok", async function () {
-      const { status } = await axiosAPIClient.get("/login")
+      const { status } = await client.get("/login")
 
       expect(status).to.equal(OK)
     })
@@ -43,7 +45,7 @@ describe("Login routes", function () {
         password: "blahblah1Q",
       }
 
-      const { data, status } = await axiosAPIClient.post("/login", credentials)
+      const { data, status } = await client.post("/login", credentials)
 
       expect(status).to.equal(UNAUTHORIZED)
       expect(data).to.equal(expected)
@@ -60,9 +62,9 @@ describe("Login routes", function () {
         username: setupCredentials.username,
         password: "wrongPassword0",
       }
-      await axiosAPIClient.post("/register", setupCredentials)
+      await client.post("/register", setupCredentials)
 
-      const { status, data } = await axiosAPIClient.post("/login", credentials)
+      const { status, data } = await client.post("/login", credentials)
 
       const deleted = await models.User.destroy({
         where: { username: setupCredentials.username },
@@ -81,11 +83,10 @@ describe("Login routes", function () {
         username: generateUsername(),
         password: generatePassword(),
       }
-      console.log(setupCredentials.password)
       const credentials = setupCredentials
-      await axiosAPIClient.post("/register", setupCredentials)
+      await client.post("/register", setupCredentials)
 
-      const { status, data } = await axiosAPIClient.post("/login", credentials)
+      const { status, data } = await client.post("/login", credentials)
 
       const deleted = await models.User.destroy({
         where: { username: setupCredentials.username },
