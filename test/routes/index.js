@@ -3,5 +3,5 @@
 // require("./login")
 // require("./logout")
 // require("./users")
-require("./photos")
-// require("./captions")
+// require("./photos")
+require("./captions")

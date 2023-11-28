@@ -8,8 +8,8 @@ const logError = (err) => {
 }
 
 const logErrorMiddleware = async (err, req, res, next) => {
-  console.log(err)
-  logError(err)
+  // console.log(err)
+  // logError(err)
   next(err)
 }
 

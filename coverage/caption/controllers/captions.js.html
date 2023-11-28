@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">14.94% </span>
+                <span class="strong">31.03% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>13/87</span>
+                <span class='fraction'>27/87</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">6.66% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/30</span>
+                <span class='fraction'>2/30</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">28.57% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/7</span>
+                <span class='fraction'>2/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">14.94% </span>
+                <span class="strong">31.03% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>13/87</span>
+                <span class='fraction'>27/87</span>
             </div>
         
             
@@ -304,28 +304,28 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -387,10 +387,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -520,29 +520,29 @@ const topCaptionsSearch = {
   limit: 10,
 }
 &nbsp;
-exports.paramCaptionId = <span class="fstat-no" title="function not covered" >as</span>ync (req, res, next, captionId) =&gt; {
-  const user = <span class="cstat-no" title="statement not covered" >req.session.user</span>
+exports.paramCaptionId = async (req, res, next, captionId) =&gt; {
+  const user = req.session.user
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  try {</span>
-<span class="cstat-no" title="statement not covered" >    await integerValidator("captionId", true).run(req)</span>
+  try {
+    await integerValidator("captionId", true).run(req)
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    validationPerusal(req, `User: ${user.id}`)</span>
+    validationPerusal(req, `User: ${user.id}`)
 &nbsp;
-    const searchParams = <span class="cstat-no" title="statement not covered" >whereSearch({ id: captionId }, otherOptions)</span>
+    const searchParams = whereSearch({ id: captionId }, otherOptions)
 &nbsp;
-    const searched = <span class="cstat-no" title="statement not covered" >await models.Caption.findOne(searchParams)</span>
+    const searched = await models.Caption.findOne(searchParams)
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    if (!searched) {</span>
-<span class="cstat-no" title="statement not covered" >      throw new Api404Error(</span>
+    if (!searched) {
+      throw new Api404Error(
         `User: ${user.id} caption was not found given caption id ${captionId}.`
       )
     }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    req.caption = searched.dataValues</span>
+    req.caption = searched.dataValues
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    next()</span>
+    next()
   } catch (err) {
-<span class="cstat-no" title="statement not covered" >    next(err)</span>
+    next(err)
   }
 }
 &nbsp;
@@ -603,11 +603,11 @@ exports.getCaptions = <span class="fstat-no" title="function not covered" >as</s
   }
 }
 &nbsp;
-exports.getCaption = <span class="fstat-no" title="function not covered" >as</span>ync (req, res, next) =&gt; {
-  const caption = <span class="cstat-no" title="statement not covered" >req.caption</span>
+exports.getCaption = async (req, res, next) =&gt; {
+  const caption = req.caption
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  try {</span>
-<span class="cstat-no" title="statement not covered" >    res.json(caption)</span>
+  try {
+    res.json(caption)
   } catch (err) {
 <span class="cstat-no" title="statement not covered" >    next(err)</span>
   }
@@ -721,7 +721,7 @@ exports.deleteCaption = <span class="fstat-no" title="function not covered" >as<
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-11-28T00:01:31.163Z
+                at 2023-11-28T01:18:39.546Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

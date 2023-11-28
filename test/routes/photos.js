@@ -65,11 +65,6 @@ describe("Photos route", function () {
     adminSetHeaders.headers.Cookie = headers1["set-cookie"]
     adminSetHeaders.headers["x-csrf-token"] = data1.csrfToken
 
-    const searched = await models.User.findOne({
-      where: { username: userCredentials.username },
-    })
-    loggedInUserId = searched.dataValues.id
-
     expect(status).to.equal(CREATED)
     expect(status1).to.equal(OK)
     expect(status2).to.equal(OK)

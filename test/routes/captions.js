@@ -1,78 +1,117 @@
 const {
   app,
   assert,
-  describe,
-  httpStatusCodes,
-  models,
   server,
   session,
+  axios,
+  axiosConfig,
+  initializeWebServer,
+  stopWebServer,
+  expect,
+  httpStatusCodes,
+  models,
+  generatePassword,
+  generateUsername,
+  s3,
 } = require("../common")
 
 const { OK, CREATED, NOT_FOUND, FORBIDDEN } = httpStatusCodes
 
-describe("Captions route", () => {
-  const userCredentials = {
-    username: "username",
-    password: "Password1",
-  }
+describe("Captions route", function () {
+  const userCredentials = {}
   const adminCredentials = {
     username: "yomaster",
     password: "yoyoyo1Q",
   }
 
-  let userSession = ""
-  let csrfToken = ""
-  let loggedInUserId = ""
-
-  let adminSession = ""
-  let adminCsrfToken = ""
+  let client
+  let setHeaders = { headers: {} }
+  let adminSetHeaders = { headers: {} }
+  let loggedInUserId
 
   before(async function () {
-    userSession = session(app)
+    userCredentials.username = generateUsername()
+    userCredentials.password = generatePassword()
 
-    await userSession.post("/register").send(userCredentials).expect(CREATED)
+    const apiConnection = await initializeWebServer()
 
-    const loginResponse = await userSession
-      .post("/login")
-      .send(userCredentials)
-      .expect(OK)
+    axiosConfig.baseURL += apiConnection.port
 
-    csrfToken = JSON.parse(loginResponse.text).csrfToken
+    client = axios.create(axiosConfig)
 
-    const searched = await models.User.findOne({
-      where: { username: userCredentials.username },
-    })
-    loggedInUserId = searched.dataValues.id
+    const { status } = await client.post("/register", userCredentials)
 
-    adminSession = session(app)
+    const {
+      status: status1,
+      data,
+      headers,
+    } = await client.post("/login", userCredentials)
 
-    const adminLoginResponse = await adminSession
-      .post("/login")
-      .set("x-csrf-token", adminCsrfToken)
-      .send(adminCredentials)
-      .expect(OK)
+    setHeaders.headers.Cookie = headers["set-cookie"]
+    setHeaders.headers["x-csrf-token"] = data.csrfToken
 
-    adminCsrfToken = JSON.parse(adminLoginResponse.text).csrfToken
+    const { data: user } = await client.get(
+      "/users/" + userCredentials.username,
+      setHeaders
+    )
+
+    loggedInUserId = user.id
+
+    const {
+      status: status2,
+      data: data1,
+      headers: headers1,
+    } = await client.post("/login", adminCredentials)
+
+    adminSetHeaders.headers.Cookie = headers1["set-cookie"]
+    adminSetHeaders.headers["x-csrf-token"] = data1.csrfToken
+
+    expect(status).to.equal(CREATED)
+    expect(status1).to.equal(OK)
+    expect(status2).to.equal(OK)
   })
 
   after(async function () {
-    await userSession
-      .delete("/users/" + userCredentials.username)
-      .set("x-csrf-token", csrfToken)
-      .send(userCredentials)
-      .expect(OK)
+    const usernameSearch = userCredentials.username
+    setHeaders.data = userCredentials
 
-    await adminSession
-      .post("/logout")
-      .set("x-csrf-token", adminCsrfToken)
-      .expect(OK)
+    const { status } = await client.delete(
+      "/users/" + usernameSearch,
+      setHeaders
+    )
 
-    server.close()
+    await stopWebServer()
+
+    expect(status).to.equal(OK)
   })
 
-  describe("Get /", () => {
+  const captionSchema = {
+    title: "Captions schema",
+    type: "array",
+    items: {
+      type: "object",
+      required: [
+        "id",
+        "userId",
+        "photoId",
+        "text",
+        "votes",
+        "createdAt",
+        "updatedAt",
+        "author",
+      ],
+      properties: {
+        author: {
+          type: "object",
+          required: ["username"],
+        },
+      },
+    },
+  }
+
+  describe("Get /", function () {
     it("When the request body input is one of the valid values (userId and photoId) is a user id, then response is all the captions from the respective user", async function () {
-      const expected = JSON.stringify([
+      const expected = [
         {
           id: 4,
           userId: 4,
@@ -137,19 +176,25 @@ describe("Captions route", () => {
             updatedAt: "2023-11-02T20:00:00.000Z",
           },
         },
-      ])
+      ]
       const requestBody = {
         userId: 4,
       }
+      const config = JSON.parse(JSON.stringify(setHeaders))
+      config.data = requestBody
 
-      const response = await userSession.get("/captions/").send(requestBody)
+      const { status, data } = await client.get("/captions/", config)
 
-      assert.strictEqual(response.status, OK)
-      assert.strictEqual(response.text, expected)
+      expect(status).to.equal(OK)
+      expect(data).to.be.jsonSchema(captionSchema)
+      for (let i = 0; i < expected.length; i++) {
+        const expectedObject = expected[parseInt(i)]
+        expect(data).to.deep.include(expectedObject)
+      }
     })
 
     it("When the request body input is one of the valid values (userId and photoId) is a photo id, then response is all the captions with of the respective photo", async function () {
-      const expected = JSON.stringify([
+      const expected = [
         {
           id: 2,
           userId: 2,
@@ -182,19 +227,24 @@ describe("Captions route", () => {
             updatedAt: "2023-11-02T20:00:00.000Z",
           },
         },
-      ])
+      ]
       const requestBody = {
         photoId: 3,
       }
+      const config = JSON.parse(JSON.stringify(setHeaders))
+      config.data = requestBody
 
-      const response = await userSession.get("/captions/").send(requestBody)
+      const { status, data } = await client.get("/captions/", config)
 
-      assert.strictEqual(response.status, OK)
-      assert.strictEqual(response.text, expected)
+      expect(status).to.equal(OK)
+      for (let i = 0; i < expected.length; i++) {
+        const expectedObject = expected[parseInt(i)]
+        expect(data).to.deep.include(expectedObject)
+      }
     })
 
     it("When there are two valid request body inputs is a user id and photo id, then response is all captions with respective photo and user", async function () {
-      const expected = JSON.stringify([
+      const expected = [
         {
           id: 5,
           userId: 4,
@@ -227,32 +277,40 @@ describe("Captions route", () => {
             updatedAt: "2023-11-02T20:00:00.000Z",
           },
         },
-      ])
+      ]
       const requestBody = {
         userId: 4,
         photoId: 2,
       }
+      const config = JSON.parse(JSON.stringify(setHeaders))
+      config.data = requestBody
 
-      const response = await userSession.get("/captions/").send(requestBody)
+      const { status, data } = await client.get("/captions/", config)
 
-      assert.strictEqual(response.status, OK)
-      assert.strictEqual(response.text, expected)
+      expect(status).to.equal(OK)
+      for (let i = 0; i < expected.length; i++) {
+        const expectedObject = expected[parseInt(i)]
+        expect(data).to.deep.include(expectedObject)
+      }
     })
   })
 
-  describe("Get /:captionId", () => {
+  describe("Get /:captionId", function () {
     it("When the given caption id does not exist, then response is not found ", async function () {
       const expected = "Not found."
       const captionId = 1000
 
-      const response = await userSession.get("/captions/" + captionId)
+      const { status, data } = await client.get(
+        "/captions/" + captionId,
+        setHeaders
+      )
 
-      assert.strictEqual(response.status, NOT_FOUND)
-      assert.strictEqual(response.text, expected)
+      expect(status).to.equal(NOT_FOUND)
+      expect(data).to.equal(expected)
     })
 
-    it("When the given caption id does exist, then response is not found ", async function () {
-      const expected = JSON.stringify({
+    it("When the given caption id does exist, then response the respective caption ", async function () {
+      const expected = {
         id: 5,
         userId: 4,
         photoId: 2,
@@ -267,17 +325,20 @@ describe("Captions route", () => {
           createdAt: "2023-11-02T20:00:00.000Z",
           updatedAt: "2023-11-02T20:00:00.000Z",
         },
-      })
+      }
       const captionId = 5
 
-      const response = await userSession.get("/captions/" + captionId)
+      const { status, data } = await client.get(
+        "/captions/" + captionId,
+        setHeaders
+      )
 
-      assert.strictEqual(response.status, OK)
-      assert.strictEqual(response.text, expected)
+      expect(status).to.equal(OK)
+      expect(data).to.deep.include(expected)
     })
   })
 
-  describe("Post /", () => {
+  describe("Post /", function () {
     it("When request body has both required inputs (photoId, and caption text), then a caption is created on the respective photo with the caption text that is made from the logged in user ", async function () {
       const expected = " caption has been created."
       const expectedOne = 1
@@ -304,7 +365,7 @@ describe("Captions route", () => {
     })
   })
 
-  describe("Delete /", () => {
+  describe("Delete /", function () {
     it("When user tries to delete other user's cations, then response is forbidden", async function () {
       const expected = "Forbidden."
       const requestBody = { userId: 1 }
@@ -518,7 +579,7 @@ describe("Captions route", () => {
     })
   })
 
-  describe("Delete /:captionId", () => {
+  describe("Delete /:captionId", function () {
     it("When user tries to delete other user's caption, then response is forbidden", async function () {
       const expected = "Forbidden."
       const captionId = 5
@@ -584,7 +645,7 @@ describe("Captions route", () => {
     })
   })
 
-  describe("Put /:captionId", () => {
+  describe("Put /:captionId", function () {
     it("When user tries to update another user's caption, then response is forbidden", async function () {
       const expected = "Forbidden."
       const captionId = 1
