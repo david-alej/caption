@@ -117,7 +117,7 @@ exports.getCaption = async (req, res, next) => {
 exports.putCaption = async (req, res, next) => {
   const user = req.session.user
   const caption = req.caption
-  const { captionText } = req.body
+  const { text } = req.body
 
   try {
     if (caption.userId !== user.id) {
@@ -126,7 +126,7 @@ exports.putCaption = async (req, res, next) => {
       )
     }
 
-    const updatedValues = { captionText, updatedAt: new Date() }
+    const updatedValues = { text, updatedAt: new Date() }
 
     const updated = await models.Caption.update(updatedValues, {
       where: { id: caption.id },

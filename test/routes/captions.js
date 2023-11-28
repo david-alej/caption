@@ -1,8 +1,4 @@
 const {
-  app,
-  assert,
-  server,
-  session,
   axios,
   axiosConfig,
   initializeWebServer,
@@ -12,10 +8,11 @@ const {
   models,
   generatePassword,
   generateUsername,
-  s3,
 } = require("../common")
 
 const { OK, CREATED, NOT_FOUND, FORBIDDEN } = httpStatusCodes
+
+const fs = require("node:fs")
 
 describe("Captions route", function () {
   const userCredentials = {}
@@ -338,7 +335,7 @@ describe("Captions route", function () {
     })
   })
 
-  describe.only("Post /", function () {
+  describe("Post /", function () {
     it("When request body has both required inputs (photoId, and caption text), then a caption is created on the respective photo with the caption text that is made from the logged in user ", async function () {
       const expected = " caption has been created."
       const expectedOne = 1
@@ -370,18 +367,16 @@ describe("Captions route", function () {
     it("When user tries to delete other user's cations, then response is forbidden", async function () {
       const expected = "Forbidden."
       const requestBody = { userId: 1 }
+      const config = JSON.parse(JSON.stringify(setHeaders))
+      config.data = requestBody
 
-      const response = await userSession
-        .delete("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
+      const { status, data } = await client.delete("/captions", config)
 
-      assert.strictEqual(response.status, FORBIDDEN)
-      assert.strictEqual(response.text, expected)
+      expect(status).to.equal(FORBIDDEN)
+      expect(data).to.equal(expected)
     })
 
     it("When user does not input anything into request body, then all of captions of the logged in user are deleted", async function () {
-      const expected = "has deleted all of their own captions associated"
       const requestBody = {}
       const requestBody1 = {
         photoId: 1,
@@ -391,28 +386,35 @@ describe("Captions route", function () {
         photoId: 1,
         text: "caption text 1",
       }
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody1)
-        .expect(CREATED)
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody2)
-        .expect(CREATED)
+      const { status: captionOneStatus } = await client.post(
+        "/captions",
+        requestBody1,
+        setHeaders
+      )
+      const { status: captionTwoStatus } = await client.post(
+        "/captions",
+        requestBody2,
+        setHeaders
+      )
+      const expected = "has deleted all of their own captions associated"
+      const expectedOne = 0
+      const config = JSON.parse(JSON.stringify(setHeaders))
+      config.data = requestBody
 
-      const response = await userSession
-        .delete("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
+      const { status, data } = await client.delete("/captions", config)
 
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      const searched = await models.Caption.findAll({
+        where: { userId: loggedInUserId },
+      })
+
+      expect(captionOneStatus).to.equal(CREATED)
+      expect(captionTwoStatus).to.equal(CREATED)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(searched.length).to.equal(expectedOne)
     })
 
     it("When user inputs their own user id into the request body, then all of captions of the logged in user are deleted", async function () {
-      const expected = "has deleted all of their own captions associated"
       const requestBody = {
         userId: loggedInUserId,
       }
@@ -424,28 +426,35 @@ describe("Captions route", function () {
         photoId: 1,
         text: "caption text 1",
       }
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody1)
-        .expect(CREATED)
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody2)
-        .expect(CREATED)
+      const { status: captionOneStatus } = await client.post(
+        "/captions",
+        requestBody1,
+        setHeaders
+      )
+      const { status: captionTwoStatus } = await client.post(
+        "/captions",
+        requestBody2,
+        setHeaders
+      )
+      const expected = "has deleted all of their own captions associated"
+      const expectedOne = 0
+      const config = JSON.parse(JSON.stringify(setHeaders))
+      config.data = requestBody
 
-      const response = await userSession
-        .delete("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
+      const { status, data } = await client.delete("/captions", config)
 
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      const searched = await models.Caption.findAll({
+        where: { userId: loggedInUserId },
+      })
+
+      expect(captionOneStatus).to.equal(CREATED)
+      expect(captionTwoStatus).to.equal(CREATED)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(searched.length).to.equal(expectedOne)
     })
 
     it("When user inputs a photo id into the request body, then all of captions of the the respective photo owned by the logged in user", async function () {
-      const expected = "has deleted all of their own captions associated"
       const photoId = 1
       const requestBody = {
         photoId,
@@ -454,23 +463,29 @@ describe("Captions route", function () {
         photoId,
         text: "caption text",
       }
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody1)
-        .expect(CREATED)
+      const { status: captionOneStatus } = await client.post(
+        "/captions",
+        requestBody1,
+        setHeaders
+      )
+      const expected = "has deleted all of their own captions associated"
+      const expectedOne = 0
+      const config = JSON.parse(JSON.stringify(setHeaders))
+      config.data = requestBody
 
-      const response = await userSession
-        .delete("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
+      const { status, data } = await client.delete("/captions", config)
 
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      const searched = await models.Caption.findAll({
+        where: { userId: loggedInUserId, photoId },
+      })
+
+      expect(captionOneStatus).to.equal(CREATED)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(searched.length).to.equal(expectedOne)
     })
 
     it("When an admin inputs a different user's user id into the request body, then all of captions owned by the different user are deleted", async function () {
-      const expected = "has deleted all of the captions associated"
       const photoId = 1
       const requestBody = {
         userId: loggedInUserId,
@@ -483,40 +498,52 @@ describe("Captions route", function () {
         photoId: 2,
         text: "caption text 1",
       }
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody1)
-        .expect(CREATED)
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody2)
-        .expect(CREATED)
+      const { status: captionOneStatus } = await client.post(
+        "/captions",
+        requestBody1,
+        setHeaders
+      )
+      const { status: captionTwoStatus } = await client.post(
+        "/captions",
+        requestBody2,
+        setHeaders
+      )
+      const expected = "has deleted all of the captions associated"
+      const expectedOne = 0
+      const config = JSON.parse(JSON.stringify(adminSetHeaders))
+      config.data = requestBody
 
-      const response = await adminSession
-        .delete("/captions")
-        .set("x-csrf-token", adminCsrfToken)
-        .send(requestBody)
+      const { status, data } = await client.delete("/captions", config)
 
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      const searched = await models.Caption.findAll({
+        where: { userId: loggedInUserId, photoId },
+      })
+
+      expect(captionOneStatus).to.equal(CREATED)
+      expect(captionTwoStatus).to.equal(CREATED)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(searched.length).to.equal(expectedOne)
     })
 
     it("When an admin inputs a photo id into the request body, then all of captions owned by the different user are deleted", async function () {
-      const expected = "has deleted all of the captions associated"
       const title = "title"
       const filePath = "./public/img/photo-tests/title.jpeg"
-      await userSession
-        .post("/photos/")
-        .set("x-csrf-token", csrfToken)
-        .field("title", title)
-        .attach("photo", filePath)
-        .expect(CREATED)
-      const searched = await models.Photo.findOne({
+      const userConfig = JSON.parse(JSON.stringify(setHeaders))
+      userConfig.headers["Content-Type"] = "multipart/form-data"
+      const createPhotoData = {
+        title,
+        photo: fs.createReadStream(filePath),
+      }
+      const { status: createPhotoStatus } = await client.post(
+        "/photos/",
+        createPhotoData,
+        userConfig
+      )
+      const searchedPhotoId = await models.Photo.findOne({
         where: { userId: loggedInUserId },
       })
-      const photoId = searched.dataValues.id
+      const photoId = searchedPhotoId.dataValues.id
       const requestBody = {
         photoId,
       }
@@ -528,33 +555,41 @@ describe("Captions route", function () {
         photoId: 2,
         text: "caption text 1",
       }
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody1)
-        .expect(CREATED)
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody2)
-        .expect(CREATED)
+      const { status: captionOneStatus } = await client.post(
+        "/captions",
+        requestBody1,
+        setHeaders
+      )
+      const { status: captionTwoStatus } = await client.post(
+        "/captions",
+        requestBody2,
+        setHeaders
+      )
+      const expected = "has deleted all of the captions associated"
+      const expectedOne = 1
+      const adminConfig = JSON.parse(JSON.stringify(adminSetHeaders))
+      adminConfig.data = requestBody
 
-      const response = await adminSession
-        .delete("/captions")
-        .set("x-csrf-token", adminCsrfToken)
-        .send(requestBody)
+      const { status, data } = await client.delete("/captions", adminConfig)
 
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      const searched = await models.Caption.findAll({
+        where: { userId: loggedInUserId },
+      })
+      const { status: deletePhotoStatus } = await client.delete(
+        "/photos/" + photoId,
+        adminSetHeaders
+      )
 
-      await adminSession
-        .delete("/photos/" + photoId)
-        .set("x-csrf-token", adminCsrfToken)
-        .expect(OK)
+      expect(createPhotoStatus).to.equal(CREATED)
+      expect(captionOneStatus).to.equal(CREATED)
+      expect(captionTwoStatus).to.equal(CREATED)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(searched.length).to.equal(expectedOne)
+      expect(deletePhotoStatus).to.equal(OK)
     })
 
     it("When an admin inputs a different user's user id and photo id into the request body, then all of captions of the respective photo owned by the different user are deleted", async function () {
-      const expected = "has deleted all of the captions associated"
       const photoId = 1
       const requestBody = {
         userId: loggedInUserId,
@@ -564,19 +599,26 @@ describe("Captions route", function () {
         photoId,
         text: "caption text",
       }
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody1)
-        .expect(CREATED)
+      const { status: captionOneStatus } = await client.post(
+        "/captions",
+        requestBody1,
+        setHeaders
+      )
+      const expected = "has deleted all of the captions associated"
+      const expectedOne = 0
+      const adminConfig = JSON.parse(JSON.stringify(adminSetHeaders))
+      adminConfig.data = requestBody
 
-      const response = await adminSession
-        .delete("/captions")
-        .set("x-csrf-token", adminCsrfToken)
-        .send(requestBody)
+      const { status, data } = await client.delete("/captions", adminConfig)
 
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      const searched = await models.Caption.findAll({
+        where: { userId: loggedInUserId, photoId },
+      })
+
+      expect(captionOneStatus).to.equal(CREATED)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(searched.length).to.equal(expectedOne)
     })
   })
 
@@ -585,112 +627,144 @@ describe("Captions route", function () {
       const expected = "Forbidden."
       const captionId = 5
 
-      const response = await userSession
-        .delete("/captions/" + captionId)
-        .set("x-csrf-token", csrfToken)
+      const { status, data } = await client.delete(
+        "/captions/" + captionId,
+        setHeaders
+      )
 
-      assert.strictEqual(response.status, FORBIDDEN)
-      assert.strictEqual(response.text, expected)
+      expect(status).to.equal(FORBIDDEN)
+      expect(data).to.equal(expected)
     })
 
     it("When user tries to delete one of their caption's given a caption id, then respective caption is deleted", async function () {
-      const expected = "has deleted one of their own captions."
       const photoId = 1
       const text = "That is really cool art"
       const requestBody = {
         photoId,
         text,
       }
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
-        .expect(CREATED)
-      const searched = await models.Caption.findOne({
+      const { status: createCaptionStatus } = await client.post(
+        "/captions",
+        requestBody,
+        setHeaders
+      )
+      const searchedCaptionId = await models.Caption.findOne({
         where: { photoId, text },
       })
-      const captionId = searched.dataValues.id
+      const captionId = searchedCaptionId.dataValues.id
+      const expected = "has deleted one of their own captions."
+      const expectedOne = null
 
-      const response = await userSession
-        .delete("/captions/" + captionId)
-        .set("x-csrf-token", csrfToken)
+      const { status, data } = await client.delete(
+        "/captions/" + captionId,
+        setHeaders
+      )
 
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      const searched = await models.Caption.findOne({
+        where: { id: captionId },
+      })
+
+      expect(createCaptionStatus).to.equal(CREATED)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(searched).to.equal(expectedOne)
     })
 
     it("When admin tries to delete another user's caption given caption id, then respective caption is deleted", async function () {
-      const expected = "has deleted one of user id"
       const photoId = 1
       const text = "Awesome"
       const requestBody = {
         photoId,
         text,
       }
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
-        .expect(CREATED)
-      const searched = await models.Caption.findOne({
+      const { status: createCaptionStatus } = await client.post(
+        "/captions",
+        requestBody,
+        setHeaders
+      )
+      const searchedCaptionId = await models.Caption.findOne({
         where: { photoId, text },
       })
-      const captionId = searched.dataValues.id
+      const captionId = searchedCaptionId.dataValues.id
+      const expected = "has deleted one of user id"
+      const expectedOne = null
 
-      const response = await adminSession
-        .delete("/captions/" + captionId)
-        .set("x-csrf-token", adminCsrfToken)
+      const { status, data } = await client.delete(
+        "/captions/" + captionId,
+        adminSetHeaders
+      )
 
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      const searched = await models.Caption.findOne({
+        where: { id: captionId },
+      })
+
+      expect(createCaptionStatus).to.equal(CREATED)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(searched).to.equal(expectedOne)
     })
   })
 
   describe("Put /:captionId", function () {
     it("When user tries to update another user's caption, then response is forbidden", async function () {
-      const expected = "Forbidden."
       const captionId = 1
       const requestBody = {
         text: "Not awesome, the best",
       }
+      const expected = "Forbidden."
 
-      const response = await userSession
-        .put("/captions/" + captionId)
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
+      const { status, data } = await client.put(
+        "/captions/" + captionId,
+        requestBody,
+        setHeaders
+      )
 
-      assert.strictEqual(response.status, FORBIDDEN)
-      assert.strictEqual(response.text, expected)
+      expect(status).to.equal(FORBIDDEN)
+      expect(data).to.equal(expected)
     })
 
     it("When user tries to update one of their own caption's given a caption id and new caption text, then respective caption is updated", async function () {
-      const expected = "has updated one of their caption with id"
       const photoId = 1
       const text = "Awesome"
       const requestBody1 = {
         photoId,
         text,
       }
-      await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody1)
-        .expect(CREATED)
-      const searched = await models.Caption.findOne({
+      const { status: createCaptionStatus } = await client.post(
+        "/captions",
+        requestBody1,
+        setHeaders
+      )
+      const searchedCaptionId = await models.Caption.findOne({
         where: { photoId, text },
       })
-      const captionId = searched.dataValues.id
+      const captionId = searchedCaptionId.dataValues.id
       const requestBody = {
         text: "Not awesome, the best",
       }
+      const expected = "has updated one of their caption with id"
+      const expectedOne = requestBody.text
+      const expectedTwo = 1
 
-      const response = await userSession
-        .put("/captions/" + captionId)
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
+      const { status, data } = await client.put(
+        "/captions/" + captionId,
+        requestBody,
+        setHeaders
+      )
 
-      assert.strictEqual(response.status, OK)
-      assert.include(response.text, expected)
+      const searched = await models.Caption.findOne({
+        where: { id: captionId },
+      })
+      const newText = searched.dataValues.text
+      const deleted = await models.Caption.destroy({
+        where: { id: captionId },
+      })
+
+      expect(createCaptionStatus).to.equal(CREATED)
+      expect(status).to.equal(OK)
+      expect(data).to.include(expected)
+      expect(newText).to.equal(expectedOne)
+      expect(deleted).to.equal(expectedTwo)
     })
   })
 })
