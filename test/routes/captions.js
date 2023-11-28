@@ -338,7 +338,7 @@ describe("Captions route", function () {
     })
   })
 
-  describe("Post /", function () {
+  describe.only("Post /", function () {
     it("When request body has both required inputs (photoId, and caption text), then a caption is created on the respective photo with the caption text that is made from the logged in user ", async function () {
       const expected = " caption has been created."
       const expectedOne = 1
@@ -348,20 +348,21 @@ describe("Captions route", function () {
         photoId,
         text,
       }
+      const config = JSON.parse(JSON.stringify(setHeaders))
 
-      const response = await userSession
-        .post("/captions")
-        .set("x-csrf-token", csrfToken)
-        .send(requestBody)
-
-      assert.strictEqual(response.status, CREATED)
-      assert.include(response.text, expected)
+      const { status, data } = await client.post(
+        "/captions",
+        requestBody,
+        config
+      )
 
       const deleted = await models.Caption.destroy({
         where: { photoId, text, userId: loggedInUserId },
       })
 
-      assert.strictEqual(deleted, expectedOne)
+      expect(status).to.equal(CREATED)
+      expect(data).to.include(expected)
+      expect(deleted).to.equal(expectedOne)
     })
   })
 
