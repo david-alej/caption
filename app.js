@@ -12,8 +12,6 @@ const initializeWebServer = () => {
   return new Promise((resolve) => {
     const PORT = process.env.PORT || 0
 
-    // app.set("trust proxy", 1)
-
     server = https
       .createServer(
         {

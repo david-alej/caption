@@ -10,7 +10,7 @@ const { httpLogger } = require("../util/index")
 require("dotenv").config()
 const app = express()
 
-// app.use(httpLogger)
+app.use(httpLogger)
 
 app.use(express.json())
 
@@ -31,11 +31,11 @@ app.use(
   })
 )
 
-app.use(cookieParser(process.env.COOKIES_SECRET)) //process.env.COOKIES_SECRET
+app.use(cookieParser(process.env.COOKIES_SECRET))
 
 app.use(helmet())
 
-app.use(cors({ origin: "https://localhost:3300", credentials: true }))
+app.use(cors({ credentials: true }))
 
 app.use("/", routes)
 
