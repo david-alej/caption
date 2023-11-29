@@ -24,11 +24,11 @@ exports.whereSearch = whereSearch
 
 const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
   nameOfTable = nameOfTable.toLowerCase()
-  const { userId, username, photoId } = req.body
-  const inputs = [{ userId }, { username }, { photoId }]
+  const { userId, photoId } = req.body
+  const inputs = [{ userId }, { photoId }]
 
   let searchParams = defaultSearch
-  let afterMsg = ""
+  let afterMsg = "."
 
   let definedInputs = inputs.filter((input) => {
     return Object.values(input)[0] !== undefined
@@ -64,7 +64,7 @@ const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
   inputKeys.shift()
   inputValues.shift()
 
-  if (definedInputs.length === 1) {
+  if (Object.keys(definedInputs).length === 2) {
     afterMsg =
       afterMsg.substring(0, afterMsg.length - 1) +
       ", and " +

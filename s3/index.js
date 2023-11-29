@@ -143,6 +143,8 @@ const attachFilesToResponse = async (res, photos) => {
   res.setHeader("Content-Type", "text/plain")
 
   await form.pipe(res)
+
+  res.end()
 }
 
 exports.attachFilesToResponse = attachFilesToResponse

@@ -66,7 +66,9 @@ module.exports = {
   generateUsername,
   generatePassword,
   fs: require("fs"),
+  httpMocks: require("node-mocks-http"),
   httpStatusCodes: require("../util/index").httpStatusCodes,
   models: require("../database/models"),
   s3: require("../s3/index"),
+  sinon: require("sinon"),
 }
