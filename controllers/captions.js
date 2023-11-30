@@ -137,6 +137,7 @@ exports.putCaption = async (req, res, next) => {
         `User: ${user.id} update caption text query did not work.`
       )
     }
+
     res.send(
       `User: ${user.id} has updated one of their caption with id ${caption.id}.`
     )

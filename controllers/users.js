@@ -21,14 +21,8 @@ exports.paramUsername = async (req, res, next, username) => {
         {
           model: models.Photo,
           as: "photos",
-          include: [
-            {
-              model: models.Caption,
-              as: "captions",
-              order: [["votes", "DESC"]],
-            },
-          ],
           order: [["id", "DESC"]],
+          limit: 10,
         },
       ],
       order: [["id", "DESC"]],
@@ -39,7 +33,9 @@ exports.paramUsername = async (req, res, next, username) => {
         `User: ${user.id} target username ${username} not found.`
       )
     }
-    req.targetUser = JSON.parse(JSON.stringify(searched))
+
+    req.targetUser = searched.dataValues
+
     next()
   } catch (err) {
     next(err)
@@ -54,18 +50,14 @@ exports.getUsers = async (req, res, next) => {
         {
           model: models.Photo,
           as: "photos",
-          include: [
-            {
-              model: models.Caption,
-              as: "captions",
-              order: [["votes", "DESC"]],
-            },
-          ],
           order: [["id", "DESC"]],
+          limit: 10,
         },
       ],
       order: [["id", "DESC"]],
+      limit: 20,
     })
+
     res.json(searched)
   } catch (err) {
     next(err)

@@ -10,7 +10,7 @@ const { httpLogger } = require("../util/index")
 require("dotenv").config()
 const app = express()
 
-app.use(httpLogger)
+// app.use(httpLogger)
 
 app.use(express.json())
 

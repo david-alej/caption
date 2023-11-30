@@ -7,12 +7,12 @@ const {
   S3Client,
   ListObjectsV2Command,
 } = require("@aws-sdk/client-s3")
-const fs = require("fs")
-const path = require("path")
+const fs = require("node:fs")
+const path = require("node:path")
+const util = require("node:util")
+const { pipeline } = require("node:stream/promises")
 const sharp = require("sharp")
 const FormData = require("form-data")
-const util = require("util")
-const { pipeline } = require("stream/promises")
 const unlinkFile = util.promisify(fs.unlink)
 
 const bucketName = process.env.AWS_BUCKET_NAME
@@ -109,16 +109,16 @@ const attachFilesToResponse = async (res, photos) => {
 
   for (let i = 0; i < photos.length; i++) {
     const { filename, title } = photos[parseInt(i)]
+
+    const { Body } = await getFileStream(filename)
+
     const filePath = path.join("./public/img/temp", filename)
 
-    fs.writeFileSync(filePath, "")
-
     const file = fs.createWriteStream(filePath)
-    const response = await getFileStream(filename)
 
-    await pipeline(response.Body, file)
+    await pipeline(Body, file)
 
-    const buffer = fs.readFileSync(filePath, { encoding: "" })
+    const buffer = await fs.promises.readFile(filePath, { encoding: "" })
 
     await sharp(buffer)
       .resize(maxWidth, maxHeight)
@@ -143,8 +143,6 @@ const attachFilesToResponse = async (res, photos) => {
   res.setHeader("Content-Type", "text/plain")
 
   await form.pipe(res)
-
-  res.end()
 }
 
 exports.attachFilesToResponse = attachFilesToResponse

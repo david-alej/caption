@@ -22,6 +22,7 @@ const otherOptions = {
         },
       ],
       order: [["votes", "DESC"]],
+      limit: 10,
     },
     {
       model: models.User,
@@ -73,7 +74,7 @@ exports.paramPhotoId = async (req, res, next, photoId) => {
       )
     }
 
-    req.photo = JSON.parse(JSON.stringify(searched))
+    req.photo = searched.dataValues
 
     next()
   } catch (err) {
@@ -163,7 +164,7 @@ exports.getPhotos = async (req, res, next) => {
       throw new Api401Error(`User: ${user.id} photos were not found` + afterMsg)
     }
 
-    const photos = JSON.parse(JSON.stringify(searched))
+    const photos = searched.map((photo) => photo.dataValues)
 
     await attachFilesToResponse(res, photos)
   } catch (err) {
@@ -175,7 +176,7 @@ exports.getPhoto = async (req, res, next) => {
   const photo = req.photo
 
   try {
-    attachFilesToResponse(res, [photo])
+    await attachFilesToResponse(res, [photo])
   } catch (err) {
     next(err)
   }
@@ -204,6 +205,7 @@ exports.putPhoto = async (req, res, next) => {
         `User: ${user.id} update photo name query did not work.`
       )
     }
+
     res.send(
       `User: ${user.id} has updated one of their photo with id ${photo.id}.`
     )
@@ -239,8 +241,8 @@ exports.deletePhotos = async (req, res, next) => {
 
     const searched = await models.Photo.findAll(searchParams)
 
-    const filenames = JSON.parse(JSON.stringify(searched)).map((photo) => {
-      return photo.filename
+    const filenames = searched.map((photo) => {
+      return photo.dataValues.filename
     })
 
     for (let i = 0; i < filenames.length; i++) {

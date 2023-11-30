@@ -223,6 +223,13 @@ describe("Photos route", function () {
         filename: "a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg",
         createdAt: "2023-11-04T20:00:00.000Z",
         updatedAt: "2023-11-04T20:00:00.000Z",
+        author: {
+          id: 2,
+          username: "Carkeys23307",
+          isAdmin: false,
+          createdAt: "2023-11-02T20:00:00.000Z",
+          updatedAt: "2023-11-02T20:00:00.000Z",
+        },
         captions: [
           {
             id: 1,
@@ -273,13 +280,6 @@ describe("Photos route", function () {
             },
           },
         ],
-        author: {
-          id: 2,
-          username: "Carkeys23307",
-          isAdmin: false,
-          createdAt: "2023-11-02T20:00:00.000Z",
-          updatedAt: "2023-11-02T20:00:00.000Z",
-        },
       })
       const photoId = "2"
 
