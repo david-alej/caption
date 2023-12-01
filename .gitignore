@@ -5,3 +5,5 @@ package-lock.json
 testing.js
 testing.html
 .nyc_output/
+# stryker temp files
+.stryker-tmp

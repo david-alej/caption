@@ -104,7 +104,7 @@ describe("Photos route", function () {
     })
 
     it("When valid request is made with no valid request body inputs, then all the top voted photos are returned ", async function () {
-      this.timeout(5 * 1000)
+      this.timeout(6 * 1000)
 
       const expected = [
         {

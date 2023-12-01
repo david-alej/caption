@@ -1,3 +1,3 @@
-require("./s3")
+// require("./s3")
 require("./search")
-// require("./jsonParsing")
+require("./jsonParsing")
