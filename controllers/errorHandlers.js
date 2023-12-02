@@ -7,21 +7,26 @@ const logError = (err) => {
   logger.error(err)
 }
 
+const isOperationalError = (err) => {
+  if (err instanceof BaseError) {
+    return err.isOperational
+  }
+
+  return false
+}
+
 const logErrorMiddleware = async (err, req, res, next) => {
-  console.log(err)
-  // logError(err)
+  if (!(err.code === "EBADCSRFTOKEN") && !isOperationalError(err)) {
+    throw err
+  }
+
+  logError(err)
+
   next(err)
 }
 
 const returnError = (err, req, res, next) => {
   res.status(err.statusCode || 500).send(err.message)
-}
-
-const isOperationalError = (err) => {
-  if (err instanceof BaseError) {
-    return err.isOperational
-  }
-  return false
 }
 
 module.exports = {

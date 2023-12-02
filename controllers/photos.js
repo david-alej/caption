@@ -154,8 +154,7 @@ exports.getPhotos = async (req, res, next) => {
     const { afterMsg, searchParams } = inputsToSearch(
       req,
       topPhotosSearch,
-      otherOptions,
-      "photo"
+      otherOptions
     )
 
     const searched = await models.Photo.findAll(searchParams)
@@ -235,8 +234,7 @@ exports.deletePhotos = async (req, res, next) => {
     const { afterMsg, searchParams } = inputsToSearch(
       req,
       selfSearch(user.id),
-      {},
-      "photo"
+      {}
     )
 
     const searched = await models.Photo.findAll(searchParams)

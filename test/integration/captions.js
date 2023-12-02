@@ -8,6 +8,7 @@ const {
   models,
   generatePassword,
   generateUsername,
+  preUserMsg,
 } = require("../common")
 
 const { OK, CREATED, NOT_FOUND, FORBIDDEN } = httpStatusCodes
@@ -339,8 +340,7 @@ describe("Captions route", function () {
 
   describe("Post /", function () {
     it("When request body has both required inputs (photoId, and caption text), then a caption is created on the respective photo with the caption text that is made from the logged in user ", async function () {
-      const expected = " caption has been created."
-      const expectedOne = 1
+      const afterMsg = " caption has been created."
       const photoId = 1
       const text = "That is really cool art"
       const requestBody = {
@@ -355,13 +355,13 @@ describe("Captions route", function () {
         config
       )
 
-      const deleted = await models.Caption.destroy({
+      const captionsDeleted = await models.Caption.destroy({
         where: { photoId, text, userId: loggedInUserId },
       })
 
       expect(status).to.equal(CREATED)
-      expect(data).to.include(expected)
-      expect(deleted).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(captionsDeleted).to.equal(1)
     })
   })
 
@@ -398,22 +398,21 @@ describe("Captions route", function () {
         requestBody2,
         setHeaders
       )
-      const expected = "has deleted all of their own captions associated"
-      const expectedOne = 0
+      const afterMsg = "has deleted all of their own captions associated"
       const config = JSON.parse(JSON.stringify(setHeaders))
       config.data = requestBody
 
       const { status, data } = await client.delete("/captions", config)
 
-      const searched = await models.Caption.findAll({
+      const captionsFound = await models.Caption.findAll({
         where: { userId: loggedInUserId },
       })
 
       expect(captionOneStatus).to.equal(CREATED)
       expect(captionTwoStatus).to.equal(CREATED)
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(searched.length).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(captionsFound.length).to.equal(0)
     })
 
     it("When user inputs their own user id into the request body, then all of captions of the logged in user are deleted", async function () {
@@ -438,22 +437,23 @@ describe("Captions route", function () {
         requestBody2,
         setHeaders
       )
-      const expected = "has deleted all of their own captions associated"
-      const expectedOne = 0
+      const afterMsg = "has deleted all of their own captions associated"
       const config = JSON.parse(JSON.stringify(setHeaders))
       config.data = requestBody
 
       const { status, data } = await client.delete("/captions", config)
 
-      const searched = await models.Caption.findAll({
-        where: { userId: loggedInUserId },
-      })
+      const captionsFound = (
+        await models.Caption.findAll({
+          where: { userId: loggedInUserId },
+        })
+      ).length
 
       expect(captionOneStatus).to.equal(CREATED)
       expect(captionTwoStatus).to.equal(CREATED)
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(searched.length).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(captionsFound).to.equal(0)
     })
 
     it("When user inputs a photo id into the request body, then all of captions of the the respective photo owned by the logged in user", async function () {
@@ -470,21 +470,22 @@ describe("Captions route", function () {
         requestBody1,
         setHeaders
       )
-      const expected = "has deleted all of their own captions associated"
-      const expectedOne = 0
+      const afterMsg = "has deleted all of their own captions associated"
       const config = JSON.parse(JSON.stringify(setHeaders))
       config.data = requestBody
 
       const { status, data } = await client.delete("/captions", config)
 
-      const searched = await models.Caption.findAll({
-        where: { userId: loggedInUserId, photoId },
-      })
+      const captionsFound = (
+        await models.Caption.findAll({
+          where: { userId: loggedInUserId, photoId },
+        })
+      ).length
 
       expect(captionOneStatus).to.equal(CREATED)
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(searched.length).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(captionsFound).to.equal(0)
     })
 
     it("When an admin inputs a different user's user id into the request body, then all of captions owned by the different user are deleted", async function () {
@@ -510,22 +511,23 @@ describe("Captions route", function () {
         requestBody2,
         setHeaders
       )
-      const expected = "has deleted all of the captions associated"
-      const expectedOne = 0
+      const afterMsg = "has deleted all of the captions associated"
       const config = JSON.parse(JSON.stringify(adminSetHeaders))
       config.data = requestBody
 
       const { status, data } = await client.delete("/captions", config)
 
-      const searched = await models.Caption.findAll({
-        where: { userId: loggedInUserId, photoId },
-      })
+      const captionsFound = (
+        await models.Caption.findAll({
+          where: { userId: loggedInUserId, photoId },
+        })
+      ).length
 
       expect(captionOneStatus).to.equal(CREATED)
       expect(captionTwoStatus).to.equal(CREATED)
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(searched.length).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(captionsFound).to.equal(0)
     })
 
     it("When an admin inputs a photo id into the request body, then all of captions owned by the different user are deleted", async function () {
@@ -567,16 +569,17 @@ describe("Captions route", function () {
         requestBody2,
         setHeaders
       )
-      const expected = "has deleted all of the captions associated"
-      const expectedOne = 1
+      const afterMsg = "has deleted all of the captions associated"
       const adminConfig = JSON.parse(JSON.stringify(adminSetHeaders))
       adminConfig.data = requestBody
 
       const { status, data } = await client.delete("/captions", adminConfig)
 
-      const searched = await models.Caption.findAll({
-        where: { userId: loggedInUserId },
-      })
+      const captionsFound = (
+        await models.Caption.findAll({
+          where: { userId: loggedInUserId },
+        })
+      ).length
       const { status: deletePhotoStatus } = await client.delete(
         "/photos/" + photoId,
         adminSetHeaders
@@ -586,8 +589,8 @@ describe("Captions route", function () {
       expect(captionOneStatus).to.equal(CREATED)
       expect(captionTwoStatus).to.equal(CREATED)
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(searched.length).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(captionsFound).to.equal(1)
       expect(deletePhotoStatus).to.equal(OK)
     })
 
@@ -606,21 +609,22 @@ describe("Captions route", function () {
         requestBody1,
         setHeaders
       )
-      const expected = "has deleted all of the captions associated"
-      const expectedOne = 0
+      const afterMsg = "has deleted all of the captions associated"
       const adminConfig = JSON.parse(JSON.stringify(adminSetHeaders))
       adminConfig.data = requestBody
 
       const { status, data } = await client.delete("/captions", adminConfig)
 
-      const searched = await models.Caption.findAll({
-        where: { userId: loggedInUserId, photoId },
-      })
+      const captionsFound = (
+        await models.Caption.findAll({
+          where: { userId: loggedInUserId, photoId },
+        })
+      ).length
 
       expect(captionOneStatus).to.equal(CREATED)
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(searched.length).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(captionsFound).to.equal(0)
     })
   })
 
@@ -654,22 +658,21 @@ describe("Captions route", function () {
         where: { photoId, text },
       })
       const captionId = searchedCaptionId.dataValues.id
-      const expected = "has deleted one of their own captions."
-      const expectedOne = null
+      const afterMsg = "has deleted one of their own captions."
 
       const { status, data } = await client.delete(
         "/captions/" + captionId,
         setHeaders
       )
 
-      const searched = await models.Caption.findOne({
+      const captionsFound = await models.Caption.findOne({
         where: { id: captionId },
       })
 
       expect(createCaptionStatus).to.equal(CREATED)
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(searched).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(captionsFound).to.equal(null)
     })
 
     it("When admin tries to delete another user's caption given caption id, then respective caption is deleted", async function () {
@@ -688,22 +691,21 @@ describe("Captions route", function () {
         where: { photoId, text },
       })
       const captionId = searchedCaptionId.dataValues.id
-      const expected = "has deleted one of user id"
-      const expectedOne = null
+      const afterMsg = "has deleted one of user id"
 
       const { status, data } = await client.delete(
         "/captions/" + captionId,
         adminSetHeaders
       )
 
-      const searched = await models.Caption.findOne({
+      const captionsFound = await models.Caption.findOne({
         where: { id: captionId },
       })
 
       expect(createCaptionStatus).to.equal(CREATED)
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(searched).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(captionsFound).to.equal(null)
     })
   })
 
@@ -744,9 +746,8 @@ describe("Captions route", function () {
       const requestBody = {
         text: "Not awesome, the best",
       }
-      const expected = "has updated one of their caption with id"
-      const expectedOne = requestBody.text
-      const expectedTwo = 1
+      const afterMsg = "has updated one of their caption with id"
+      const expectedText = requestBody.text
 
       const { status, data } = await client.put(
         "/captions/" + captionId,
@@ -754,19 +755,19 @@ describe("Captions route", function () {
         setHeaders
       )
 
-      const searched = await models.Caption.findOne({
+      const captionsFound = await models.Caption.findOne({
         where: { id: captionId },
       })
-      const newText = searched.dataValues.text
-      const deleted = await models.Caption.destroy({
+      const newText = captionsFound.dataValues.text
+      const captionsDeleted = await models.Caption.destroy({
         where: { id: captionId },
       })
 
       expect(createCaptionStatus).to.equal(CREATED)
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(newText).to.equal(expectedOne)
-      expect(deleted).to.equal(expectedTwo)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(newText).to.equal(expectedText)
+      expect(captionsDeleted).to.equal(1)
     })
   })
 })

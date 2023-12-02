@@ -86,8 +86,7 @@ exports.getCaptions = async (req, res, next) => {
     const { afterMsg, searchParams } = inputsToSearch(
       req,
       topCaptionsSearch,
-      otherOptions,
-      "caption"
+      otherOptions
     )
 
     const searched = await models.Caption.findAll(searchParams)
@@ -168,8 +167,7 @@ exports.deleteCaptions = async (req, res, next) => {
     const { afterMsg, searchParams } = inputsToSearch(
       req,
       selfSearch(user.id),
-      otherOptions,
-      "caption"
+      otherOptions
     )
 
     const deleted = await models.Caption.destroy(searchParams)

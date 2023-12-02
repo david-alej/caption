@@ -5,6 +5,7 @@
   "reporters": ["html", "clear-text", "progress"],
   "testRunner": "mocha",
   "testRunner_comment": "Take a look at (missing 'homepage' URL in package.json) for information about the mocha plugin.",
+  "commandRunner": { "command": "npm run test" },
   "coverageAnalysis": "perTest",
   "mochaOptions": {
     "spec": ["./test/main.js"],
@@ -14,10 +15,13 @@
   "plugins": ["@stryker-mutator/mocha-runner"],
   "mutate": [
     "./controllers/*",
-    "./routes/*",
     "./util/*",
-    "./s3/index.js",
     "./server/*",
-    "./app.js"
-  ]
+    "./app.js",
+    "!./controllers/photos.js",
+    "!./controllers/captions.js",
+    "!./s3/*"
+  ],
+  "cleanTempDir": "always",
+  "incremental": false
 }

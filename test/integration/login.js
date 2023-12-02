@@ -4,10 +4,11 @@ const {
   initializeWebServer,
   stopWebServer,
   expect,
-  httpStatusCodes,
-  models,
   generatePassword,
   generateUsername,
+  httpStatusCodes,
+  models,
+  preUserMsg,
 } = require("../common")
 
 const { OK, UNAUTHORIZED } = httpStatusCodes
@@ -76,9 +77,8 @@ describe("Login routes", function () {
     })
 
     it("When authentication works, then user is logged in #authenticate", async function () {
-      const expectedOne = "User: "
-      const expectedTwo = " is now logged in."
-      const expectedThree = 1
+      const afterMsg = " is now logged in."
+      const usersDeleted = 1
       const setupCredentials = {
         username: generateUsername(),
         password: generatePassword(),
@@ -94,9 +94,48 @@ describe("Login routes", function () {
 
       expect(status).to.equal(OK)
       expect(data.message)
-        .to.include.all.string(expectedOne)
-        .and.string(expectedTwo)
-      expect(deleted).to.equal(expectedThree)
+        .to.include.all.string(preUserMsg)
+        .and.string(afterMsg)
+      expect(deleted).to.equal(usersDeleted)
+    })
+
+    it("When authentication works, and you login again, then the csrf token is changes #authenticate", async function () {
+      const setupCredentials = {
+        username: generateUsername(),
+        password: generatePassword(),
+      }
+      const credentials = setupCredentials
+      await client.post("/register", setupCredentials)
+      const { status: firstStatus, data: firstData } = await client.post(
+        "/login",
+        credentials
+      )
+      const oldConfigs = {
+        headers: {
+          "x-csrf-token": firstData.csrfToken,
+        },
+      }
+
+      const { status: secondStatus, data: secondData } = await client.post(
+        "/login",
+        credentials
+      )
+      const newConfigs = {
+        headers: {
+          "x-csrf-token": secondData.csrfToken,
+        },
+      }
+
+      const usersDeleted = await models.User.destroy({
+        where: { username: setupCredentials.username },
+      })
+
+      expect(firstStatus).to.equal(OK)
+      expect(secondStatus).to.equal(OK)
+      expect(oldConfigs.headers["x-csrf-token"]).to.not.eql(
+        newConfigs.headers["x-csrf-token"]
+      )
+      expect(usersDeleted).to.equal(1)
     })
   })
 })

@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">87.5% </span>
+                <span class="strong">37.5% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>7/8</span>
+                <span class='fraction'>3/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>12/15</span>
+                <span class='fraction'>0/15</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/5</span>
+                <span class='fraction'>0/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">87.5% </span>
+                <span class="strong">37.5% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>7/8</span>
+                <span class='fraction'>3/8</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -138,7 +138,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -149,7 +149,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -160,7 +160,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -171,7 +171,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -197,46 +197,46 @@
 const BaseError = require("./baseError")
 &nbsp;
 class Api400Error extends BaseError {
-  constructor(
+<span class="fstat-no" title="function not covered" >  co</span>nstructor(
     description,
-    statusCode = httpStatusCodes.BAD_REQUEST,
-    name = "Bad request.",
-    isOperational = true
+    statusCode = <span class="branch-0 cbranch-no" title="branch not covered" >httpStatusCodes.BAD_REQUEST,</span>
+    name = <span class="branch-0 cbranch-no" title="branch not covered" >"Bad request.",</span>
+    isOperational = <span class="branch-0 cbranch-no" title="branch not covered" >true</span>
   ) {
-    super(description, statusCode, name, isOperational)
+<span class="cstat-no" title="statement not covered" >    super(description, statusCode, name, isOperational)</span>
   }
 }
 &nbsp;
 class Api401Error extends BaseError {
-  constructor(
+<span class="fstat-no" title="function not covered" >  co</span>nstructor(
     description,
-    statusCode = httpStatusCodes.UNAUTHORIZED,
-    name = "Unauthorized.",
-    isOperational = true
+    statusCode = <span class="branch-0 cbranch-no" title="branch not covered" >httpStatusCodes.UNAUTHORIZED,</span>
+    name = <span class="branch-0 cbranch-no" title="branch not covered" >"Unauthorized.",</span>
+    isOperational = <span class="branch-0 cbranch-no" title="branch not covered" >true</span>
   ) {
-    super(description, statusCode, name, isOperational)
+<span class="cstat-no" title="statement not covered" >    super(description, statusCode, name, isOperational)</span>
   }
 }
 &nbsp;
 class Api403Error extends BaseError {
-  constructor(
+<span class="fstat-no" title="function not covered" >  co</span>nstructor(
     description,
-    statusCode = httpStatusCodes.FORBIDDEN,
-    name = "Forbidden.",
-    isOperational = true
+    statusCode = <span class="branch-0 cbranch-no" title="branch not covered" >httpStatusCodes.FORBIDDEN,</span>
+    name = <span class="branch-0 cbranch-no" title="branch not covered" >"Forbidden.",</span>
+    isOperational = <span class="branch-0 cbranch-no" title="branch not covered" >true</span>
   ) {
-    super(description, statusCode, name, isOperational)
+<span class="cstat-no" title="statement not covered" >    super(description, statusCode, name, isOperational)</span>
   }
 }
 &nbsp;
 class Api404Error extends BaseError {
-  constructor(
+<span class="fstat-no" title="function not covered" >  co</span>nstructor(
     description,
-    statusCode = httpStatusCodes.NOT_FOUND,
-    name = "Not found.",
-    isOperational = true
+    statusCode = <span class="branch-0 cbranch-no" title="branch not covered" >httpStatusCodes.NOT_FOUND,</span>
+    name = <span class="branch-0 cbranch-no" title="branch not covered" >"Not found.",</span>
+    isOperational = <span class="branch-0 cbranch-no" title="branch not covered" >true</span>
   ) {
-    super(description, statusCode, name, isOperational)
+<span class="cstat-no" title="statement not covered" >    super(description, statusCode, name, isOperational)</span>
   }
 }
 &nbsp;
@@ -265,7 +265,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-11-30T22:49:52.513Z
+                at 2023-12-02T00:25:55.296Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

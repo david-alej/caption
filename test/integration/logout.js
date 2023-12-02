@@ -4,10 +4,11 @@ const {
   initializeWebServer,
   stopWebServer,
   expect,
-  httpStatusCodes,
-  models,
   generatePassword,
   generateUsername,
+  httpStatusCodes,
+  models,
+  preUserMsg,
 } = require("../common")
 
 const { OK, CREATED, BAD_REQUEST, FORBIDDEN } = httpStatusCodes
@@ -60,7 +61,7 @@ describe("Logout routes", function () {
   describe("Get /", function () {
     it("When the request does not have cookies attached, then response is bad request #authorize", async function () {
       const expected = "Bad request."
-      const expectedOne = 1
+      const usersDeleted = 1
       const newCredentials = {
         username: generateUsername(),
         password: generatePassword(),
@@ -84,7 +85,7 @@ describe("Logout routes", function () {
       expect(loginStatus).to.equal(OK)
       expect(status).to.equal(BAD_REQUEST)
       expect(data).to.equal(expected)
-      expect(deleted).to.equal(expectedOne)
+      expect(deleted).to.equal(usersDeleted)
     })
 
     it("When valid request is made, then response is ok", async function () {
@@ -115,14 +116,32 @@ describe("Logout routes", function () {
     })
 
     it("When a valid request is made (has cookies and csrf-token as a header), then user is logged out", async function () {
-      const expected = " is now logged out."
-      const configs = setHeaders
+      const afterMsg = " is now logged out."
+      const configs = structuredClone(setHeaders)
       configs.headers["x-csrf-token"] = csrfToken
 
       const { status, data } = await client.post("/logout", {}, configs)
 
+      const { status: retryLogoutStatus, data: retryLogoutData } =
+        await client.post("/logout", {}, configs)
+
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(retryLogoutStatus).to.equal(BAD_REQUEST)
+      expect(retryLogoutData).to.equal("Bad request.")
+    })
+
+    it("When user logouts thus devalidating the cookies, and user tries to logout again, then cookies are rejected and response is bad request ", async function () {
+      const configs = structuredClone(setHeaders)
+      configs.headers["x-csrf-token"] = csrfToken
+      const { status } = await client.post("/logout", {}, configs)
+
+      const { status: retryLogoutStatus, data: retryLogoutData } =
+        await client.post("/logout", {}, configs)
+
+      expect(status).to.equal(OK)
+      expect(retryLogoutStatus).to.equal(BAD_REQUEST)
+      expect(retryLogoutData).to.equal("Bad request.")
     })
   })
 })

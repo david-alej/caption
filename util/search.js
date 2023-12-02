@@ -1,5 +1,3 @@
-const { Api500Error } = require("./apiErrors")
-
 const sentenceCase = (camelCase) => {
   const result = camelCase.replace(/([A-Z])/g, " $1")
   return result[0].toUpperCase() + result.substring(1).toLowerCase()
@@ -22,8 +20,7 @@ const whereSearch = (whereOption, otherOptions) => {
 
 exports.whereSearch = whereSearch
 
-const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
-  nameOfTable = nameOfTable.toLowerCase()
+const inputsToSearch = (req, defaultSearch, otherOptions) => {
   const { userId, photoId } = req.body
   const inputs = [{ userId }, { photoId }]
 
@@ -36,15 +33,6 @@ const inputsToSearch = (req, defaultSearch, otherOptions, nameOfTable) => {
 
   if (definedInputs.length === 0) {
     return { afterMsg, searchParams }
-  }
-
-  if (definedInputs.length > 2) {
-    throw new Api500Error(
-      `User: ${req.session.user.id} something went wrong with ` +
-        nameOfTable +
-        // eslint-disable-next-line quotes
-        '\'s "allowedBodyInputsValidator" function in the validators.'
-    )
   }
 
   definedInputs = definedInputs.reduce(

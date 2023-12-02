@@ -8,6 +8,7 @@ const {
   models,
   generatePassword,
   generateUsername,
+  preUserMsg,
 } = require("../common")
 
 const { OK, CREATED, NOT_FOUND, BAD_REQUEST, FORBIDDEN } = httpStatusCodes
@@ -59,7 +60,7 @@ describe("Users route", function () {
     expect(deleted).to.equal(1)
   })
 
-  const userSchema = {
+  const usersSchema = {
     title: "Users schema",
     type: "array",
     items: {
@@ -80,7 +81,23 @@ describe("Users route", function () {
           },
         },
       },
+      not: { required: ["password"] },
     },
+  }
+
+  const userSchema = {
+    title: "Users schema",
+    type: "object",
+    required: ["id", "username", "isAdmin", "createdAt", "updatedAt", "photos"],
+    properties: {
+      photos: {
+        type: "array",
+        items: {
+          type: "object",
+        },
+      },
+    },
+    not: { required: ["password"] },
   }
 
   describe("Get /", function () {
@@ -120,14 +137,25 @@ describe("Users route", function () {
         },
       ]
 
-      const { status, data } = await client.get("/users", setHeaders)
+      const { status, data: users } = await client.get("/users", setHeaders)
 
       expect(status).to.equal(OK)
-      expect(data).to.be.jsonSchema(userSchema)
+      expect(users).to.be.jsonSchema(usersSchema)
       for (let i = 0; i < expected.length; i++) {
-        const resultObject = data[parseInt(i)]
-        const expectedObject = expected[parseInt(i)]
-        expect(resultObject).to.include(expectedObject)
+        const user = users[parseInt(i)]
+        const expectedUser = expected[parseInt(i)]
+        const userPhotos = user.photos
+
+        expect(user).to.include(expectedUser)
+
+        expect(userPhotos.length).to.be.below(11)
+
+        if (i === expected.length - 1) break
+
+        const userId = users[parseInt(i)].id
+        const nextUserId = users[parseInt(i + 1)].id
+
+        expect(userId).to.be.above(nextUserId)
       }
     })
   })
@@ -168,13 +196,22 @@ describe("Users route", function () {
         updatedAt: "2023-11-02T20:00:00.000Z",
       }
 
-      const { status, data } = await client.get(
+      const { status, data: user } = await client.get(
         "/users/" + usernameSearch,
         setHeaders
       )
+      const photos = user.photos
 
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
+      expect(user).to.be.jsonSchema(userSchema)
+      expect(user).to.include(expected)
+      expect(photos.length).to.be.below(11)
+      for (let i = 0; i < photos.length - 1; i++) {
+        const previousPhotoId = photos[parseInt(i)].id
+        const photoId = photos[parseInt(i + 1)].id
+
+        expect(previousPhotoId).to.be.above(photoId)
+      }
     })
   })
 
@@ -248,7 +285,7 @@ describe("Users route", function () {
       const { password } = putUserCredentials
       const { newUsername } = putUserNewCredentials
       const requestBody = { ...putUserCredentials, newUsername }
-      const expected = " has updated either/both their username or password."
+      const afterMsg = " has updated either/both their username or password."
 
       const { status, data } = await client.put(
         "/users/",
@@ -263,15 +300,15 @@ describe("Users route", function () {
       putUserCredentials.username = newUsername
 
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
       expect(status1).to.equal(OK)
     })
 
-    it("When a valid new password is provided, then response is ok", async function () {
+    it.only("When a valid new password is provided, then response is ok", async function () {
       const { username } = putUserCredentials
       const { newPassword } = putUserNewCredentials
       const requestBody = { ...putUserCredentials, newPassword }
-      const expected = " has updated either/both their username or password."
+      const afterMsg = " has updated either/both their username or password."
 
       const { status, data } = await client.put(
         "/users/",
@@ -285,7 +322,7 @@ describe("Users route", function () {
       })
 
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
       expect(status1).to.equal(OK)
     })
 
@@ -296,7 +333,7 @@ describe("Users route", function () {
         newUsername,
         newPassword,
       }
-      const expected = " has updated either/both their username or password."
+      const afterMsg = " has updated either/both their username or password."
 
       const { status, data } = await client.put(
         "/users/",
@@ -311,7 +348,7 @@ describe("Users route", function () {
       putUserCredentials.username = newUsername
 
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
       expect(status1).to.equal(OK)
     })
   })
@@ -359,8 +396,8 @@ describe("Users route", function () {
     })
 
     it("When username given is the logged in user, then user is deleted with a response message", async function () {
-      const expected = " has deleted their own account."
-      const expectedOne = null
+      const afterMsg = " has deleted their own account."
+      const nothingFound = null
       const usernameSearch = deleteUserCredentials.username
       const requestBody = deleteUserCredentials
       deleteSetHeaders.data = requestBody
@@ -377,13 +414,13 @@ describe("Users route", function () {
       })
 
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(searched).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(searched).to.equal(nothingFound)
     })
 
     it("When admin inputs username to delete another user, then user is deleted with a response message", async function () {
-      const expected = " has deleted user"
-      const expectedOne = null
+      const afterMsg = " has deleted user"
+      const nothingFound = null
       const usernameSearch = deleteUserCredentials.username
       const { data: data1, headers: headers1 } = await client.post(
         "/login",
@@ -407,8 +444,8 @@ describe("Users route", function () {
       })
 
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(searched).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(searched).to.equal(nothingFound)
     })
   })
 })

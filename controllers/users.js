@@ -6,6 +6,19 @@ const { Api400Error, Api403Error, Api404Error, Api500Error } =
 const { passwordHash } = require("../util/index").passwordHash
 const { generateToken } = require("../util/index").doubleCsrf
 
+const otherOptions = {
+  attributes: { exclude: ["password"] },
+  include: [
+    {
+      model: models.Photo,
+      as: "photos",
+      order: [["id", "DESC"]],
+      limit: 10,
+    },
+  ],
+  order: [["id", "DESC"]],
+}
+
 exports.paramUsername = async (req, res, next, username) => {
   const user = req.session.user
 
@@ -16,16 +29,7 @@ exports.paramUsername = async (req, res, next, username) => {
 
     const searched = await models.User.findOne({
       where: { username: username },
-      attributes: { exclude: ["password"] },
-      include: [
-        {
-          model: models.Photo,
-          as: "photos",
-          order: [["id", "DESC"]],
-          limit: 10,
-        },
-      ],
-      order: [["id", "DESC"]],
+      ...otherOptions,
     })
 
     if (!searched) {
@@ -45,17 +49,7 @@ exports.paramUsername = async (req, res, next, username) => {
 exports.getUsers = async (req, res, next) => {
   try {
     const searched = await models.User.findAll({
-      attributes: { exclude: ["password"] },
-      include: [
-        {
-          model: models.Photo,
-          as: "photos",
-          order: [["id", "DESC"]],
-          limit: 10,
-        },
-      ],
-      order: [["id", "DESC"]],
-      limit: 20,
+      ...otherOptions,
     })
 
     res.json(searched)

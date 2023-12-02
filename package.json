@@ -64,7 +64,8 @@
     "seed:migrate:reset": "npx sequelize-cli db:migrate:undo:all && npm run migrate && npm run seed && npm run s3-seed",
     "pretest": "cross-env NODE_ENV=test npm run seed:migrate:reset",
     "test": "cross-env NODE_ENV=test nyc --reporter=html mocha ./test/main.js --testTimeout=10000 --exit",
-    "mutate": "cross-env NODE_ENV=test npm run pretest && cross-env NODE_ENV=test npx stryker run"
+    "no-pretest": "cross-env NODE_ENV=test mocha ./test/main.js --testTimeout=10000 --exit",
+    "mutate": "npm run pretest && cross-env NODE_ENV=test npx stryker run"
   },
   "author": "David Alejandro",
   "license": "MIT"

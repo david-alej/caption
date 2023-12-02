@@ -9,6 +9,7 @@ const {
   generatePassword,
   generateUsername,
   s3,
+  preUserMsg,
 } = require("../common")
 
 const { OK, CREATED, NO_CONTENT, NOT_FOUND, BAD_REQUEST, FORBIDDEN } =
@@ -315,8 +316,7 @@ describe("Photos route", function () {
       this.timeout(5 * 1000)
 
       const title = "title"
-      const expected = `/photos/${title}`
-      const expectedOne = 1
+      const imagePath = `/photos/${title}`
       const filePath = "./public/img/photo-tests/title.jpeg"
       const config = JSON.parse(JSON.stringify(setHeaders))
       config.headers["Content-Type"] = "multipart/form-data"
@@ -330,16 +330,16 @@ describe("Photos route", function () {
       const searched = await models.Photo.findOne({ where: { title } })
       const filename = searched.dataValues.filename
       const { httpStatusCode: s3PhotoStatus } = await s3.deleteFile(filename)
-      const deleted = await models.Photo.destroy({
+      const numberOfUsersDeleted = await models.Photo.destroy({
         where: {
           filename,
         },
       })
 
       expect(status).to.equal(CREATED)
-      expect(data.imagePath).to.equal(expected)
+      expect(data.imagePath).to.equal(imagePath)
       expect(s3PhotoStatus).to.equal(NO_CONTENT)
-      expect(deleted).to.equal(expectedOne)
+      expect(numberOfUsersDeleted).to.equal(1)
     })
   })
 
@@ -396,8 +396,7 @@ describe("Photos route", function () {
     it("When user does not input anything to request body, then all of photos of the logged in user are deleted ", async function () {
       this.timeout(6 * 1000)
 
-      const expectedOne = "has deleted all of their own photos associated"
-      const expectedTwo = null
+      const afterMsg = "has deleted all of their own photos associated"
       const searched = await models.Photo.findAll({
         where: { userId: loggedInUserId },
       })
@@ -407,20 +406,19 @@ describe("Photos route", function () {
 
       const { status, data } = await client.delete("/photos", setHeaders)
 
-      const s3PhotoOne = await s3.getObjectData(filenames[0])
-      const s3PhotoTwo = await s3.getObjectData(filenames[1])
+      const s3PhotoOneData = await s3.getObjectData(filenames[0])
+      const s3PhotoTwoData = await s3.getObjectData(filenames[1])
 
       expect(status).to.equal(OK)
-      expect(data).to.include(expectedOne)
-      expect(s3PhotoOne).to.equal(expectedTwo)
-      expect(s3PhotoTwo).to.equal(expectedTwo)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(s3PhotoOneData).to.equal(null)
+      expect(s3PhotoTwoData).to.equal(null)
     })
 
     it("When user inputs their own user ids, then all of photos of the logged in user are deleted ", async function () {
       this.timeout(6 * 1000)
 
-      const expectedOne = "has deleted all of the"
-      const expectedTwo = null
+      const afterMsg = "has deleted all of the"
       const config = JSON.parse(JSON.stringify(setHeaders))
       config.data = { userId: loggedInUserId }
       const searched = await models.Photo.findAll({
@@ -432,20 +430,19 @@ describe("Photos route", function () {
 
       const { status, data } = await client.delete("/photos", config)
 
-      const s3PhotoOne = await s3.getObjectData(filenames[0])
-      const s3PhotoTwo = await s3.getObjectData(filenames[1])
+      const s3PhotoOneData = await s3.getObjectData(filenames[0])
+      const s3PhotoTwoData = await s3.getObjectData(filenames[1])
 
       expect(status).to.equal(OK)
-      expect(data).to.include(expectedOne)
-      expect(s3PhotoOne).to.equal(expectedTwo)
-      expect(s3PhotoTwo).to.equal(expectedTwo)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(s3PhotoOneData).to.equal(null)
+      expect(s3PhotoTwoData).to.equal(null)
     })
 
     it("When an admin inputs their another user's user id, then all of photos of the choosen user are deleted ", async function () {
       this.timeout(7 * 1000)
 
-      const expectedOne = "has deleted all of the"
-      const expectedTwo = null
+      const afterMsg = "has deleted all of the"
       const targetUserIdCredentials = { userId: loggedInUserId }
       const config = JSON.parse(JSON.stringify(adminSetHeaders))
       config.data = targetUserIdCredentials
@@ -458,13 +455,13 @@ describe("Photos route", function () {
 
       const { status, data } = await client.delete("/photos", config)
 
-      const s3PhotoOne = await s3.getObjectData(filenames[0])
-      const s3PhotoTwo = await s3.getObjectData(filenames[1])
+      const s3PhotoOneData = await s3.getObjectData(filenames[0])
+      const s3PhotoTwoData = await s3.getObjectData(filenames[1])
 
       expect(status).to.equal(OK)
-      expect(data).to.include(expectedOne)
-      expect(s3PhotoOne).to.equal(expectedTwo)
-      expect(s3PhotoTwo).to.equal(expectedTwo)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(s3PhotoOneData).to.equal(null)
+      expect(s3PhotoTwoData).to.equal(null)
     })
   })
 
@@ -518,8 +515,7 @@ describe("Photos route", function () {
     })
 
     it("When the logged in user tries to delete one of their photo's by photo id, then photo with respective id is deleted ", async function () {
-      const expected = "has deleted one of "
-      const expectedOne = null
+      const afterMsg = "has deleted one of "
       const config = JSON.parse(JSON.stringify(setHeaders))
       const beforeSearched = await models.Photo.findOne({
         where: { id: photoId },
@@ -528,20 +524,19 @@ describe("Photos route", function () {
 
       const { status, data } = await client.delete("/photos/" + photoId, config)
 
-      const afterSearched = await models.Photo.findOne({
+      const dbPhoto = await models.Photo.findOne({
         where: { id: photoId },
       })
       const s3Photo = await s3.getObjectData(filename)
 
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(afterSearched).to.equal(expectedOne)
-      expect(s3Photo).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(dbPhoto).to.equal(null)
+      expect(s3Photo).to.equal(null)
     })
 
     it("When an admin tries to delete an another users photo by photo id, then the users respective photo is deleted ", async function () {
-      const expected = "has deleted one of "
-      const expectedOne = null
+      const afterMsg = "has deleted one of "
       const beforeSearched = await models.Photo.findOne({
         where: { id: photoId },
       })
@@ -552,15 +547,15 @@ describe("Photos route", function () {
         adminSetHeaders
       )
 
-      const afterSearched = await models.Photo.findOne({
+      const dbPhoto = await models.Photo.findOne({
         where: { id: photoId },
       })
       const s3Photo = await s3.getObjectData(filename)
 
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
-      expect(afterSearched).to.equal(expectedOne)
-      expect(s3Photo).to.equal(expectedOne)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(dbPhoto).to.equal(null)
+      expect(s3Photo).to.equal(null)
     })
   })
 
@@ -615,8 +610,7 @@ describe("Photos route", function () {
       const photoId = beforeSearch.dataValues.id
       const newTitle = "New title"
       const putData = { title: newTitle }
-      const expected = "has updated one of their photo with id " + photoId + "."
-      const expectedOne = 1
+      const afterMsg = "has updated one of their photo with id " + photoId + "."
 
       const { status, data } = await client.put(
         "/photos/" + photoId,
@@ -630,20 +624,20 @@ describe("Photos route", function () {
         },
       })
       const currentTitle = afterSearch.dataValues.title
-      const deleted = await models.Photo.destroy({
+      const photosDeleted = await models.Photo.destroy({
         where: {
           id: photoId,
         },
       })
-      const { httpStatusCode: status2 } = await s3.deleteFile(
+      const { httpStatusCode: deletePhotoStatus } = await s3.deleteFile(
         afterSearch.dataValues.filename
       )
 
       expect(status).to.equal(OK)
-      expect(data).to.include(expected)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
       expect(currentTitle).to.equal(newTitle)
-      expect(deleted).to.equal(expectedOne)
-      expect(status2).to.equal(NO_CONTENT)
+      expect(photosDeleted).to.equal(1)
+      expect(deletePhotoStatus).to.equal(NO_CONTENT)
     })
   })
 })

@@ -6,6 +6,7 @@ const {
   expect,
   httpStatusCodes,
   models,
+  preUserMsg,
 } = require("../common")
 
 const { OK, BAD_REQUEST, CREATED } = httpStatusCodes
@@ -192,7 +193,7 @@ describe("Register routes", function () {
     })
 
     it("When credentials are validated, then user is created #credentialsValidator", async function () {
-      const expected = "is created."
+      const afterMsg = "is created."
       const expectedOne = 1
       const credentials = {
         username: "newUser",
@@ -208,7 +209,7 @@ describe("Register routes", function () {
       })
 
       expect(status).to.equal(CREATED)
-      expect(data).to.include(expected)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
       expect(searched.dataValues).to.deep.jsonSchema(userSchema)
       expect(deleted).to.equal(expectedOne)
     })
