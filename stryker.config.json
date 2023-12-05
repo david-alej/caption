@@ -19,9 +19,9 @@
     "./server/*",
     "./app.js",
     "!./controllers/photos.js",
-    "!./controllers/captions.js",
     "!./s3/*"
   ],
   "cleanTempDir": "always",
-  "incremental": false
+  "incremental": false,
+  "logLevel": "trace"
 }

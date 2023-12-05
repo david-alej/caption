@@ -127,8 +127,6 @@ exports.postPhoto = async (req, res, next) => {
       userId: user.id,
       title,
       filename,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     })
 
     if (!created) {
@@ -193,7 +191,7 @@ exports.putPhoto = async (req, res, next) => {
       )
     }
 
-    const updatedValues = { title, updatedAt: new Date() }
+    const updatedValues = { title }
 
     const updated = await models.Photo.update(updatedValues, {
       where: { id: photo.id },

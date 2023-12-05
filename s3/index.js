@@ -37,12 +37,12 @@ const uploadFile = async (buffer, filename) => {
 
   const command = new PutObjectCommand(uploadParams)
 
-  await client.send(command)
+  return await client.send(command)
 }
 
 exports.uploadFile = uploadFile
 
-function getFileStream(fileKey) {
+const getFileStream = async (fileKey) => {
   const downloadParams = {
     Key: fileKey,
     Bucket: bucketName,
@@ -50,7 +50,7 @@ function getFileStream(fileKey) {
 
   const command = new GetObjectCommand(downloadParams)
 
-  return client.send(command)
+  return await client.send(command)
 }
 
 exports.getFileStream = getFileStream
@@ -114,9 +114,7 @@ const attachFilesToResponse = async (res, photos) => {
 
     const filePath = path.join("./public/img/temp", filename)
 
-    const file = fs.createWriteStream(filePath)
-
-    await pipeline(Body, file)
+    await pipeline(Body, fs.createWriteStream(filePath))
 
     const buffer = await fs.promises.readFile(filePath, { encoding: "" })
 
@@ -156,6 +154,7 @@ const deleteFile = async (fileKey) => {
   const command = new DeleteObjectCommand(deleteParams)
 
   const response = await client.send(command)
+
   return response.$metadata
 }
 
@@ -166,6 +165,8 @@ const seedS3Images = async () => {
 
   const files = await fs.promises.readdir(baseDirectory)
 
+  const imagesUploaded = []
+
   for (const filename of files) {
     const data = await getObjectData(filename)
 
@@ -173,6 +174,8 @@ const seedS3Images = async () => {
       console.log(filename, "exists already in S3.")
       continue
     }
+
+    imagesUploaded.push(filename)
 
     const filePath = path.join(baseDirectory, filename)
 
@@ -199,18 +202,26 @@ const seedS3Images = async () => {
 
     console.log(filename + " is seeded into the S3 bucket.")
   }
+
+  return imagesUploaded
 }
 
 exports.seedS3Images = seedS3Images
 
 const deleteAllS3Images = async () => {
+  let imagesDeleted = []
+
   const filenames = await getAllObjectKeys()
 
   for (const filename of filenames) {
     await deleteFile(filename)
 
+    imagesDeleted.push(filename)
+
     console.log(filename + " is deleted from the S3 bucket.")
   }
+
+  return imagesDeleted
 }
 
 exports.deleteAllS3Images = deleteAllS3Images

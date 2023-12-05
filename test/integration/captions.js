@@ -15,6 +15,8 @@ const { OK, CREATED, NOT_FOUND, FORBIDDEN } = httpStatusCodes
 
 const fs = require("node:fs")
 
+const { passwordHash } = require("../../util/passwordHash")
+
 describe("Captions route", function () {
   const userCredentials = {}
   const adminCredentials = {
@@ -50,7 +52,7 @@ describe("Captions route", function () {
     setHeaders.headers.Cookie = headers["set-cookie"]
     setHeaders.headers["x-csrf-token"] = data.csrfToken
 
-    const { data: user } = await client.get(
+    const { status: getUserStatus, data: user } = await client.get(
       "/users/" + userCredentials.username,
       setHeaders
     )
@@ -68,6 +70,7 @@ describe("Captions route", function () {
 
     expect(status).to.equal(CREATED)
     expect(status1).to.equal(OK)
+    expect(getUserStatus).to.equal(OK)
     expect(status2).to.equal(OK)
   })
 
@@ -366,6 +369,39 @@ describe("Captions route", function () {
   })
 
   describe("Delete /", function () {
+    let newAdminCredentials
+    let newAdminHeaders = { headers: {} }
+    let newAdminUserId
+
+    before(async function () {
+      const password = generatePassword()
+      const hashedPassword = await passwordHash(password, 10)
+
+      newAdminCredentials = {
+        username: generateUsername(),
+        password: password,
+      }
+
+      const createNewAdmin = await models.User.create({
+        username: newAdminCredentials.username,
+        password: hashedPassword,
+        isAdmin: true,
+      })
+
+      newAdminUserId = createNewAdmin.dataValues.id
+
+      const {
+        status: loginStatus,
+        headers,
+        data,
+      } = await client.post("/login", newAdminCredentials)
+
+      newAdminHeaders.headers.Cookie = headers["set-cookie"]
+      newAdminHeaders.headers["x-csrf-token"] = data.csrfToken
+
+      expect(loginStatus).to.equal(OK)
+    })
+
     it("When user tries to delete other user's cations, then response is forbidden", async function () {
       const expected = "Forbidden."
       const requestBody = { userId: 1 }
@@ -438,7 +474,7 @@ describe("Captions route", function () {
         setHeaders
       )
       const afterMsg = "has deleted all of their own captions associated"
-      const config = JSON.parse(JSON.stringify(setHeaders))
+      const config = structuredClone(setHeaders)
       config.data = requestBody
 
       const { status, data } = await client.delete("/captions", config)
@@ -622,6 +658,47 @@ describe("Captions route", function () {
       ).length
 
       expect(captionOneStatus).to.equal(CREATED)
+      expect(status).to.equal(OK)
+      expect(data).to.include.string(preUserMsg).and.string(afterMsg)
+      expect(captionsFound).to.equal(0)
+    })
+
+    it("When admin inputs their own user id into the request body, then all of captions of the logged in admin are deleted", async function () {
+      const requestBody = {
+        userId: newAdminUserId,
+      }
+      const requestBody1 = {
+        photoId: 1,
+        text: "caption text",
+      }
+      const requestBody2 = {
+        photoId: 1,
+        text: "caption text 1",
+      }
+      const { status: captionOneStatus } = await client.post(
+        "/captions",
+        requestBody1,
+        newAdminHeaders
+      )
+      const { status: captionTwoStatus } = await client.post(
+        "/captions",
+        requestBody2,
+        newAdminHeaders
+      )
+      const afterMsg = "has deleted all of their own captions associated"
+      const config = structuredClone(newAdminHeaders)
+      config.data = requestBody
+
+      const { status, data } = await client.delete("/captions", config)
+
+      const captionsFound = (
+        await models.Caption.findAll({
+          where: { userId: newAdminUserId },
+        })
+      ).length
+
+      expect(captionOneStatus).to.equal(CREATED)
+      expect(captionTwoStatus).to.equal(CREATED)
       expect(status).to.equal(OK)
       expect(data).to.include.string(preUserMsg).and.string(afterMsg)
       expect(captionsFound).to.equal(0)

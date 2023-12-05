@@ -131,14 +131,21 @@ describe("Logout routes", function () {
       expect(retryLogoutData).to.equal("Bad request.")
     })
 
-    it("When user logouts thus devalidating the cookies, and user tries to logout again, then cookies are rejected and response is bad request ", async function () {
+    it("When user logouts thus devalidating the cookies and csrf protection, and user tries to logout again with previous cookies, then response is bad request ", async function () {
+      const {
+        status: loginStatus,
+        data: loginData,
+        headers,
+      } = await client.post("/login", userCredentials)
       const configs = structuredClone(setHeaders)
-      configs.headers["x-csrf-token"] = csrfToken
+      configs.headers.Cookie = headers["set-cookie"]
+      configs.headers["x-csrf-token"] = loginData.csrfToken
       const { status } = await client.post("/logout", {}, configs)
 
       const { status: retryLogoutStatus, data: retryLogoutData } =
         await client.post("/logout", {}, configs)
 
+      expect(loginStatus).to.equal(OK)
       expect(status).to.equal(OK)
       expect(retryLogoutStatus).to.equal(BAD_REQUEST)
       expect(retryLogoutData).to.equal("Bad request.")

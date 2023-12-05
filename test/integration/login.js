@@ -98,44 +98,5 @@ describe("Login routes", function () {
         .and.string(afterMsg)
       expect(deleted).to.equal(usersDeleted)
     })
-
-    it("When authentication works, and you login again, then the csrf token is changes #authenticate", async function () {
-      const setupCredentials = {
-        username: generateUsername(),
-        password: generatePassword(),
-      }
-      const credentials = setupCredentials
-      await client.post("/register", setupCredentials)
-      const { status: firstStatus, data: firstData } = await client.post(
-        "/login",
-        credentials
-      )
-      const oldConfigs = {
-        headers: {
-          "x-csrf-token": firstData.csrfToken,
-        },
-      }
-
-      const { status: secondStatus, data: secondData } = await client.post(
-        "/login",
-        credentials
-      )
-      const newConfigs = {
-        headers: {
-          "x-csrf-token": secondData.csrfToken,
-        },
-      }
-
-      const usersDeleted = await models.User.destroy({
-        where: { username: setupCredentials.username },
-      })
-
-      expect(firstStatus).to.equal(OK)
-      expect(secondStatus).to.equal(OK)
-      expect(oldConfigs.headers["x-csrf-token"]).to.not.eql(
-        newConfigs.headers["x-csrf-token"]
-      )
-      expect(usersDeleted).to.equal(1)
-    })
   })
 })

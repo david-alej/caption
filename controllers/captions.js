@@ -60,8 +60,6 @@ exports.postCaption = async (req, res, next) => {
       userId: user.id,
       photoId,
       text,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     }
 
     const created = await models.Caption.create(values)
@@ -103,14 +101,10 @@ exports.getCaptions = async (req, res, next) => {
   }
 }
 
-exports.getCaption = async (req, res, next) => {
+exports.getCaption = async (req, res) => {
   const caption = req.caption
 
-  try {
-    res.json(caption)
-  } catch (err) {
-    next(err)
-  }
+  res.json(caption)
 }
 
 exports.putCaption = async (req, res, next) => {
@@ -125,7 +119,7 @@ exports.putCaption = async (req, res, next) => {
       )
     }
 
-    const updatedValues = { text, updatedAt: new Date() }
+    const updatedValues = { text }
 
     const updated = await models.Caption.update(updatedValues, {
       where: { id: caption.id },
@@ -167,9 +161,9 @@ exports.deleteCaptions = async (req, res, next) => {
     const { afterMsg, searchParams } = inputsToSearch(
       req,
       selfSearch(user.id),
-      otherOptions
+      {}
     )
-
+    console.log(searchParams)
     const deleted = await models.Caption.destroy(searchParams)
 
     if (!deleted) {

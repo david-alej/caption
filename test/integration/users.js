@@ -138,7 +138,7 @@ describe("Users route", function () {
       ]
 
       const { status, data: users } = await client.get("/users", setHeaders)
-
+      console.log(users)
       expect(status).to.equal(OK)
       expect(users).to.be.jsonSchema(usersSchema)
       for (let i = 0; i < expected.length; i++) {
@@ -304,10 +304,15 @@ describe("Users route", function () {
       expect(status1).to.equal(OK)
     })
 
-    it.only("When a valid new password is provided, then response is ok", async function () {
+    it("When a valid new password is provided, then response is ok", async function () {
       const { username } = putUserCredentials
       const { newPassword } = putUserNewCredentials
       const requestBody = { ...putUserCredentials, newPassword }
+      const { status: firstSearchStatus, data: oldUser } = await client.get(
+        "/users/" + username,
+        putSetHeaders
+      )
+      const oldUpdatedAt = oldUser.updatedAt
       const afterMsg = " has updated either/both their username or password."
 
       const { status, data } = await client.put(
@@ -316,14 +321,22 @@ describe("Users route", function () {
         putSetHeaders
       )
 
-      const { status: status1 } = await client.post("/login", {
+      const { status: loginStatus } = await client.post("/login", {
         username: username,
         password: newPassword,
       })
+      const { status: searchStatus, data: user } = await client.get(
+        "/users/" + username,
+        putSetHeaders
+      )
+      const newUpdatedAt = user.updatedAt
 
+      expect(firstSearchStatus).to.equal(OK)
       expect(status).to.equal(OK)
       expect(data).to.include.string(preUserMsg).and.string(afterMsg)
-      expect(status1).to.equal(OK)
+      expect(loginStatus).to.equal(OK)
+      expect(searchStatus).to.equal(OK)
+      expect(new Date(newUpdatedAt)).to.be.afterTime(new Date(oldUpdatedAt))
     })
 
     it("When both new credentiald are added and valid, then response is ok", async function () {
@@ -416,6 +429,25 @@ describe("Users route", function () {
       expect(status).to.equal(OK)
       expect(data).to.include.string(preUserMsg).and.string(afterMsg)
       expect(searched).to.equal(nothingFound)
+    })
+
+    it("When user deletes themselves and tries to use protected route, logout, then response is bad request due to invalid cookies", async function () {
+      const usernameSearch = deleteUserCredentials.username
+      const requestBody = deleteUserCredentials
+      deleteSetHeaders.data = requestBody
+      const { status } = await client.delete(
+        "/users/" + usernameSearch,
+        deleteSetHeaders
+      )
+
+      const { status: logoutStatus } = await client.post(
+        "/logout",
+        {},
+        deleteSetHeaders
+      )
+
+      expect(status).to.equal(OK)
+      expect(logoutStatus).to.equal(BAD_REQUEST)
     })
 
     it("When admin inputs username to delete another user, then user is deleted with a response message", async function () {

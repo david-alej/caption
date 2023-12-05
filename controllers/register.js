@@ -25,8 +25,6 @@ exports.postRegister = async (req, res, next) => {
     const created = await models.User.create({
       username,
       password: hashedPassword,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     })
 
     if (!created) {

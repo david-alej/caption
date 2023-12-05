@@ -58,14 +58,10 @@ exports.getUsers = async (req, res, next) => {
   }
 }
 
-exports.getUser = async (req, res, next) => {
+exports.getUser = async (req, res) => {
   const targetUser = req.targetUser
 
-  try {
-    res.json(targetUser)
-  } catch (err) {
-    next(err)
-  }
+  res.json(targetUser)
 }
 
 exports.putUser = async (req, res, next) => {
@@ -95,13 +91,9 @@ exports.putUser = async (req, res, next) => {
 
     await authenticate(username, password)
 
-    const updatedValues = {
-      updatedAt: new Date(),
-    }
+    const updatedValues = {}
 
-    if (newUsername) {
-      updatedValues.username = newUsername
-    }
+    updatedValues.username = newUsername
 
     if (newPassword) {
       const hashedNewPassword = await passwordHash(newPassword, saltRounds)
