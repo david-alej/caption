@@ -38,4 +38,6 @@ const stopWebServer = () => {
   })
 }
 
+initializeWebServer()
+
 module.exports = { initializeWebServer, stopWebServer, privateCertificate }

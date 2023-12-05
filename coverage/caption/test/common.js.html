@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">93.1% </span>
+                <span class="strong">44.82% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>27/29</span>
+                <span class='fraction'>13/29</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">87.5% </span>
+                <span class="strong">12.5% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>7/8</span>
+                <span class='fraction'>1/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>3/3</span>
+                <span class='fraction'>0/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">93.1% </span>
+                <span class="strong">44.82% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>27/29</span>
+                <span class='fraction'>13/29</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -144,7 +144,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">151x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -165,35 +165,35 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">23x</span>
-<span class="cline-any cline-yes">23x</span>
-<span class="cline-any cline-yes">23x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">23x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">23x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">22x</span>
-<span class="cline-any cline-yes">22x</span>
-<span class="cline-any cline-yes">22x</span>
-<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">22x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -219,7 +219,7 @@ const https = require("node:https")
 &nbsp;
 const axiosConfig = {
   baseURL: "https://localhost:",
-  validateStatus: () =&gt; true,
+  validateStatus: <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >true,</span>
 }
 &nbsp;
 <span class="missing-if-branch" title="if path not taken" >I</span>if (process.env.NODE_ENV === "production") {
@@ -239,36 +239,36 @@ chai.use(require("chai-datetime"))
 &nbsp;
 const { faker } = require("@faker-js/faker")
 &nbsp;
-const generateUsername = () =&gt; {
-  const minLength = 4
-  const maxLength = 20
-  let username = faker.internet.userName()
+const generateUsername = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+  const minLength = <span class="cstat-no" title="statement not covered" >4</span>
+  const maxLength = <span class="cstat-no" title="statement not covered" >20</span>
+  let username = <span class="cstat-no" title="statement not covered" >faker.internet.userName()</span>
 &nbsp;
-  while (username.length &lt; minLength || username.length &gt; maxLength) {
+<span class="cstat-no" title="statement not covered" >  while (username.length &lt; minLength || username.length &gt; maxLength) {</span>
 <span class="cstat-no" title="statement not covered" >    username = faker.internet.userName()</span>
   }
 &nbsp;
-  return username
+<span class="cstat-no" title="statement not covered" >  return username</span>
 }
 &nbsp;
-const generatePassword = () =&gt; {
-  const minLength = 8
-  const maxLength = 20
-  const uppercaseRegex = /[A-Z]/
-  const numberRegex = /\d/
+const generatePassword = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+  const minLength = <span class="cstat-no" title="statement not covered" >8</span>
+  const maxLength = <span class="cstat-no" title="statement not covered" >20</span>
+  const uppercaseRegex = <span class="cstat-no" title="statement not covered" >/[A-Z]/</span>
+  const numberRegex = <span class="cstat-no" title="statement not covered" >/\d/</span>
 &nbsp;
-  let password = faker.internet.password()
+  let password = <span class="cstat-no" title="statement not covered" >faker.internet.password()</span>
 &nbsp;
-  while (
+<span class="cstat-no" title="statement not covered" >  while (</span>
     password.length &lt; minLength ||
     password.length &gt; maxLength ||
     !uppercaseRegex.test(password) ||
     !numberRegex.test(password)
   ) {
-    password = faker.internet.password()
+<span class="cstat-no" title="statement not covered" >    password = faker.internet.password()</span>
   }
 &nbsp;
-  return password
+<span class="cstat-no" title="statement not covered" >  return password</span>
 }
 &nbsp;
 module.exports = {
@@ -295,7 +295,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-12-05T14:05:28.235Z
+                at 2023-12-05T18:50:02.597Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

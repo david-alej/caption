@@ -6,6 +6,7 @@ const httpLogger = require("./httpLogger")
 const httpStatusCodes = require("./httpStatusCodes")
 const logger = require("./logger")
 const passwordHash = require("./passwordHash")
+const redisClient = require("./redisClient")
 const search = require("./search")
 
 module.exports = {
@@ -17,5 +18,6 @@ module.exports = {
   httpStatusCodes,
   logger,
   passwordHash,
+  redisClient,
   search,
 }

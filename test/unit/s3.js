@@ -8,7 +8,7 @@ const { createResponse } = httpMocks
 const fs = require("fs")
 const path = require("path")
 
-describe("AWS-SDK S3 client", function () {
+describe.only("AWS-SDK S3 client", function () {
   const seededImagesFilenames = [
     "744fe784-f556-4c68-a81a-2e5d859e27ef.jpg",
     "a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg",
@@ -37,7 +37,7 @@ describe("AWS-SDK S3 client", function () {
       }
     })
 
-    it("When existing object key is given, Then all the object keys in the s3 bucket are returned", async function () {
+    it("When existing object key is given, Then response is the image buffer", async function () {
       const key =
         seededImagesFilenames[
           Math.floor(Math.random() * seededImagesFilenames.length)
@@ -78,7 +78,7 @@ describe("AWS-SDK S3 client", function () {
   describe("s3.getAllObjectKeys", function () {
     it("When function is called, Then all the object keys in the s3 bucket are returned", async function () {
       const keys = await s3.getAllObjectKeys()
-      console.log(keys)
+
       expect(keys).to.have.all.members(seededImagesFilenames)
     })
   })
@@ -138,7 +138,7 @@ describe("AWS-SDK S3 client", function () {
       ]
 
       await s3.attachFilesToResponse(res, photos)
-      console.log(res)
+
       expect(res._headers["x-content-type"]).to.include(
         "multipart/form-data; boundary=--------------------------"
       )

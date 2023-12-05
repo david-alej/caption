@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">43.75% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>16/16</span>
+                <span class='fraction'>7/16</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">40% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>5/5</span>
+                <span class='fraction'>2/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">43.75% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>16/16</span>
+                <span class='fraction'>7/16</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -117,27 +117,27 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -155,28 +155,28 @@ const { OK } = httpStatusCodes
 describe("Starting page", function () {
   let client
 &nbsp;
-  before(async function () {
-    const apiConnection = await initializeWebServer()
+  before(<span class="fstat-no" title="function not covered" >as</span>ync function () {
+    const apiConnection = <span class="cstat-no" title="statement not covered" >await initializeWebServer()</span>
 &nbsp;
-    const currentAxiosConfig = { ...axiosConfig }
+    const currentAxiosConfig = <span class="cstat-no" title="statement not covered" >{ ...axiosConfig }</span>
 &nbsp;
-    currentAxiosConfig.baseURL += apiConnection.port
+<span class="cstat-no" title="statement not covered" >    currentAxiosConfig.baseURL += apiConnection.port</span>
 &nbsp;
-    client = axios.create(currentAxiosConfig)
+<span class="cstat-no" title="statement not covered" >    client = axios.create(currentAxiosConfig)</span>
   })
 &nbsp;
-  after(async function () {
-    await stopWebServer()
+  after(<span class="fstat-no" title="function not covered" >as</span>ync function () {
+<span class="cstat-no" title="statement not covered" >    await stopWebServer()</span>
   })
 &nbsp;
   describe("/", function () {
-    it("When request is made for the starting page, then response is ok with a message", async function () {
-      const expected = "Welcome to the social media app Caption!!"
+    it("When request is made for the starting page, then response is ok with a message", <span class="fstat-no" title="function not covered" >as</span>ync function () {
+      const expected = <span class="cstat-no" title="statement not covered" >"Welcome to the social media app Caption!!"</span>
 &nbsp;
-      const { data, status } = await client.get("/")
+      const { data, status } = <span class="cstat-no" title="statement not covered" >await client.get("/")</span>
 &nbsp;
-      expect(status).to.equal(OK)
-      expect(data).to.equal(expected)
+<span class="cstat-no" title="statement not covered" >      expect(status).to.equal(OK)</span>
+<span class="cstat-no" title="statement not covered" >      expect(data).to.equal(expected)</span>
     })
   })
 })
@@ -187,7 +187,7 @@ describe("Starting page", function () {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-12-05T14:05:28.235Z
+                at 2023-12-05T18:50:02.597Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

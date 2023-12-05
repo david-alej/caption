@@ -1,4 +1,4 @@
-const { seedS3Images, deleteAllS3Images } = require("./index")
+const { seedS3Images, deleteAllS3Images } = require("./helpers")
 
 const seed = async () => {
   await deleteAllS3Images()
