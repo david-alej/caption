@@ -18,6 +18,8 @@
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
     "redis": "^4.6.11",
+    "redis-rstream": "^1.0.1",
+    "redis-wstream": "^1.0.0",
     "sequelize": "^6.33.0",
     "sequelize-cli": "^6.6.1",
     "sharp": "^0.32.6",

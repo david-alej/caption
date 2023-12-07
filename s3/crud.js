@@ -25,10 +25,11 @@ const getFileStream = async (fileKey) => {
     Key: fileKey,
     Bucket: bucketName,
   }
-
   const command = new GetObjectCommand(downloadParams)
 
-  return await client.send(command)
+  const results = await client.send(command)
+
+  return results
 }
 
 exports.getFileStream = getFileStream

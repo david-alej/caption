@@ -6,13 +6,12 @@ const {
   deleteFile,
 } = require("./crud")
 
+const redisCache = require("../util/redisClient")
+
 const fs = require("node:fs")
 const path = require("node:path")
-const util = require("node:util")
-const { pipeline } = require("node:stream/promises")
 const sharp = require("sharp")
 const FormData = require("form-data")
-const unlinkFile = util.promisify(fs.unlink)
 
 const getObjectData = async (fileKey) => {
   try {
@@ -37,15 +36,35 @@ const attachFilesToResponse = async (res, photos) => {
   for (let i = 0; i < photos.length; i++) {
     const { filename, title } = photos[parseInt(i)]
 
-    const { Body } = await getFileStream(filename)
+    let Body
 
-    const filePath = path.join("./public/img/temp", filename)
+    const redisClient = await redisCache.getConnection()
+    console.log(filename)
+    const cacheResults = await redisClient.get(filename)
+    // console.log(cacheResults)
+    if (!cacheResults) {
+      const results = await getFileStream(filename)
 
-    await pipeline(Body, fs.createWriteStream(filePath))
+      Body = Buffer.concat(await results.Body.toArray())
+      console.log("No cache", Array.isArray(Body))
+      // console.log(Body)
+      await redisClient.set(filename, JSON.stringify(Body), 180)
+    } else {
+      JSON.parse(cacheResults)
+      console.log(cacheResults)
+      console.log(typeof cacheResults)
+      console.log("Yes cache", Buffer.isBuffer(cacheResults[0]))
+    }
 
-    const buffer = await fs.promises.readFile(filePath, { encoding: "" })
+    console.log("\npast cache\n")
+    Body = Buffer.concat(Body)
+    // console.log(Body)
 
-    await sharp(buffer)
+    // const filePath = path.join("./public/img/temp", filename)
+    // await pipeline(Body, fs.createWriteStream(filePath))
+    // const buffer = await fs.promises.readFile(filePath, { encoding: "" })
+
+    await sharp(Body)
       .resize(maxWidth, maxHeight)
       .webp({ lossless: true })
       .toBuffer()
@@ -57,7 +76,7 @@ const attachFilesToResponse = async (res, photos) => {
         )
       })
 
-    await unlinkFile(filePath)
+    console.log("File appended to form")
   }
 
   res.setHeader(

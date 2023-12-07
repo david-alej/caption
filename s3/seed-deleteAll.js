@@ -8,6 +8,8 @@ const seed = async () => {
   await seedS3Images()
 
   console.log("\nImages are seeded into the S3 bucket.")
+
+  return
 }
 
 seed()
