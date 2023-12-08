@@ -24,6 +24,8 @@ const correctPassword = async (user, password) => {
       `Client: with chosen user id ${user.id} has input an incorrect password.`
     )
   }
+
+  return false
 }
 
 const authenticate = async (username, password) => {
@@ -31,7 +33,7 @@ const authenticate = async (username, password) => {
 
   await correctPassword(user, password)
 
-  return user
+  return user, false
 }
 
 module.exports = { usernameExists, correctPassword, authenticate }

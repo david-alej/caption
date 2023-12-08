@@ -1,4 +1,7 @@
 const redis = require("redis")
+const { Api500Error } = require("./apiErrors")
+
+const { RateLimiterRedis } = require("rate-limiter-flexible")
 
 class Redis {
   constructor() {
@@ -8,8 +11,9 @@ class Redis {
     this.client = null
   }
   async getConnection() {
-    if (this.connected) return this.client
-    else {
+    if (this.connected) {
+      return this.client
+    } else {
       this.client = redis.createClient({
         host: this.host,
         port: this.port,
@@ -18,11 +22,7 @@ class Redis {
 
       this.client.on("error", (error) => console.error(`Error : ${error}`))
 
-      this.client.on("ready", () => console.log("Redis is ready"))
-
       try {
-        console.log("connecting new redis client!\n")
-
         await this.client.connect()
 
         this.connected = true
@@ -34,6 +34,21 @@ class Redis {
 
       return this.client
     }
+  }
+
+  async createRateLimiter(options) {
+    if (typeof options !== "object") {
+      throw new Api500Error(
+        "Redis.createRateLimiter has an input that is not an object"
+      )
+    }
+
+    if (!this.connected) await this.getConnection()
+
+    return new RateLimiterRedis({
+      storeClient: this.client,
+      ...options,
+    })
   }
 }
 

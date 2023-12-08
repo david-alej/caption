@@ -121,7 +121,7 @@ describe.only("AWS-SDK S3 client", function () {
     })
   })
 
-  describe("s3.attachFileToResponse", function () {
+  describe.only("s3.attachFileToResponse", function () {
     let res
 
     beforeEach(function () {
@@ -132,13 +132,14 @@ describe.only("AWS-SDK S3 client", function () {
 
     it("When a replica of express response is given and an array of photo objects is given, Then the headers for the express response is ammended", async function () {
       this.timeout(10 * 1000)
+      const filename = "mage.jpg"
       const photos = [
         { filename, title: "randomImage" },
         { filename, title: "random image two" },
       ]
 
       await s3.attachFilesToResponse(res, photos)
-
+      console.log(await res._getData())
       expect(res._headers["x-content-type"]).to.include(
         "multipart/form-data; boundary=--------------------------"
       )

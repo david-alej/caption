@@ -6,12 +6,13 @@ const {
   deleteFile,
 } = require("./crud")
 
-const redisCache = require("../util/redisClient")
+const { Redis } = require("../util/index")
 
 const fs = require("node:fs")
 const path = require("node:path")
 const sharp = require("sharp")
 const FormData = require("form-data")
+const { pipeline } = require("stream/promises")
 
 const getObjectData = async (fileKey) => {
   try {
@@ -36,35 +37,26 @@ const attachFilesToResponse = async (res, photos) => {
   for (let i = 0; i < photos.length; i++) {
     const { filename, title } = photos[parseInt(i)]
 
-    let Body
+    let buffer
 
-    const redisClient = await redisCache.getConnection()
-    console.log(filename)
-    const cacheResults = await redisClient.get(filename)
-    // console.log(cacheResults)
+    const redisClient = await Redis.getConnection()
+
+    let cacheResults = await redisClient.get(filename)
     if (!cacheResults) {
       const results = await getFileStream(filename)
 
-      Body = Buffer.concat(await results.Body.toArray())
-      console.log("No cache", Array.isArray(Body))
-      // console.log(Body)
-      await redisClient.set(filename, JSON.stringify(Body), 180)
+      buffer = Buffer.concat(await results.Body.toArray())
+
+      await redisClient.set(filename, JSON.stringify(buffer), 180)
+
+      console.log("Cache Miss")
     } else {
-      JSON.parse(cacheResults)
-      console.log(cacheResults)
-      console.log(typeof cacheResults)
-      console.log("Yes cache", Buffer.isBuffer(cacheResults[0]))
+      buffer = Buffer.from(JSON.parse(cacheResults).data)
+
+      console.log("Cache Hit")
     }
 
-    console.log("\npast cache\n")
-    Body = Buffer.concat(Body)
-    // console.log(Body)
-
-    // const filePath = path.join("./public/img/temp", filename)
-    // await pipeline(Body, fs.createWriteStream(filePath))
-    // const buffer = await fs.promises.readFile(filePath, { encoding: "" })
-
-    await sharp(Body)
+    await sharp(buffer)
       .resize(maxWidth, maxHeight)
       .webp({ lossless: true })
       .toBuffer()
@@ -76,7 +68,7 @@ const attachFilesToResponse = async (res, photos) => {
         )
       })
 
-    console.log("File appended to form")
+    console.log(filename + " appended to form\n")
   }
 
   res.setHeader(
@@ -86,7 +78,7 @@ const attachFilesToResponse = async (res, photos) => {
 
   res.setHeader("Content-Type", "text/plain")
 
-  await form.pipe(res)
+  await pipeline(form, res)
 }
 
 exports.attachFilesToResponse = attachFilesToResponse

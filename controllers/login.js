@@ -8,7 +8,9 @@ exports.getLogin = async (req, res) => {
 
 exports.postLogin = async (req, res, next) => {
   try {
-    const { username, password } = validationPerusal(req, "Client:")
+    validationPerusal(req, "Client:")
+
+    const { username, password } = req.body
 
     const user = await authenticate(username, password)
 
