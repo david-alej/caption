@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">37.5% </span>
+                <span class="strong">55.55% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>3/8</span>
+                <span class='fraction'>5/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">33.33% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>6/18</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">33.33% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>2/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">37.5% </span>
+                <span class="strong">55.55% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>3/8</span>
+                <span class='fraction'>5/9</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -128,7 +128,19 @@
 <a name='L63'></a><a href='#L63'>63</a>
 <a name='L64'></a><a href='#L64'>64</a>
 <a name='L65'></a><a href='#L65'>65</a>
-<a name='L66'></a><a href='#L66'>66</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -138,7 +150,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -161,6 +173,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -187,6 +210,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -197,13 +221,13 @@
 const BaseError = require("./baseError")
 &nbsp;
 class Api400Error extends BaseError {
-<span class="fstat-no" title="function not covered" >  co</span>nstructor(
+  constructor(
     description,
-    statusCode = <span class="branch-0 cbranch-no" title="branch not covered" >httpStatusCodes.BAD_REQUEST,</span>
-    name = <span class="branch-0 cbranch-no" title="branch not covered" >"Bad request.",</span>
-    isOperational = <span class="branch-0 cbranch-no" title="branch not covered" >true</span>
+    statusCode = httpStatusCodes.BAD_REQUEST,
+    name = "Bad request.",
+    isOperational = true
   ) {
-<span class="cstat-no" title="statement not covered" >    super(description, statusCode, name, isOperational)</span>
+    super(description, statusCode, name, isOperational)
   }
 }
 &nbsp;
@@ -230,10 +254,21 @@ class Api403Error extends BaseError {
 }
 &nbsp;
 class Api404Error extends BaseError {
+  constructor(
+    description,
+    statusCode = httpStatusCodes.NOT_FOUND,
+    name = "Not found.",
+    isOperational = true
+  ) {
+    super(description, statusCode, name, isOperational)
+  }
+}
+&nbsp;
+class Api429Error extends BaseError {
 <span class="fstat-no" title="function not covered" >  co</span>nstructor(
     description,
-    statusCode = <span class="branch-0 cbranch-no" title="branch not covered" >httpStatusCodes.NOT_FOUND,</span>
-    name = <span class="branch-0 cbranch-no" title="branch not covered" >"Not found.",</span>
+    statusCode = <span class="branch-0 cbranch-no" title="branch not covered" >httpStatusCodes.TOO_MANY_REQUESTS,</span>
+    name = <span class="branch-0 cbranch-no" title="branch not covered" >"Too many requests.",</span>
     isOperational = <span class="branch-0 cbranch-no" title="branch not covered" >true</span>
   ) {
 <span class="cstat-no" title="statement not covered" >    super(description, statusCode, name, isOperational)</span>
@@ -256,6 +291,7 @@ module.exports = {
   Api401Error,
   Api403Error,
   Api404Error,
+  Api429Error,
   Api500Error,
 }
 &nbsp;</pre></td></tr></table></pre>
@@ -265,7 +301,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-12-07T20:07:07.739Z
+                at 2023-12-12T02:00:26.985Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

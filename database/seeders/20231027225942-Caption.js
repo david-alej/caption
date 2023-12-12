@@ -12,6 +12,7 @@ module.exports = {
           text: "Why is the dog on a chair",
           createdAt: "2023-11-04T20:01:00.000Z",
           updatedAt: "2023-11-04T20:01:00.000Z",
+          votes: 0,
         },
         {
           userId: 2,
@@ -19,6 +20,7 @@ module.exports = {
           text: "Didn't know there was brown penguins!",
           createdAt: "2023-11-04T20:01:00.000Z",
           updatedAt: "2023-11-04T20:01:00.000Z",
+          votes: 1,
         },
         {
           userId: 3,
@@ -26,6 +28,7 @@ module.exports = {
           text: "Gotta catch em all!",
           createdAt: "2023-11-04T20:01:00.000Z",
           updatedAt: "2023-11-04T20:01:00.000Z",
+          votes: 2,
         },
         {
           userId: 4,
@@ -33,6 +36,7 @@ module.exports = {
           text: "yo",
           createdAt: "2023-11-04T20:01:00.000Z",
           updatedAt: "2023-11-04T20:01:00.000Z",
+          votes: -1,
         },
         {
           userId: 4,
@@ -40,6 +44,7 @@ module.exports = {
           text: "yo",
           createdAt: "2023-11-04T20:01:00.000Z",
           updatedAt: "2023-11-04T20:01:00.000Z",
+          votes: 0,
         },
         {
           userId: 4,
@@ -47,6 +52,7 @@ module.exports = {
           text: "That is a good salesboy",
           createdAt: "2023-11-04T20:01:00.000Z",
           updatedAt: "2023-11-04T20:01:00.000Z",
+          votes: 2,
         },
         {
           userId: 4,
@@ -54,6 +60,7 @@ module.exports = {
           text: "yo",
           createdAt: "2023-11-04T20:01:00.000Z",
           updatedAt: "2023-11-04T20:01:00.000Z",
+          votes: 0,
         },
       ],
       {}

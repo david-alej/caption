@@ -97,6 +97,20 @@ const textValidator = (input, inputIsParam = false, optional = false) => {
 
 exports.textValidator = textValidator
 
+const incrementValidator = (input) => {
+  const { head } = basicValidator(input, false, false)
+
+  return head.custom((voteValue) => {
+    if (voteValue === 1 || voteValue === -1) return true
+
+    throw new Error(
+      `the voteValue in the request body object must either be -1 or 1.`
+    )
+  })
+}
+
+exports.incrementValidator = incrementValidator
+
 const captionsMultiInputCheck = (allowedInputsInBody) => {
   if (
     !allowedInputsInBody.includes("userId") &&

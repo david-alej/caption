@@ -1,5 +1,6 @@
 /* eslint no-process-exit: 0 */
 
+const votesRouter = require("./votes")
 const captionsRouter = require("./captions")
 const loginRouter = require("./login")
 const logoutRouter = require("./logout")
@@ -11,9 +12,11 @@ const { authorizedUser } = require("../controllers/index").authorize
 const { logError, logErrorMiddleware, returnError, isOperationalError } =
   require("../controllers/index").errorHandlers
 const { doubleCsrfProtection } = require("../util/index").doubleCsrf
+const { rateLimeter } = require("../controllers/index").rateLimiter
 
-const { Router } = require("express")
-const router = Router()
+const router = require("express").Router()
+
+if (process.env.NODE_ENV === "development") router.use(rateLimeter)
 
 router.get("/", (req, res) => {
   res.send("Welcome to the social media app Caption!!")
@@ -25,6 +28,7 @@ router.use("/register", registerRouter)
 router.use(authorizedUser)
 router.use(doubleCsrfProtection)
 
+router.use("/votes", votesRouter)
 router.use("/captions", captionsRouter)
 router.use("/photos", photosRouter)
 router.use("/users", usersRouter)

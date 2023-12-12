@@ -38,6 +38,6 @@ const stopWebServer = () => {
   })
 }
 
-initializeWebServer()
+if (process.env.NODE_ENV !== "test") initializeWebServer()
 
 module.exports = { initializeWebServer, stopWebServer, privateCertificate }
