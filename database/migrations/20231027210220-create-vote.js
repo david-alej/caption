@@ -3,6 +3,11 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("Votes", {
+      id: {
+        type: Sequelize.INTEGER,
+        primaryKey: false,
+        autoIncrement: true,
+      },
       userId: {
         allowNull: false,
         type: Sequelize.INTEGER,

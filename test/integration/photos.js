@@ -115,7 +115,7 @@ describe("Photos route", function () {
           filename: "a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg",
           createdAt: "2023-11-04T20:00:00.000Z",
           updatedAt: "2023-11-04T20:00:00.000Z",
-          totalVotes: "0",
+          totalVotes: "2",
         },
         {
           id: 1,
@@ -124,7 +124,7 @@ describe("Photos route", function () {
           filename: "744fe784-f556-4c68-a81a-2e5d859e27ef.jpg",
           createdAt: "2023-11-04T20:00:00.000Z",
           updatedAt: "2023-11-04T20:00:00.000Z",
-          totalVotes: "0",
+          totalVotes: "1",
         },
         {
           id: 3,
@@ -133,7 +133,7 @@ describe("Photos route", function () {
           filename: "cc30b9e6-0ae1-4753-86cf-9b81717030c2.jpg",
           createdAt: "2023-11-04T20:00:00.000Z",
           updatedAt: "2023-11-04T20:00:00.000Z",
-          totalVotes: "0",
+          totalVotes: "1",
         },
       ]
 
@@ -176,7 +176,7 @@ describe("Photos route", function () {
         filename: "cc30b9e6-0ae1-4753-86cf-9b81717030c2.jpg",
         createdAt: "2023-11-04T20:00:00.000Z",
         updatedAt: "2023-11-04T20:00:00.000Z",
-        totalVotes: "0",
+        totalVotes: "1",
       })
       const requestBody = { title: "Me and my siblings" }
       const config = setHeaders
@@ -269,7 +269,7 @@ describe("Photos route", function () {
             userId: 4,
             photoId: 2,
             text: "That is a good salesboy",
-            votes: 0,
+            votes: 2,
             createdAt: "2023-11-04T20:01:00.000Z",
             updatedAt: "2023-11-04T20:01:00.000Z",
             author: {

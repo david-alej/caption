@@ -120,7 +120,7 @@ describe("Captions route", function () {
           userId: 4,
           photoId: 1,
           text: "yo",
-          votes: 0,
+          votes: -1,
           createdAt: "2023-11-04T20:01:00.000Z",
           updatedAt: "2023-11-04T20:01:00.000Z",
           author: {
@@ -152,7 +152,7 @@ describe("Captions route", function () {
           userId: 4,
           photoId: 2,
           text: "That is a good salesboy",
-          votes: 0,
+          votes: 2,
           createdAt: "2023-11-04T20:01:00.000Z",
           updatedAt: "2023-11-04T20:01:00.000Z",
           author: {
@@ -203,7 +203,7 @@ describe("Captions route", function () {
           userId: 2,
           photoId: 3,
           text: "Didn't know there was brown penguins!",
-          votes: 0,
+          votes: 1,
           createdAt: "2023-11-04T20:01:00.000Z",
           updatedAt: "2023-11-04T20:01:00.000Z",
           author: {
@@ -269,7 +269,7 @@ describe("Captions route", function () {
           userId: 4,
           photoId: 2,
           text: "That is a good salesboy",
-          votes: 0,
+          votes: 2,
           createdAt: "2023-11-04T20:01:00.000Z",
           updatedAt: "2023-11-04T20:01:00.000Z",
           author: {

@@ -230,3 +230,11 @@ exports.deleteCaptionsValidator = () => {
     allowedBodyInputsValidator(["userId", "photoId"], true, 2),
   ]
 }
+
+exports.votesValidator = () => {
+  return [incrementValidator("voteValue")]
+}
+
+exports.getVotesValidator = () => {
+  return [integerValidator("userId", false, true)]
+}

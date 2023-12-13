@@ -1,11 +1,13 @@
 const models = require("../database/models")
-const {
-  validationPerusal,
-  integerValidator,
-  incrementValidator,
-} = require("./validators")
+const { validationPerusal, integerValidator } = require("./validators")
 const { Api400Error, Api404Error, Api500Error } =
   require("../util/index").apiErrors
+
+const otherOptions = {
+  order: [["updatedAt", "DESC"]],
+  attributes: { exclude: ["id"] },
+  limit: 10,
+}
 
 exports.paramVotes = async (req, res, next, captionId) => {
   const user = req.session.user
@@ -13,7 +15,6 @@ exports.paramVotes = async (req, res, next, captionId) => {
 
   try {
     await integerValidator("captionId", true).run(req)
-    await incrementValidator("voteValue").run(req)
 
     validationPerusal(req, `User: ${user.id}`)
 
@@ -32,10 +33,18 @@ exports.paramVotes = async (req, res, next, captionId) => {
         userId: user.id,
         captionId: captionId,
       },
-      attributes: ["value"],
+      ...otherOptions,
     })
 
-    req.preVoteValue = searchedVote ? searchedVote.dataValues.value : undefined
+    req.vote = null
+    req.preVoteValue = null
+
+    if (searchedVote) {
+      req.vote = searchedVote.dataValues
+      req.preVoteValue = req.vote.value
+
+      req.vote.caption = searchedCaption.dataValues
+    }
 
     next()
   } catch (err) {
@@ -77,14 +86,18 @@ exports.postVote = async (req, res, next) => {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-      {
-        returning: ["*"],
-        fields: ["userId", "captionId", "value", "createdAt", "updatedAt"],
-      }
+      otherOptions
     )
 
     if (!created) {
-      throw new Api500Error(`User: ${user.id} create query did not work.`)
+      await models.Caption.increment(
+        { votes: -voteValue },
+        {
+          where: { id: captionId },
+        }
+      )
+
+      throw new Api500Error(`User: ${user.id} create vote query did not work.`)
     }
 
     res
@@ -100,10 +113,13 @@ exports.putVote = async (req, res, next) => {
 
   try {
     if (!req.preVoteValue) {
-      throw new Api400Error(
+      throw new Api404Error(
         `User: ${user.id} has not voted for caption with id ${req.captionId} yet.`
       )
     }
+
+    validationPerusal(req, `User: ${user.id}`)
+
     const { voteValue } = req.body
     const captionId = parseInt(req.params.captionId)
 
@@ -121,22 +137,30 @@ exports.putVote = async (req, res, next) => {
     )
 
     if (!incremented) {
-      throw new Api500Error(`User: ${user.id} increment query did not work.`)
+      throw new Api500Error(
+        `User: ${user.id} update increment query did not work.`
+      )
     }
 
-    const created = await models.Vote.update(
+    const updated = await models.Vote.update(
       {
         value: voteValue,
       },
       {
         where: { captionId, userId: user.id },
-        returning: ["*"],
-        fields: ["userId", "captionId", "value", "createdAt", "updatedAt"],
+        ...otherOptions,
       }
     )
 
-    if (!created) {
-      throw new Api500Error(`User: ${user.id} create query did not work.`)
+    if (!updated) {
+      await models.Caption.increment(
+        { votes: -voteValue },
+        {
+          where: { id: captionId },
+        }
+      )
+
+      throw new Api500Error(`User: ${user.id} update vote query did not work.`)
     }
 
     res.send(
@@ -152,10 +176,182 @@ exports.deleteVote = async (req, res, next) => {
 
   try {
     if (!req.preVoteValue) {
-      throw new Api400Error(
+      throw new Api404Error(
         `User: ${user.id} cannot delete a vote that does not exist.`
       )
     }
+
+    const voteValue = req.preVoteValue
+    const captionId = parseInt(req.params.captionId)
+
+    const incremented = await models.Caption.increment(
+      { votes: -voteValue },
+      {
+        where: { id: captionId },
+      }
+    )
+
+    if (!incremented) {
+      throw new Api500Error(
+        `User: ${user.id} deconstruct increment query did not work.`
+      )
+    }
+
+    const deleted = await models.Vote.destroy({
+      where: { captionId, userId: user.id },
+    })
+
+    if (!deleted) {
+      await models.Caption.increment(
+        { votes: voteValue },
+        {
+          where: { id: captionId },
+        }
+      )
+
+      throw new Api500Error(`User: ${user.id} delete vote query did not work.`)
+    }
+
+    res.send(
+      `User: ${user.id} has deleted their vote on caption id ${captionId} with vote value ${voteValue}`
+    )
+  } catch (err) {
+    next(err)
+  }
+}
+
+exports.deleteVotes = async (req, res, next) => {
+  const user = req.session.user
+
+  try {
+    validationPerusal(req, `User: ${user.id}`)
+
+    const whereUserId = { userId: user.id }
+    let searchParams = { where: whereUserId, ...otherOptions }
+    let afterMsg = "."
+
+    if (req.body.photoId) {
+      afterMsg = ` given photo id of ${req.body.photoId}.`
+      const wherePhotoId = { photoId: req.body.photoId }
+
+      searchParams = {
+        where: whereUserId,
+        include: [
+          {
+            model: models.Caption,
+            as: "caption",
+            where: wherePhotoId,
+          },
+        ],
+        ...otherOptions,
+      }
+    }
+
+    const searchedVotes = await models.Vote.findAll(searchParams)
+
+    if (!searchedVotes) {
+      throw new Api404Error(
+        `User: ${user.id} search votes query did not work` + afterMsg
+      )
+    }
+
+    const votes = searchedVotes.map((vote) => vote.dataValues)
+    let amountOfVotesDeleted
+
+    for (let i = 0; i < votes.length; i++) {
+      const vote = votes[parseInt(i)]
+      const voteValue = vote.value
+      const captionId = vote.captionId
+
+      const incremented = await models.Caption.increment(
+        { votes: -voteValue },
+        {
+          where: { id: captionId },
+        }
+      )
+
+      if (!incremented) {
+        throw new Api500Error(
+          `User: ${user.id} deconstruct increment query did not work, only ${amountOfVotesDeleted} votes where deleted` +
+            afterMsg
+        )
+      }
+
+      const deleted = await models.Vote.destroy({
+        where: { captionId, userId: user.id },
+        ...otherOptions,
+      })
+
+      if (!deleted) {
+        await models.Caption.increment(
+          { votes: voteValue },
+          {
+            where: { id: captionId },
+          }
+        )
+
+        throw new Api500Error(
+          `User: ${user.id} delete vote query did not work, only ${amountOfVotesDeleted} votes where deleted` +
+            afterMsg
+        )
+      }
+
+      amountOfVotesDeleted = i + 1
+    }
+
+    res.send(
+      `User: ${user.id} has deleted ${amountOfVotesDeleted} of their votes` +
+        afterMsg
+    )
+  } catch (err) {
+    next(err)
+  }
+}
+
+exports.getVote = async (req, res, next) => {
+  const user = req.session.user
+
+  try {
+    if (!req.vote) {
+      throw new Api404Error(
+        `User: ${user.id} cannot update a vote that does not exist.`
+      )
+    }
+
+    res.json(req.vote)
+  } catch (err) {
+    next(err)
+  }
+}
+
+exports.getVotes = async (req, res, next) => {
+  const user = req.session.user
+  let searchParams = {
+    where: { userId: user.id },
+    ...otherOptions,
+  }
+
+  try {
+    validationPerusal(req, `User: ${user.id}`)
+
+    const { userId } = req.body
+
+    if (userId) {
+      searchParams = {
+        where: { userId },
+        ...otherOptions,
+      }
+    }
+
+    const searched = await models.Vote.findAll(searchParams)
+
+    if (!searched) {
+      throw new Api404Error(
+        `User: ${user.id} search vote query did not work given user id of ${searchParams.where.userId}.`
+      )
+    }
+
+    res.json(searched)
   } catch (err) {
     next(err)
   }
