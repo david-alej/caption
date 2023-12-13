@@ -6,7 +6,6 @@ const { Api400Error, Api404Error, Api500Error } =
 const otherOptions = {
   order: [["updatedAt", "DESC"]],
   attributes: { exclude: ["id"] },
-  limit: 10,
 }
 
 exports.paramVotes = async (req, res, next, captionId) => {
@@ -226,31 +225,27 @@ exports.deleteVotes = async (req, res, next) => {
   try {
     validationPerusal(req, `User: ${user.id}`)
 
+    const { photoId } = req.body
     const whereUserId = { userId: user.id }
-    let searchParams = { where: whereUserId, ...otherOptions }
+    const searchParams = { where: whereUserId, ...otherOptions }
     let afterMsg = "."
 
-    if (req.body.photoId) {
-      afterMsg = ` given photo id of ${req.body.photoId}.`
-      const wherePhotoId = { photoId: req.body.photoId }
+    if (photoId) {
+      afterMsg = ` given photo id of ${photoId}.`
 
-      searchParams = {
-        where: whereUserId,
-        include: [
-          {
-            model: models.Caption,
-            as: "caption",
-            where: wherePhotoId,
-          },
-        ],
-        ...otherOptions,
-      }
+      searchParams.include = [
+        {
+          model: models.Caption,
+          as: "caption",
+          where: { photoId },
+        },
+      ]
     }
 
     const searchedVotes = await models.Vote.findAll(searchParams)
 
     if (!searchedVotes) {
-      throw new Api404Error(
+      throw new Api500Error(
         `User: ${user.id} search votes query did not work` + afterMsg
       )
     }
@@ -326,9 +321,16 @@ exports.getVote = async (req, res, next) => {
 
 exports.getVotes = async (req, res, next) => {
   const user = req.session.user
-  let searchParams = {
+  const searchParams = {
     where: { userId: user.id },
     ...otherOptions,
+    include: [
+      {
+        model: models.Caption,
+        as: "caption",
+      },
+    ],
+    limit: 10,
   }
 
   try {
@@ -336,17 +338,12 @@ exports.getVotes = async (req, res, next) => {
 
     const { userId } = req.body
 
-    if (userId) {
-      searchParams = {
-        where: { userId },
-        ...otherOptions,
-      }
-    }
+    if (userId) searchParams.where.userId = userId
 
     const searched = await models.Vote.findAll(searchParams)
 
     if (!searched) {
-      throw new Api404Error(
+      throw new Api500Error(
         `User: ${user.id} search vote query did not work given user id of ${searchParams.where.userId}.`
       )
     }

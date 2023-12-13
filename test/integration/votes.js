@@ -12,7 +12,7 @@ const {
 
 const { OK, BAD_REQUEST, CREATED, NOT_FOUND } = httpStatusCodes
 
-describe.only("Votes route", function () {
+describe("Votes route", function () {
   const preExistingUserCredentials = {
     username: "penguinlover",
     password: "Alaska456",
@@ -27,7 +27,14 @@ describe.only("Votes route", function () {
 
   const voteObject = {
     type: "object",
-    required: ["captionId", "userId", "value", "createdAt", "updatedAt"],
+    required: [
+      "captionId",
+      "userId",
+      "value",
+      "createdAt",
+      "updatedAt",
+      "caption",
+    ],
     properties: {
       captionId: {
         type: "number",
@@ -44,6 +51,15 @@ describe.only("Votes route", function () {
       updatedAt: {
         type: "string",
       },
+      caption: {
+        type: "object",
+        required: ["votes"],
+        properties: {
+          votes: {
+            type: "number",
+          },
+        },
+      },
     },
   }
 
@@ -52,28 +68,9 @@ describe.only("Votes route", function () {
     type: "array",
     items: { ...voteObject },
   }
-
-  let voteObjectWithCaption
-  let voteSchema
+  const voteSchema = { title: "Vote Schema", ...voteObject }
 
   before(async function () {
-    voteObjectWithCaption = structuredClone(voteObject)
-    voteObjectWithCaption.required.push("caption")
-    voteObjectWithCaption.properties.caption = {
-      type: "object",
-      required: ["votes"],
-      properties: {
-        votes: {
-          type: "number",
-        },
-      },
-    }
-
-    voteSchema = {
-      title: "Votes Schema",
-      ...voteObjectWithCaption,
-    }
-
     userCredentials.username = generateUsername()
     userCredentials.password = generatePassword()
 
@@ -552,6 +549,19 @@ describe.only("Votes route", function () {
     })
 
     it("When user tries to get an existent vote, Then repsonse is the vote data row ", async function () {
+      const expectedVote = {
+        userId: 5,
+        captionId: 5,
+        value: 1,
+        caption: {
+          id: 5,
+          userId: 4,
+          photoId: 2,
+          text: "yo",
+          votes: 1,
+          createdAt: "2023-11-04T20:01:00.000Z",
+        },
+      }
       const captionId = 5
       const voteValue = 1
       const incrementedCaptionVotesBefore = await models.Caption.increment(
@@ -594,6 +604,12 @@ describe.only("Votes route", function () {
       expect(createdVote).to.exist
       expect(status).to.equal(OK)
       expect(vote).to.be.jsonSchema(voteSchema)
+      const captionExpectedVote = structuredClone(expectedVote.caption)
+      delete expectedVote.caption
+      const captionVote = structuredClone(vote.caption)
+      delete vote.caption
+      expect(vote).to.include(expectedVote)
+      expect(captionVote).to.include(captionExpectedVote)
       expect(captionsVotesBefore - voteValue).to.equal(captionsVotesAfter)
       expect(deletedVote).to.equal(1)
     })
@@ -608,6 +624,14 @@ describe.only("Votes route", function () {
           value: 1,
           createdAt: "2023-11-04T20:08:00.000Z",
           updatedAt: "2023-11-04T20:08:00.000Z",
+          caption: {
+            createdAt: "2023-11-04T20:01:00.000Z",
+            id: 6,
+            photoId: 2,
+            text: "That is a good salesboy",
+            userId: 4,
+            votes: 1,
+          },
         },
         {
           captionId: 2,
@@ -615,6 +639,14 @@ describe.only("Votes route", function () {
           value: 1,
           createdAt: "2023-11-04T20:03:00.000Z",
           updatedAt: "2023-11-04T20:03:00.000Z",
+          caption: {
+            createdAt: "2023-11-04T20:01:00.000Z",
+            id: 2,
+            photoId: 3,
+            text: "Didn't know there was brown penguins!",
+            userId: 2,
+            votes: 1,
+          },
         },
       ]
       const firstVoteDate = new Date(expectedVotes[0].updatedAt)
@@ -627,7 +659,19 @@ describe.only("Votes route", function () {
 
       expect(status).to.equal(OK)
       expect(votes).to.be.jsonSchema(votesSchema)
-      expect(votes).to.eql(expectedVotes)
+      for (let i = 0; i < expectedVotes.length; i++) {
+        const vote = votes[parseInt(i)]
+        const captionVote = structuredClone(vote.caption)
+        delete vote.caption
+
+        const expectedVote = expectedVotes[parseInt(i)]
+        const captionExpectedVote = structuredClone(expectedVote.caption)
+        delete expectedVote.caption
+
+        expect(vote).to.eql(expectedVote)
+
+        expect(captionVote).to.include(captionExpectedVote)
+      }
       expect(firstVoteDate).to.be.afterTime(secondVoteDate)
     })
 
@@ -639,6 +683,14 @@ describe.only("Votes route", function () {
           value: -1,
           createdAt: "2023-11-04T20:02:00.000Z",
           updatedAt: "2023-11-04T20:02:00.000Z",
+          caption: {
+            createdAt: "2023-11-04T20:01:00.000Z",
+            id: 2,
+            photoId: 3,
+            text: "Didn't know there was brown penguins!",
+            userId: 2,
+            votes: 1,
+          },
         },
         {
           captionId: 4,
@@ -646,6 +698,15 @@ describe.only("Votes route", function () {
           value: -1,
           createdAt: "2023-11-04T20:01:00.000Z",
           updatedAt: "2023-11-04T20:01:00.000Z",
+          caption: {
+            createdAt: "2023-11-04T20:01:00.000Z",
+            id: 4,
+            photoId: 1,
+            text: "yo",
+            updatedAt: "2023-11-04T20:01:00.000Z",
+            userId: 4,
+            votes: -1,
+          },
         },
       ]
       const firstVoteDate = new Date(expectedVotes[0].updatedAt)
@@ -658,7 +719,19 @@ describe.only("Votes route", function () {
 
       expect(status).to.equal(OK)
       expect(votes).to.be.jsonSchema(votesSchema)
-      expect(votes).to.eql(expectedVotes)
+      for (let i = 0; i < expectedVotes.length; i++) {
+        const vote = votes[parseInt(i)]
+        const captionVote = structuredClone(vote.caption)
+        delete vote.caption
+
+        const expectedVote = expectedVotes[parseInt(i)]
+        const captionExpectedVote = structuredClone(expectedVote.caption)
+        delete expectedVote.caption
+
+        expect(vote).to.eql(expectedVote)
+
+        expect(captionVote).to.include(captionExpectedVote)
+      }
       expect(firstVoteDate).to.be.afterTime(secondVoteDate)
     })
   })
