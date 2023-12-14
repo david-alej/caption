@@ -566,7 +566,7 @@ describe("Captions route", function () {
       expect(captionsFound).to.equal(0)
     })
 
-    it("When an admin inputs a photo id into the request body, then all of captions owned by the different user are deleted", async function () {
+    it("When an admin inputs a photo id into the request body, then all of captions owned by photo id are deleted", async function () {
       const title = "title"
       const filePath = "./public/img/photo-tests/title.jpeg"
       const userConfig = JSON.parse(JSON.stringify(setHeaders))
@@ -620,6 +620,9 @@ describe("Captions route", function () {
         "/photos/" + photoId,
         adminSetHeaders
       )
+      const remainingCaptionOfUserDeleted = await models.Captions.destroy({
+        where: { userId: loggedInUserId },
+      })
 
       expect(createPhotoStatus).to.equal(CREATED)
       expect(captionOneStatus).to.equal(CREATED)
@@ -628,6 +631,7 @@ describe("Captions route", function () {
       expect(data).to.include.string(preUserMsg).and.string(afterMsg)
       expect(captionsFound).to.equal(1)
       expect(deletePhotoStatus).to.equal(OK)
+      expect(remainingCaptionOfUserDeleted).to.equal(1)
     })
 
     it("When an admin inputs a different user's user id and photo id into the request body, then all of captions of the respective photo owned by the different user are deleted", async function () {

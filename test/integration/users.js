@@ -339,7 +339,7 @@ describe("Users route", function () {
       expect(new Date(newUpdatedAt)).to.be.afterTime(new Date(oldUpdatedAt))
     })
 
-    it("When both new credentiald are added and valid, then response is ok", async function () {
+    it("When both new credentials are added and valid, then response is ok", async function () {
       const { newUsername, newPassword } = putUserNewCredentials
       const requestBody = {
         ...putUserCredentials,

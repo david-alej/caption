@@ -115,7 +115,7 @@ describe("Logout routes", function () {
       expect(data).to.equal(expected)
     })
 
-    it("When a valid request is made (has cookies and csrf-token as a header), then user is logged out", async function () {
+    it("When user logsout with (has cookies and csrf-token as a header) and tries to logout again, then response is bad request", async function () {
       const afterMsg = " is now logged out."
       const configs = structuredClone(setHeaders)
       configs.headers["x-csrf-token"] = csrfToken
