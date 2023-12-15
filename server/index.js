@@ -3,9 +3,11 @@ const session = require("express-session")
 const helmet = require("helmet")
 const cors = require("cors")
 const cookieParser = require("cookie-parser")
+const swaggerUi = require("swagger-ui-express")
 
 const routes = require("../routes/index")
 const { httpLogger } = require("../util/index")
+const openApiDocumentation = require("../api-documentation/openapi.json")
 
 require("dotenv").config()
 const app = express()
@@ -36,6 +38,8 @@ app.use(cookieParser(process.env.COOKIES_SECRET))
 app.use(helmet())
 
 app.use(cors({ credentials: true }))
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocumentation))
 
 app.use("/", routes)
 

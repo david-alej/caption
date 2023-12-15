@@ -12,11 +12,10 @@ const { authorizedUser } = require("../controllers/index").authorize
 const { logError, logErrorMiddleware, returnError, isOperationalError } =
   require("../controllers/index").errorHandlers
 const { doubleCsrfProtection } = require("../util/index").doubleCsrf
-const { rateLimeter } = require("../controllers/index").rateLimiter
-
+const { rateLimiter } = require("../controllers/index").rateLimiter
 const router = require("express").Router()
 
-if (process.env.NODE_ENV === "development") router.use(rateLimeter)
+if (process.env.NODE_ENV === "production") router.use(rateLimiter)
 
 router.get("/", (req, res) => {
   res.send("Welcome to the social media app Caption!!")

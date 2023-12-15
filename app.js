@@ -25,6 +25,12 @@ const initializeWebServer = () => {
           `Server is live at https://localhost:${server.address().port}`
         )
 
+        console.log(
+          `Swagger-ui is available on https://localhost:${
+            server.address().port
+          }/api-docs`
+        )
+
         resolve(server.address())
       })
   })

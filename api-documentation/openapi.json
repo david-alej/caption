@@ -1,0 +1,1345 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Caption",
+    "version": "1",
+    "description": "A back-end application for posting photos and commenting on them while being able to vote on the comments.",
+    "license": {
+      "name": "MIT",
+      "url": "https://spdx.org/licenses/MIT.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://localhost:{PORT}",
+      "variables": {},
+      "description": "The application's URL has randomized after every initialization through its port number represented in the URL as {PORT}."
+    }
+  ],
+  "paths": {
+    "/": {
+      "summary": "get starting page",
+      "description": "This path is used to get the starting page of the Back-end application",
+      "get": {
+        "summary": "Get starting page",
+        "description": "This path uses GET operation to get the starting page",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "The only response": {
+                    "value": "Welcome to the social media app Caption!!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Starting Page"
+        ]
+      }
+    },
+    "/login": {
+      "summary": "Related to users logging into Caption",
+      "description": "This path is used to get the login page and log into Caption",
+      "get": {
+        "summary": "Get the login page",
+        "description": "This path uses the Get operation to get the starting page of Caption",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "The only response": {
+                    "value": "\"\""
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Login"
+        ]
+      },
+      "post": {
+        "summary": "Attempt to log into Caption",
+        "description": "This path is uses POST operation to attempt to authorize client as a user",
+        "operationId": "",
+        "requestBody": {
+          "description": "Client credentials needed to login",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/userCredentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Client is authenticated ": {
+                    "value": "User: {userId} is now logged in."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Input username does not exist": {
+                    "value": "Unauthorized."
+                  },
+                  "Username matches but Password is not correct.": {
+                    "value": "Unauthorized."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Client tries to login with wrong username and password one more time than is allowed, 100 times, in less than the allowed duration.": {
+                    "value": "Client: has made to many request to the original url, /login, next retry is after 1 seconds."
+                  },
+                  "Client tries to login with wrong username and password after already getting an too many requests error": {
+                    "value": "Client: has made to many request to the original url, /login, next retry is after 1 seconds."
+                  },
+                  "Client tries to login with right username and wrong password one more time than is allowed, 10 times, in less than the duration": {
+                    "value": "User: {userId} has made to many request to the original url, /login, next retry is after 1 seconds."
+                  },
+                  "Client tries to login with right username and wrong password after already getting an too many requests error": {
+                    "value": "User: {userId} has made to many request to the original url, /login, next retry is after 1 seconds."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Login"
+        ]
+      }
+    },
+    "/register": {
+      "summary": "Register client",
+      "description": "This path is used to get register page and register client to create a Caption user",
+      "get": {
+        "summary": "Get registration page",
+        "description": "This path uses GET operation to get registration page for Caption",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "The only response": {
+                    "value": "\"\""
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Register"
+        ]
+      },
+      "post": {
+        "summary": "Attempts to register into Caption",
+        "description": "This path uses POST operation to attempt to register a client ",
+        "operationId": "",
+        "requestBody": {
+          "description": "Client credentials needed to register as a user",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/userCredentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Credentials are validated": {
+                    "value": "User: {userId} is created."
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Username is already in use": {
+                    "value": "Bad request."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Register"
+        ]
+      }
+    },
+    "/logout": {
+      "summary": "Logout a user",
+      "description": "This path is used to get logout page and logout a user from Caption",
+      "get": {
+        "summary": "Get logout page",
+        "description": "This path uses GET operation to get the logout page",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "The only response": {
+                    "value": "\"\""
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Logout"
+        ]
+      },
+      "post": {
+        "summary": "Logout a Caption user",
+        "description": "This path uses POST operation to logout a Caption user",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User logs out": {
+                    "value": "User: {userId} is now logged out."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Logout"
+        ]
+      }
+    },
+    "/users": {
+      "summary": "Requests for users data",
+      "description": "This path is used to perform CRUD operations on users",
+      "get": {
+        "summary": "Get users information",
+        "description": "This path uses GET operation to get Caption users data",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Response with seeded data": {
+                    "value": "[{\"id\":4,\"username\":\"yomaster\",\"isAdmin\":true,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"},{\"id\":3,\"username\":\"penguinlover\",\"isAdmin\":false,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"},{\"id\":2,\"username\":\"Carkeys23307\",\"isAdmin\":false,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"},{\"id\":1,\"username\":\"rina.dark\",\"isAdmin\":false,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}]"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "put": {
+        "summary": "Update users",
+        "description": "This path uses PUT operation to update a users credentials",
+        "operationId": "",
+        "requestBody": {
+          "description": "User credentials needed while at least one new credential is needed",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/newCredentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "A valid new username is provided": {
+                    "value": "User: {userId} has updated either/both their username or password."
+                  },
+                  "A valid new password is provided": {
+                    "value": "User: {userId} has updated either/both their username or password."
+                  },
+                  "Both new credentials are added and valid": {
+                    "value": "User: {userId} has updated either/both their username or password."
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "No new credentials are added": {
+                    "value": "Bad request."
+                  },
+                  "New username is entered but it already exists": {
+                    "value": "Bad request."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{username}": {
+      "summary": "Requests for users data",
+      "description": "This path is used to perform CRUD operations on users",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "username",
+          "schema": {
+            "type": "string"
+          },
+          "required": true,
+          "description": "The target username for operation"
+        }
+      ],
+      "get": {
+        "summary": "Get a user's data",
+        "description": "This path uses GET operation to get a user's data",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Username exists with seeded data": {
+                    "value": "{\"username\":\"penguinlover\",\"isAdmin\":false,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Username does not exist": {
+                    "value": "Not found."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "summary": "Delete a user",
+        "description": "This path uses Delete operation to delete the loggedin user or an admin can delete a target user",
+        "operationId": "",
+        "requestBody": {
+          "description": "User credentials needed for delete operation",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/userCredentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Username given is the logged in user": {
+                    "value": "User: {userId} has deleted their own account."
+                  },
+                  "Admin inputs username to delete another user": {
+                    "value": "User: {userId} has deleted user {targetUserId}."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Regular user tries to delete other user": {
+                    "value": "Forbidden."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/photos": {
+      "summary": "Requests for photos data",
+      "description": "This path is uses to perform CRUD operations on photos",
+      "get": {
+        "summary": "Get a photo's data",
+        "description": "This path uses GET operation to get a photos",
+        "operationId": "",
+        "requestBody": {
+          "description": "Search for photos with no inputs or one of userId or title but not both",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/getPhotosInputs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Search for seeded Photos with no valid inputs added": {
+                    "value": "GET /photos HTTP/1.1\nHost: https://localhost:{PORT}\nContent-Type: multipart/form-data; boundary=--------------------------abcdef1234567890\n\n--------------------------abcdef1234567890\nContent-Disposition: form-data; name=\"Sales Consultant\" filename=\"a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg\"\n\n[ Buffer data here ]\n--------------------------abcdef1234567890\nContent-Disposition: form-data; name=\"Sales Consultant - information\"\n\n{\"id\":2,\"userId\":2,\"title\":\"Sales Consultant\",\"filename\":\"a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg\",\"createdAt\":\"2023-11-04T20:00:00.000Z\",\"updatedAt\":\"2023-11-04T20:00:00.000Z\",\"totalVotes\":\"2\"}\n--------------------------abcdef1234567890\nContent-Disposition: form-data; name=\"Designer\" filename = \"744fe784-f556-4c68-a81a-2e5d859e27ef.jpg\"\n\n[ Buffer data here ]\n--------------------------abcdef1234567890\nContent-Disposition: form-data; name=\"Designer - information\"\n\n{\"id\":1,\"userId\":1,\"title\":\"Designer\",\"filename\":\"744fe784-f556-4c68-a81a-2e5d859e27ef.jpg\",\"createdAt\":\"2023-11-04T20:00:00.000Z\",\"updatedAt\":\"2023-11-04T20:00:00.000Z\",\"totalVotes\":\"1\"}\n--------------------------abcdef1234567890\nContent-Disposition: form-data; name=\"Me and my siblings\" filename=\"cc30b9e6-0ae1-4753-86cf-9b81717030c2.jpg\"\n\n[ Buffer data here ]\n--------------------------abcdef1234567890\nContent-Disposition: form-data; name=\"Me and my siblings - information\"\n\n{\"id\":3,\"userId\":3,\"title\":\"Me and my siblings\",\"filename\":\"cc30b9e6-0ae1-4753-86cf-9b81717030c2.jpg\",\"createdAt\":\"2023-11-04T20:00:00.000Z\",\"updatedAt\":\"2023-11-04T20:00:00.000Z\",\"totalVotes\":\"1\"}\n--------------------------abcdef1234567890"
+                  },
+                  "Search for seeded Photos with specific userId of 2": {
+                    "value": "GET /photos HTTP/1.1\nHost: https://localhost:{PORT}\nContent-Type: multipart/form-data; boundary=--------------------------abcdef1234567890\n\n--------------------------abcdef1234567890\nContent-Disposition: form-data; name=\"Sales Consultant\" filename=\"a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg\"\n\n[ Buffer data here ]\n--------------------------abcdef1234567890\nContent-Disposition: form-data; name=\"Sales Consultant - information\"\n\n{\"id\":2,\"userId\":2,\"title\":\"Sales Consultant\",\"filename\":\"a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg\",\"createdAt\":\"2023-11-04T20:00:00.000Z\",\"updatedAt\":\"2023-11-04T20:00:00.000Z\",\"totalVotes\":\"2\"}\n--------------------------abcdef1234567890\n"
+                  },
+                  "Search for seeded Photos with title of \"Me and my siblings\"": {
+                    "value": "GET /photos HTTP/1.1\nHost: https://localhost:{PORT}\nContent-Type: multipart/form-data; boundary=--------------------------abcdef1234567890\n\n--------------------------abcdef1234567890\nContent-Disposition: form-data; name=\"Me and my siblings\" filename=\"cc30b9e6-0ae1-4753-86cf-9b81717030c2.jpg\"\n\n[ Buffer data here ]\n--------------------------abcdef1234567890\nContent-Disposition: form-data; name=\"Me and my siblings - information\"\n\n{\"id\":3,\"userId\":3,\"title\":\"Me and my siblings\",\"filename\":\"cc30b9e6-0ae1-4753-86cf-9b81717030c2.jpg\",\"createdAt\":\"2023-11-04T20:00:00.000Z\",\"updatedAt\":\"2023-11-04T20:00:00.000Z\",\"totalVotes\":\"1\"}\n--------------------------abcdef1234567890\n"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Photos"
+        ]
+      },
+      "post": {
+        "summary": "Create a photo",
+        "description": "This path uses POST operation to upload an image to create a photo on Caption",
+        "operationId": "",
+        "requestBody": {
+          "description": "Title input needed for defining uploaded title",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/titleInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Upload a photo with a title of \"title\"": {
+                    "value": "{\"imagePath\":\"/photos/title\",\"msg\":\"User: {userId} has uploaded a photo.\"}"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User uploaded image that is not an allowed image type, that are jpg, png, and gif": {
+                    "value": "Bad request."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Photos"
+        ]
+      },
+      "delete": {
+        "summary": "Delete photos",
+        "description": "This path uses DELETE operation to delete multiple photos",
+        "operationId": "",
+        "requestBody": {
+          "description": "User id input is optional",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/userIdInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User deletes all their photos by not providing any valid inputs in the request body": {
+                    "value": "User: {userId} has deleted all of their own photos associated."
+                  },
+                  "User deletes all their photos by providing thier own user id in the request body": {
+                    "value": "User: {userId} has deleted all of their own photos associated with given user id = {userId}."
+                  },
+                  "Admin deletes all photos of target user by providing target user id in the request body": {
+                    "value": "User: {userId} has deleted all of the photos of a user associated with given user id = {targetUserId}."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Regular user inputs another user's id to delete photos of another user": {
+                    "value": "Forbidden."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Photos"
+        ]
+      }
+    },
+    "/photos/{photoId}": {
+      "summary": "Request for photos data with photoId",
+      "description": "This path uses CRUD operations on photos data",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "photoId",
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "required": true,
+          "description": "The target photo for operation"
+        }
+      ],
+      "get": {
+        "summary": "Get a photo",
+        "description": "This path uses GET operation to get a photo's data",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Search for seeded photo with photo id of 2": {
+                    "value": "GET /photo HTTP/1.1\nHost: https://localhost:{PORT}\nContent-Type: multipart/form-data; boundary=--------------------------abcdef1234567890\n\n--------------------------abcdef1234567890\nContent-Disposition: form-data; name=\"Sales Consultant\" filename=\"a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg\"\n\n[ Buffer data here ]\n--------------------------abcdef1234567890\nContent-Disposition: form-data; name=\"Sales Consultant - information\"\n\n{\"id\":2,\"userId\":2,\"title\":\"Sales Consultant\",\"filename\":\"a5f8cb21-a34f-4e15-a3a6-d3fe656b1d56.jpg\",\"createdAt\":\"2023-11-04T20:00:00.000Z\",\"updatedAt\":\"2023-11-04T20:00:00.000Z\",\"author\":{\"id\":2,\"username\":\"Carkeys23307\",\"isAdmin\":false,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"},\"captions\":[{\"id\":1,\"userId\":1,\"photoId\":2,\"text\":\"Why is the dog on a chair\",\"votes\":0,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"author\":{\"id\":1,\"username\":\"rina.dark\",\"isAdmin\":false,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}},{\"id\":5,\"userId\":4,\"photoId\":2,\"text\":\"yo\",\"votes\":0,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"author\":{\"id\":4,\"username\":\"yomaster\",\"isAdmin\":true,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}},{\"id\":6,\"userId\":4,\"photoId\":2,\"text\":\"That is a good salesboy\",\"votes\":2,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"author\":{\"id\":4,\"username\":\"yomaster\",\"isAdmin\":true,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}}]}\n--------------------------abcdef1234567890"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Photo Id does not exist": {
+                    "value": "Not found."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Photos"
+        ]
+      },
+      "delete": {
+        "summary": "Delete a photo",
+        "description": "This path uses DELETE operation to delete a photo in Caption",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User deletes one of their photo's by photo id": {
+                    "value": "User: {userId} has deleted one of their own photos."
+                  },
+                  "Admin deletes an another users photo by photo id": {
+                    "value": "User: {userId} has deleted one of user id {photoId} photos."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Regular user tries to delete another user's photo": {
+                    "value": "Forbidden."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Photos"
+        ]
+      },
+      "put": {
+        "summary": "Update a photo title",
+        "description": "This path uses PUT operation to update a photo's title",
+        "operationId": "",
+        "requestBody": {
+          "description": "Title input needed to replace old photo title",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/titleInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User updates one of their photo's by photo id": {
+                    "value": "User: {userId} has updated one of their photo with id {photoId}."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Users tries to updates another user's photo title by given photo id": {
+                    "value": "Forbidden."
+                  },
+                  "Admin tries to update another user's photo title by photo id": {
+                    "value": "Forbidden."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Photos"
+        ]
+      }
+    },
+    "/captions": {
+      "summary": "Requests for captions data ",
+      "description": "This path uses CRUD operations on captions data",
+      "get": {
+        "summary": "Get captions",
+        "description": "This path uses GET operation to get captions",
+        "operationId": "",
+        "requestBody": {
+          "description": "Both inputs userId and photoId are optional",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/captionIdentifierInputs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Get all seeded captions of the logged in user by providing no valid inputs to the request body": {
+                    "value": "[{\"id\":4,\"userId\":4,\"photoId\":1,\"text\":\"yo\",\"votes\":-1,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"author\":{\"id\":4,\"username\":\"yomaster\",\"isAdmin\":true,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}},{\"id\":5,\"userId\":4,\"photoId\":2,\"text\":\"yo\",\"votes\":0,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"author\":{\"id\":4,\"username\":\"yomaster\",\"isAdmin\":true,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}},{\"id\":6,\"userId\":4,\"photoId\":2,\"text\":\"That is a good salesboy\",\"votes\":2,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"author\":{\"id\":4,\"username\":\"yomaster\",\"isAdmin\":true,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}},{\"id\":7,\"userId\":4,\"photoId\":3,\"text\":\"yo\",\"votes\":0,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"author\":{\"id\":4,\"username\":\"yomaster\",\"isAdmin\":true,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}}]"
+                  },
+                  "Get all seeded captions of a photo owned by the logged in user by providing photo id of 3 in the request body": {
+                    "value": "[{\"id\":2,\"userId\":2,\"photoId\":3,\"text\":\"Didn't know there was brown penguins!\",\"votes\":1,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"author\":{\"id\":2,\"username\":\"Carkeys23307\",\"isAdmin\":false,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}},{\"id\":7,\"userId\":4,\"photoId\":3,\"text\":\"yo\",\"votes\":0,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"author\":{\"id\":4,\"username\":\"yomaster\",\"isAdmin\":true,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}}]"
+                  },
+                  "Get all seeded captions of photo owned by a targeted user by inputting a photo id of 2 and a user id of 4.": {
+                    "value": "[{\"id\":5,\"userId\":4,\"photoId\":2,\"text\":\"yo\",\"votes\":0,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"author\":{\"id\":4,\"username\":\"yomaster\",\"isAdmin\":true,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}},{\"id\":6,\"userId\":4,\"photoId\":2,\"text\":\"That is a good salesboy\",\"votes\":2,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"author\":{\"id\":4,\"username\":\"yomaster\",\"isAdmin\":true,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}}]"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Captions"
+        ]
+      },
+      "post": {
+        "summary": "Create caption",
+        "description": "This path uses POST operation to create a caption",
+        "operationId": "",
+        "requestBody": {
+          "description": "Caption information needed to create a caption",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/captionInformationInputs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User creates a caption": {
+                    "value": "User: {userId} caption has been created."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Captions"
+        ]
+      },
+      "delete": {
+        "summary": "Delete captions",
+        "description": "This path uses DELETE operation to delete multiple captions",
+        "operationId": "",
+        "requestBody": {
+          "description": "Both inputs are optional but for a regular user the userId must be theirs",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/captionIdentifierInputs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User deletes all their captions by providing no valid inputs into request body": {
+                    "value": "User: ${userId} has deleted all of their own captions captions associated."
+                  },
+                  "User deletes all their captions by providing their user id": {
+                    "value": "User: ${userId} has deleted all of their own captions captions associated with given user id  of {userId}."
+                  },
+                  "User deletes all their captions of a photo by providing a photo id": {
+                    "value": "User: ${userId} has deleted all of their own captions captions associated with given photo id of {photoId}."
+                  },
+                  "Admin deletes all the captions of a target user by providing the target's user id": {
+                    "value": "User: {userId} has deleted all of the captions associated with given user id of {targetUserId}."
+                  },
+                  "Admin deletes all the captions of a photo by providing the photo id": {
+                    "value": "User: {userId} has deleted all of the captions associated with given photo id of {photoId}."
+                  },
+                  "Admin deletes all the captions of a target user in a photo by providing the target's user id and photo id": {
+                    "value": "User: {userId} has deleted all of the captions associated with given user id of {targetUserId} and photo id of {photoId}."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User tries to delete another user's captions": {
+                    "value": "Forbidden."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Captions"
+        ]
+      }
+    },
+    "/captions/{captionId}": {
+      "summary": "Request for captions data with caption id",
+      "description": "This path uses CRUD operations on captions data with caption id",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "captionId",
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "required": true,
+          "description": "The target caption for operation"
+        }
+      ],
+      "get": {
+        "summary": "Get caption",
+        "description": "This path uses GET operation to get a caption",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Get caption by caption id of 5": {
+                    "value": "{\"id\":5,\"userId\":4,\"photoId\":2,\"text\":\"yo\",\"votes\":0,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"author\":{\"id\":4,\"username\":\"yomaster\",\"isAdmin\":true,\"createdAt\":\"2023-11-02T20:00:00.000Z\",\"updatedAt\":\"2023-11-02T20:00:00.000Z\"}}"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "Given caption id does not exist": {
+                    "value": "Not found."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Captions"
+        ]
+      },
+      "delete": {
+        "summary": "Delete caption",
+        "description": "This path uses DELETE operation to delete a caption",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User deletes one of their captions by caption id": {
+                    "value": "User: {userId} has deleted one of their own captions."
+                  },
+                  "Admin deletes a caption of another target user by caption id": {
+                    "value": "User: {userId} has deleted one of user id ${targetUserId} captions."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User tries to delete another user's caption": {
+                    "value": "Forbidden."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Captions"
+        ]
+      },
+      "put": {
+        "summary": "Update caption",
+        "description": "This path uses PUT operation to update a caption's text",
+        "operationId": "",
+        "requestBody": {
+          "description": "Text needed to replace the old caption's text",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/textInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User updates one of their caption's text by providing the new text": {
+                    "value": "User: {userId} has updated one of their caption with id {captionId}."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User tries to update another user's photo by given photo id": {
+                    "value": "Forbidden."
+                  },
+                  "Admin tries to update another user's photo by photo id": {
+                    "value": "Forbidden."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Captions"
+        ]
+      }
+    },
+    "/votes": {
+      "summary": "Request for votes data and captions votes",
+      "description": "This path uses CRUD operations on votes data and update a caption votes with the vote's value. The vote data is used to add, remove, and update  your vote which can be -1 or +1 to a caption's votes and enforce no  multiple votes by a user on a caption through tracking of whether you have voted that specific caption.",
+      "delete": {
+        "summary": "Delete votes and update captions votes",
+        "description": "This path uses DELETE operation to delete multiple votes and remove the vote value from the respective captions votes",
+        "operationId": "",
+        "requestBody": {
+          "description": "photoId is optional",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/photoIdInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User deletes all their votes on all captions by providing no inputs": {
+                    "value": "User: ${userId} has deleted {amountOfVotesDeleted} of their votes."
+                  },
+                  "User deletes all their votes on all captions of a photo by providing photoId": {
+                    "value": "User: ${loggedInUserId} has deleted ${captionIds.length} of  their votes given photo id of ${photoId}."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Votes"
+        ]
+      },
+      "get": {
+        "summary": "Get votes with respective captions",
+        "description": "This path uses GET operation to get multiple votes with the respective captions",
+        "operationId": "",
+        "requestBody": {
+          "description": "userId is optional",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/userIdInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "User gets their 10 most recent seeded votes by providing no inputs": {
+                    "value": "\n[{\"captionId\":6,\"userId\":3,\"value\":1,\"createdAt\":\"2023-11-04T20:08:00.000Z\",\"updatedAt\":\"2023-11-04T20:08:00.000Z\",\"caption\":{\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"id\":6,\"photoId\":2,\"text\":\"That is a good salesboy\",\"userId\":4,\"votes\":1}},{\"captionId\":2,\"userId\":3,\"value\":1,\"createdAt\":\"2023-11-04T20:03:00.000Z\",\"updatedAt\":\"2023-11-04T20:03:00.000Z\",\"caption\":{\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"id\":2,\"photoId\":3,\"text\":\"Didn't know there was brown penguins!\",\"userId\":2,\"votes\":1}}]"
+                  },
+                  "User gets a target user's 10 most recent votes with provided target user id of 1": {
+                    "value": "[{\"captionId\":2,\"userId\":1,\"value\":-1,\"createdAt\":\"2023-11-04T20:02:00.000Z\",\"updatedAt\":\"2023-11-04T20:02:00.000Z\",\"caption\":{\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"id\":2,\"photoId\":3,\"text\":\"Didn't know there was brown penguins!\",\"userId\":2,\"votes\":1}},{\"captionId\":4,\"userId\":1,\"value\":-1,\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"caption\":{\"createdAt\":\"2023-11-04T20:01:00.000Z\",\"id\":4,\"photoId\":1,\"text\":\"yo\",\"updatedAt\":\"2023-11-04T20:01:00.000Z\",\"userId\":4,\"votes\":-1}}]"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Votes"
+        ]
+      }
+    },
+    "/votes/{captionId}": {
+      "summary": "Requests for votes data and caption votes",
+      "description": "This path uses CRUD operations on votes data and update a caption votes with the vote's value. The vote data is used to add, remove, and update  your vote which can be -1 or +1 to a caption's votes and enforce no  multiple votes by a user on a caption through tracking of whether you have voted that specific caption.",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "captionId",
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "required": true,
+          "description": "The target caption for updating caption's votes"
+        }
+      ],
+      "post": {
+        "summary": "Create vote and update caption",
+        "description": "This path uses POST operation to create a vote data row and add the vote value from the respective caption's votes.",
+        "operationId": "",
+        "requestBody": {
+          "description": "voteValue is needed and has to be either -1 or 1",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/voteValueInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User votes on a caption with provided vote value": {
+                    "value": "User: {userId} has voted {voteValue} on caption {captionId}."
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User tries to vote on a caption they have already voted for": {
+                    "value": "Bad request."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Votes"
+        ]
+      },
+      "put": {
+        "summary": "Update vote value and caption votes",
+        "description": "This path uses PUT operation to update a vote value and respective caption's votes",
+        "operationId": "",
+        "requestBody": {
+          "description": "voteValue is needed and has to be either -1 or 1",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/voteValueInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User updates vote's value with different value as before": {
+                    "value": "User: {userId} has updated their vote on caption id {captionId} with vote value {voteValue}"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User tries to update vote's value with the same previous value": {
+                    "value": "Bad request."
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default error sample response"
+          }
+        },
+        "tags": [
+          "Votes"
+        ]
+      },
+      "delete": {
+        "summary": "Delete vote and update caption votes",
+        "description": "This path uses DELETE operation to delete a vote and remove vote value from respective caption id",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User deletes a vote on a caption": {
+                    "value": "User: {userId} has deleted their vote on caption id {captionId} with vote value {voteValue}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Votes"
+        ]
+      },
+      "get": {
+        "summary": "Get caption votes with respective caption",
+        "description": "This path uses GET operation to get a vote with respective caption",
+        "operationId": "",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Users gets a seeded vote with respective seeded caption": {
+                    "value": "{\"userId\":5,\"captionId\":5,\"value\":1,\"caption\":{\"id\":5, \"userId\":4,\"photoId\":2,\"text\":\"yo\",\"votes\":1,\"createdAt\": \"2023-11-04T20:01:00.000Z\"}}"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "text/plain; charset=utf-8": {
+                "examples": {
+                  "User tries to get a vote of a caption which you have not voted on": {
+                    "value": "Not found."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Votes"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "userCredentials": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "User Credentials"
+        }
+      },
+      "newCredentials": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "newUsername": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "User Credentials"
+        }
+      },
+      "getPhotosInputs": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Get Photos Inputs"
+        }
+      },
+      "captionIdentifierInputs": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "photoId": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "xml": {
+          "name": "Caption Identifier Inputs"
+        }
+      },
+      "captionInformationInputs": {
+        "type": "object",
+        "properties": {
+          "photoId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "PCaption Information Inputs"
+        }
+      },
+      "titleInput": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Title Inputs"
+        }
+      },
+      "userIdInput": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "xml": {
+          "name": "User id Inputs"
+        }
+      },
+      "textInput": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Text Input"
+        }
+      },
+      "voteValueInput": {
+        "type": "object",
+        "properties": {
+          "voteValue": {
+            "type": "integer",
+            "minimum": -1,
+            "maximum": 1
+          }
+        }
+      },
+      "photoIdInput": {
+        "type": "object",
+        "properties": {
+          "photoId": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    }
+  }
+}

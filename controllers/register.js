@@ -13,7 +13,7 @@ exports.postRegister = async (req, res, next) => {
     const { username, password } = validationPerusal(req, "Client:")
 
     const searched = await models.User.findOne({
-      where: { username: username },
+      where: { username },
     })
 
     if (searched) {

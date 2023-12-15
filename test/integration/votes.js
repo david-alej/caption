@@ -158,7 +158,7 @@ describe("Votes route", function () {
       expect(data).to.equal("Bad request.")
     })
 
-    it("When you already voted for a caption, Then repsonse is bad request #votesValidator", async function () {
+    it("When you already voted for a caption, Then repsonse is bad request ", async function () {
       const captionId = 2
       const requestBody = { voteValue: 1 }
       await models.Vote.create(
